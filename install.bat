@@ -43,11 +43,14 @@ if "%isInGitSafeDir%"=="0" (
 )
 
 rem Check and update git submodules
+if not exist dependencies mkdir dependencies
+
 set count=0
 for %%x in (dependencies/*) do set /a count+=1
 if %ERRORLEVEL% NEQ 0 echo Error: Was met some error while trying to calculate dependecies && pause && exit 1
 
 if %count%==0 (
+    echo Updating of submodules
     git submodule update --init --remote --recursive
     if %ERRORLEVEL% NEQ 0 echo Error: Was met some error while trying to updating git submodules\ && pause && exit 1
 )
