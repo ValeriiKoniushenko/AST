@@ -2,7 +2,7 @@
 .vscode
 .idea
 cmake-build-*/
-build
+build*/
 out
 dependencies/*
 scripts/check.py
