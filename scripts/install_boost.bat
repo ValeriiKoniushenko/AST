@@ -1,5 +1,7 @@
 @echo off
 
+cd %~dp0
+
 cd ../dependencies/ || (echo Folder "dependencies" not found && pause && exit 1)
 
 if not exist boost-1.86.0 (
