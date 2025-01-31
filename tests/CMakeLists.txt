@@ -10,5 +10,4 @@ file(
 add_executable(ASTTests ${Sources})
 target_compile_features(ASTTests PUBLIC ${CXX_STANDARD})
 set_target_properties(ASTTests PROPERTIES LINKER_LANGUAGE CXX)
-target_link_libraries(ASTTests PUBLIC gtest ASTCppCore)
-target_compile_definitions(ASTTests PRIVATE PATH_TO_TEST_PROJECT="${CMAKE_CURRENT_SOURCE_DIR}/test_projects/")
+target_link_libraries(ASTTests PUBLIC gtest AST::Core)
