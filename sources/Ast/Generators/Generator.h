@@ -56,9 +56,9 @@ namespace Ast
         void ForEachOverRegenerateableUnits(std::function<void(ProjectTree::Unit*)> callback);
 
         [[nodiscard]] const GeneratorContainerT& GetGeneratorUnits() const noexcept { return _generatorUnits; }
-        [[nodiscard]] GeneratorUnit::CPtr GetGeneratorUnitFor(const String& type) const;
-        [[nodiscard]] GeneratorUnit::CPtr GetGeneratorUnitFor(const BaseLexer& lexer) const;
-        [[nodiscard]] GeneratorUnit::CPtr GetGeneratorUnitFor(const BaseLexer::Ptr& lexer) const;
+        [[nodiscard]] GeneratorUnit::CPtr GetGeneratorUnitFor(const String& type, std::function<bool(const GeneratorUnit::Ptr&)>&& additionalCondition = nullptr) const;
+        [[nodiscard]] GeneratorUnit::CPtr GetGeneratorUnitFor(const BaseLexer& lexer, std::function<bool(const GeneratorUnit::Ptr&)>&& additionalCondition = nullptr) const;
+        [[nodiscard]] GeneratorUnit::CPtr GetGeneratorUnitFor(const BaseLexer::Ptr& lexer, std::function<bool(const GeneratorUnit::Ptr&)>&& additionalCondition = nullptr) const;
 
         template<IsGeneratorUnit Generator>
         void AddGenerator()
