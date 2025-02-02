@@ -48,7 +48,6 @@ namespace Ast
 // contact in the github repository and author will fix it.
 // Original file is:)";
             inline static const char* generatedSuffixDecl = ".generated";
-            inline static const char* generatedSuffixImpl = ".impl.generated";
 
             using Permission = std::filesystem::perms;
 
