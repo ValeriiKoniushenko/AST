@@ -75,8 +75,6 @@ namespace Ast
     };
 
     template<class T>
-    concept IsGeneratorUnit = std::derived_from<T, GeneratorUnit> && requires(T) {
-        { T() };
-    };
+    concept IsGeneratorUnit = std::derived_from<T, GeneratorUnit>;
 
 } // namespace Ast
