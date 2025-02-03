@@ -50,12 +50,10 @@ namespace Ast
         [[nodiscard]] String Generate(const BaseLexer* lexer) const;
         const String& GetType() const { return _type; }
 
-        [[nodiscard]] bool operator==(const GeneratorUnit& other) const { return _type == other._type; }
-        [[nodiscard]] bool operator==(const CPtr& other) const { return _type == other->_type; }
+        [[nodiscard]] bool operator==(const GeneratorUnit& other) const { return _type == other._type && OnEqual(other); }
+        [[nodiscard]] bool operator==(const CPtr& other) const { return *this == *other; }
 
     protected:
-        const String _type;
-
         template<IsLexer Lexer>
         [[nodiscard]] static GeneratorUnit Create()
         {
@@ -69,6 +67,11 @@ namespace Ast
 
         [[nodiscard]] virtual String PreGenerate(const BaseLexer* lexer) const { return String(); }
         [[nodiscard]] virtual String PostGenerate(const BaseLexer* lexer) const { return String(); }
+
+        [[nodiscard]] virtual bool OnEqual(const GeneratorUnit& other) const { return true; }
+
+    protected:
+        const String _type;
     };
 
     template<class T>
