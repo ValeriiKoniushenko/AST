@@ -319,33 +319,35 @@ namespace Ast
 
         String timeString;
 
-        _contentStream->Data().ForEachByLine([&timeString](String string){
-            const auto* found = string.Find(generatedFileHeader_Head);
-            if (!found)
+        _contentStream->Data().ForEachByLine(
+            [&timeString](String string)
             {
-                return true;
-            }
+                const auto* found = string.Find(generatedFileHeader_Head);
+                if (!found)
+                {
+                    return true;
+                }
 
-            if (!(found = string.Find(":")))
-            {
-                return true;
-            }
+                if (!(found = string.Find(":")))
+                {
+                    return true;
+                }
 
-            string.SubStr(found - string.c_str());
-            string.Trim(' ');
-            if (string.IsEmpty())
-            {
-                return true;
-            }
+                string.SubStr(found - string.c_str());
+                string.Trim(' ');
+                if (string.IsEmpty())
+                {
+                    return true;
+                }
 
-            timeString = string;
+                timeString = string;
 
-            return false;
-        });
+                return false;
+            });
 
         if (timeString.IsEmpty())
         {
-             return std::filesystem::file_time_type().time_since_epoch().count();
+            return std::filesystem::file_time_type().time_since_epoch().count();
         }
 
         const auto ret = timeString.ConvertTo<uint64_t>();
@@ -516,32 +518,7 @@ namespace Ast
             return false;
         }
 
-        for (const auto& i : std::filesystem::recursive_directory_iterator(_root->GetPath()))
-        {
-            auto tmp = String(i.path().string());
-            if (!Verify(tmp.Find(_root->GetPath().string())))
-            {
-                _logCollector->AddLog(
-                    { "Can't process the next file: {} - it's not a part of the project"_f << tmp, LogCollector::LogType::Warning });
-                continue;
-            }
-            if (std::filesystem::is_directory(i))
-            {
-                continue;
-            }
-            const auto targetPathSize = _root->GetPath().string().size();
-            tmp.SubStr(targetPathSize).TrimStart('\\');
-
-            if (Verify(!tmp.IsEmpty()))
-            {
-                auto newPath = std::filesystem::path(tmp.c_str());
-
-                if (IsValidExtension(String(newPath.extension().string())) && !IsExcludedPath(newPath))
-                {
-                    ProcessFile(newPath.parent_path(), i.path());
-                }
-            }
-        }
+        IterateOverDirectory(_root->GetPath());
 
         return true;
     }
@@ -648,6 +625,43 @@ namespace Ast
         if (Verify(i, "Undefined error. Unit is nullptr"))
         {
             i->LinkSubFile(String(fullPath.filename().string()));
+        }
+    }
+
+    void ProjectTree::IterateOverDirectory(const std::filesystem::path& path)
+    {
+        for (const auto& i : std::filesystem::directory_iterator(path))
+        {
+            auto tmp = String(i.path().string());
+            const auto rootPath = _root->GetPath().string();
+            if (!Verify(tmp.Find(rootPath)))
+            {
+                _logCollector->AddLog(
+                    { "Can't process the next file: {} - it's not a part of the project"_f << tmp, LogCollector::LogType::Warning });
+                continue;
+            }
+
+            if (std::filesystem::is_directory(i))
+            {
+                if (IsExcludedPath(i))
+                {
+                    IterateOverDirectory(i);
+                }
+                continue;
+            }
+
+            const auto targetPathSize = rootPath.size();
+            tmp.SubStr(targetPathSize).TrimStart('\\');
+
+            if (Verify(!tmp.IsEmpty()))
+            {
+                auto newPath = std::filesystem::path(tmp.c_str());
+
+                if (IsValidExtension(String(newPath.extension().string())))
+                {
+                    ProcessFile(newPath.parent_path(), i.path());
+                }
+            }
         }
     }
 

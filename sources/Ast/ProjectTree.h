@@ -378,6 +378,7 @@ namespace Ast
     protected:
         [[nodiscard]] bool IsValidExtension(const String& path) const;
         void ProcessFile(const std::filesystem::path& folders, const std::filesystem::path& fullPath);
+        void IterateOverDirectory(const std::filesystem::path& path);
 
     protected:
         std::set<String> _fileExtensions;
