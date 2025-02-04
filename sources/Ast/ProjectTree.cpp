@@ -84,7 +84,9 @@ namespace Ast
                                   });
 
         if (found != _childs.cend())
+        {
             return *found;
+        }
 
         return nullptr;
     }
@@ -115,7 +117,6 @@ namespace Ast
             }
             if (Verify(!!(unit._tree = Tree<FileLexer>::Ptr(new Tree<FileLexer>(unit._contentStream)), "Impossible to allocate an object")))
             {
-
             }
 
             unit._type = Type::File;
@@ -123,9 +124,7 @@ namespace Ast
             {
                 using namespace std::chrono;
                 const auto time = unit.ExtrudeGenerationTime();
-                decltype(time) now =
-                    duration_cast<seconds>(system_clock::now().time_since_epoch()).count();
-
+                decltype(time) now = duration_cast<seconds>(system_clock::now().time_since_epoch()).count();
 
                 Unit::GenerateData genData;
                 genData.lastWriteTime = now;
@@ -362,14 +361,15 @@ namespace Ast
 
     bool ProjectTree::IsValid() const
     {
-        if ( _root != nullptr)
+        if (_root != nullptr)
         {
             bool foundAtLeastOneFile = false;
-            ForEach([&foundAtLeastOneFile](const auto*)
-            {
-                foundAtLeastOneFile = true;
-                return false;
-            });
+            ForEach(
+                [&foundAtLeastOneFile](const auto*)
+                {
+                    foundAtLeastOneFile = true;
+                    return false;
+                });
             return foundAtLeastOneFile;
         }
         return false;
@@ -392,7 +392,7 @@ namespace Ast
     {
         if (path.empty())
         {
-            _logCollector->AddLog({"Was passed a path to exclude it. But the path is empty", LogCollector::LogType::Warning});
+            _logCollector->AddLog({ "Was passed a path to exclude it. But the path is empty", LogCollector::LogType::Warning });
             return;
         }
         _excluded.emplace(std::move(path));
@@ -413,7 +413,7 @@ namespace Ast
                 path = std::filesystem::canonical(path);
                 if (path.empty())
                 {
-                    _logCollector->AddLog({"Was trying to convert a path to absolute, but met some problem.", LogCollector::LogType::Error});
+                    _logCollector->AddLog({ "Was trying to convert a path to absolute, but met some problem.", LogCollector::LogType::Error });
                     return false;
                 }
             }
@@ -433,7 +433,7 @@ namespace Ast
 
                     if (p.empty())
                     {
-                        _logCollector->AddLog({"Was trying to convert a path to absolute, but met some problem.", LogCollector::LogType::Error});
+                        _logCollector->AddLog({ "Was trying to convert a path to absolute, but met some problem.", LogCollector::LogType::Error });
                         return false;
                     }
                 }
@@ -566,11 +566,48 @@ namespace Ast
         return false;
     }
 
-    bool ProjectTree::IsValidExtension(const String& ex) const
+    bool ProjectTree::IsGeneratedFile(const std::filesystem::path& path) const
     {
+        auto file = path.filename();
+        if (file.empty())
+        {
+            return false;
+        }
+
+        if (!file.has_extension())
+        {
+            return false;
+        }
+
+        file.replace_extension("");
+        if (!file.has_extension())
+        {
+            return false;
+        }
+
+        return file.extension().string() == Unit::generatedSuffixDecl;
+    }
+
+    bool ProjectTree::IsValidExtension(const std::filesystem::path& path) const
+    {
+        String mainExt;
+        if (Verify(path.has_extension()))
+        {
+            mainExt = path.extension().string();
+        }
+        else
+        {
+            return false;
+        }
+
+        if (IsGeneratedFile(path))
+        {
+            return false;
+        }
+
         for (const auto& extension : _fileExtensions)
         {
-            if (extension == ex)
+            if (extension == mainExt)
             {
                 return true;
             }
@@ -657,7 +694,7 @@ namespace Ast
             {
                 auto newPath = std::filesystem::path(tmp.c_str());
 
-                if (IsValidExtension(String(newPath.extension().string())))
+                if (IsValidExtension(newPath))
                 {
                     ProcessFile(newPath.parent_path(), i.path());
                 }

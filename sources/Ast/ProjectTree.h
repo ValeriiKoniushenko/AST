@@ -376,7 +376,8 @@ namespace Ast
         }
 
     protected:
-        [[nodiscard]] bool IsValidExtension(const String& path) const;
+        [[nodiscard]] bool IsGeneratedFile(const std::filesystem::path& path) const;
+        [[nodiscard]] bool IsValidExtension(const std::filesystem::path& path) const;
         void ProcessFile(const std::filesystem::path& folders, const std::filesystem::path& fullPath);
         void IterateOverDirectory(const std::filesystem::path& path);
 
