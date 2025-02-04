@@ -553,7 +553,7 @@ namespace Ast
     {
         if (unit.GetTree()->HasAtLeastOneMarkedLexer())
         {
-            if (!unit.HasGeneratedSiblingFile())
+            if (unit.HasGeneratedSiblingFile())
             {
                 const auto generatedUnit = GetGeneratedFileOfUnit(unit);
                 if (generatedUnit == nullptr)
