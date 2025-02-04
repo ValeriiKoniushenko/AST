@@ -16,7 +16,7 @@ set defaultPath=%cd%
 
 bootstrap.bat && (
     cd %defaultPath%
-    b2 variant=release debug-symbols=on link=static || (echo Was met some error while running of boost "b2" && pause && exit 1)
+    b2 install || (echo Was met some error while running of boost "b2" && pause && exit 1)
 ) || (
     echo Was met some error while running of "bootstrap.bat" && pause && exit 1
 )
