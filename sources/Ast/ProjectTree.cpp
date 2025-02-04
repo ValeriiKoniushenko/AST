@@ -562,6 +562,7 @@ namespace Ast
                 }
                 return generatedUnit->GetLastModificationTime() != unit.GetLastModificationTime();
             }
+            return true;
         }
 
         return false;
