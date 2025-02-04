@@ -259,7 +259,8 @@ namespace Ast
             return false;
         }
 
-        return GetGeneratedSiblingFilePath().empty();
+        const auto siblingFile = GetGeneratedSiblingFilePath();
+        return siblingFile.empty() ? false : std::filesystem::exists(siblingFile);
     }
 
     std::filesystem::path ProjectTree::Unit::GetGeneratedSiblingFilePath() const
