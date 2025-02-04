@@ -592,7 +592,7 @@ namespace Ast
     bool ProjectTree::IsValidExtension(const std::filesystem::path& path) const
     {
         String mainExt;
-        if (Verify(path.has_extension()))
+        if (path.has_extension())
         {
             mainExt = path.extension().string();
         }
