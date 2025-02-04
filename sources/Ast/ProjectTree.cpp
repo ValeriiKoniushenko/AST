@@ -643,7 +643,7 @@ namespace Ast
 
             if (std::filesystem::is_directory(i))
             {
-                if (IsExcludedPath(i))
+                if (!IsExcludedPath(i))
                 {
                     IterateOverDirectory(i);
                 }
