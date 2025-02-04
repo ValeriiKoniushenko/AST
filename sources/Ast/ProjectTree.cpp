@@ -231,7 +231,7 @@ namespace Ast
             return nullptr;
         }
 
-        auto unit = CreatePtrFromPath(_path.string() + static_cast<String::CharT>(std::filesystem::path::preferred_separator) + name.ToStdString());
+        auto unit = CreatePtrFromPath(_path / name.ToStdString());
 
         if (!Verify(!!unit))
         {
