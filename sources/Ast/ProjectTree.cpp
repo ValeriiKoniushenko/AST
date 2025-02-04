@@ -660,9 +660,14 @@ namespace Ast
                 }
             }
         }
-        if (Verify(i, "Undefined error. Unit is nullptr"))
+
+        if (i)
         {
             i->LinkSubFile(String(fullPath.filename().string()));
+        }
+        else
+        {
+            _root->LinkSubFile(String(fullPath.filename().string()));
         }
     }
 
