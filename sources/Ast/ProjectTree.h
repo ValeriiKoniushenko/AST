@@ -36,6 +36,11 @@ namespace Ast
     public:
         AST_CLASS(ProjectTree)
 
+        struct Config
+        {
+            bool noRewriteExistingUnitTree = false;
+        };
+
         class Unit : public Utils::CopyableAndMoveable, public boost::intrusive_ref_counter<Unit>, public ITextSourceReader
         {
         public:
@@ -72,14 +77,8 @@ namespace Ast
             [[nodiscard]] String GetGeneratedDummyHeader() const;
             [[nodiscard]] String GetTextSource() override;
 
-            [[nodiscard]] static bool IsGenerated(const Unit& unit) noexcept
-            {
-                return unit.IsGenerated();
-            }
-            [[nodiscard]] bool IsGenerated() const noexcept
-            {
-                return _generateData.has_value();
-            }
+            [[nodiscard]] static bool IsGenerated(const Unit& unit) noexcept { return unit.IsGenerated(); }
+            [[nodiscard]] bool IsGenerated() const noexcept { return _generateData.has_value(); }
 
             [[nodiscard]] static Ptr Create() { return new Self; }
 
@@ -170,10 +169,7 @@ namespace Ast
             [[nodiscard]] bool HasGeneratedSiblingFile() const;
             [[nodiscard]] std::filesystem::path GetGeneratedSiblingFilePath() const;
 
-            void _SetTree(Tree<FileLexer>&& tree)
-            {
-                _tree = Tree<FileLexer>::Ptr(new Tree<FileLexer>(std::move(tree)));
-            }
+            void _SetTree(Tree<FileLexer>&& tree) { _tree = Tree<FileLexer>::Ptr(new Tree<FileLexer>(std::move(tree))); }
 
         protected:
             // ================== PIPMPLs =======================
@@ -296,30 +292,42 @@ namespace Ast
         template<IsParser ParserT, IsContentFilter ContentFilterT = void>
         void ParseUsing()
         {
-            ForEach([this](Unit* unit)
-            {
-                if (!unit->IsGenerated())
+            ForEach(
+                [this](Unit* unit)
                 {
-                    if constexpr (!std::is_void_v<ContentFilterT>)
+                    if (!unit->IsGenerated())
                     {
-                        unit->GetFileContentStream()->ApplyFilters<ContentFilterT>();
+                        if constexpr (!std::is_void_v<ContentFilterT>)
+                        {
+                            unit->GetFileContentStream()->ApplyFilters<ContentFilterT>();
+                        }
+
+                        const bool hasTree = unit->GetTree().get();
+
+                        if ((hasTree && !_config.noRewriteExistingUnitTree) || !hasTree)
+                        {
+                            Tree<FileLexer> tree(unit->GetFileContentStream());
+                            tree.ParseUsing<ParserT>(_logCollector);
+
+                            if (hasTree && !_config.noRewriteExistingUnitTree)
+                            {
+                                _logCollector->AddLog(
+                                    { "The unit '{}' already has an Ast Tree. It will be replace by new tree. If you don't want overwrite an existing tree setup a config(Ast::ProjectTree::Config::noRewriteExistingUnitTree)"_f
+                                          << unit->GetPath().string(),
+                                      LogCollector::LogType::Warning });
+                            }
+
+                            unit->_SetTree(std::move(tree));
+                        }
+                    }
+                    else
+                    {
+                        _logCollector->AddLog(
+                            { "Unit's data was generated earlier. Unit's path: "_f << unit->GetPath().string(), LogCollector::LogType::Warning });
                     }
 
-                    Tree<FileLexer> tree(unit->GetFileContentStream());
-                    tree.ParseUsing<ParserT>(_logCollector);
-                    if (unit->GetTree())
-                    {
-                        _logCollector->AddLog({"The unit '{}' already has an Ast Tree. It will be replace by new tree. If you don't want overwrite an existing tree setup a config(Ast::ProjectTree::Config)"_f << unit->GetPath().string(), LogCollector::LogType::Warning});
-                    }
-                    unit->_SetTree(std::move(tree));
-                }
-                else
-                {
-                    _logCollector->AddLog({"Unit's data was generated earlier. Unit's path: "_f << unit->GetPath().string(), LogCollector::LogType::Warning});
-                }
-
-                return true;
-            });
+                    return true;
+                });
         }
 
         [[nodiscard]] LogCollector::Ptr GetLogCollector() { return _logCollector; }
@@ -328,14 +336,8 @@ namespace Ast
         // ==========================================================
         // ================== WORKING WITH UNITS ====================
         // ==========================================================
-        [[nodiscard]] Unit::AdaptivePtr<true> GetUnitByPath() const
-        {
-            return _root;
-        }
-        [[nodiscard]] Unit::AdaptivePtr<false> GetUnitByPath()
-        {
-            return _root;
-        }
+        [[nodiscard]] Unit::AdaptivePtr<true> GetUnitByPath() const { return _root; }
+        [[nodiscard]] Unit::AdaptivePtr<false> GetUnitByPath() { return _root; }
 
         [[nodiscard]] Unit::AdaptivePtr<true> GetUnitByPath(const std::filesystem::path& path) const
         {
@@ -380,6 +382,9 @@ namespace Ast
             }
         }
 
+        [[nodiscard]] const Config& GetConfig() const noexcept { return _config; }
+        void SetConfig(const Config& config) noexcept { _config = config; }
+
     protected:
         [[nodiscard]] bool IsGeneratedFile(const std::filesystem::path& path) const;
         [[nodiscard]] bool IsValidExtension(const std::filesystem::path& path) const;
@@ -391,6 +396,7 @@ namespace Ast
         Unit::Ptr _root;
         LogCollector::Ptr _logCollector;
         std::unordered_set<std::filesystem::path> _excluded;
+        Config _config;
     };
 
 } // namespace Ast
