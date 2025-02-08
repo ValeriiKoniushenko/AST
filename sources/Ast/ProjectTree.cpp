@@ -605,10 +605,10 @@ namespace Ast
             return false;
         }
 
-        if (IsGeneratedFile(path))
+        /*if (IsGeneratedFile(path))
         {
             return false;
-        }
+        }*/
 
         for (const auto& extension : _fileExtensions)
         {
