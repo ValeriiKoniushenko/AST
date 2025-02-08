@@ -172,10 +172,7 @@ namespace Ast
 
             void _SetTree(Tree<FileLexer>&& tree)
             {
-                if (!IsGenerated())
-                {
-                    _tree = Tree<FileLexer>::Ptr(new Tree<FileLexer>(std::move(tree)));
-                }
+                _tree = Tree<FileLexer>::Ptr(new Tree<FileLexer>(std::move(tree)));
             }
 
         protected:
@@ -310,6 +307,10 @@ namespace Ast
 
                     Tree<FileLexer> tree(unit->GetFileContentStream());
                     tree.ParseUsing<ParserT>(_logCollector);
+                    if (unit->GetTree())
+                    {
+                        _logCollector->AddLog({"The unit '{}' already has an Ast Tree. It will be replace by new tree. If you don't want overwrite an existing tree setup a config(Ast::ProjectTree::Config)"_f << unit->GetPath().string(), LogCollector::LogType::Warning});
+                    }
                     unit->_SetTree(std::move(tree));
                 }
                 else
