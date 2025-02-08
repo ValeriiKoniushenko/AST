@@ -75,8 +75,8 @@ namespace Ast
 
                 tempToken.endData = data.c_str() + (match[0].second - data.begin());
 
-                tempToken.startLine = String::GetLinesCountInText(data, tempToken.beginData);
-                tempToken.endLine = String::GetLinesCountInText(data, tempToken.endData) - 1; // 1 - to ignore the last '\n'
+                tempToken.startLine = String::GetLinesCountInText(data.c_str(), tempToken.beginData);
+                tempToken.endLine = String::GetLinesCountInText(data.c_str(), tempToken.endData) - 1; // 1 - to ignore the last '\n'
 
                 return false;
             },
