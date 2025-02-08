@@ -301,16 +301,20 @@ namespace Ast
         {
             ForEach([this](Unit* unit)
             {
-                if constexpr (!std::is_void_v<ContentFilterT>)
-                {
-                    unit->GetFileContentStream()->ApplyFilters<ContentFilterT>();
-                }
-
                 if (!unit->IsGenerated())
                 {
+                    if constexpr (!std::is_void_v<ContentFilterT>)
+                    {
+                        unit->GetFileContentStream()->ApplyFilters<ContentFilterT>();
+                    }
+
                     Tree<FileLexer> tree(unit->GetFileContentStream());
                     tree.ParseUsing<ParserT>(_logCollector);
                     unit->_SetTree(std::move(tree));
+                }
+                else
+                {
+                    _logCollector->AddLog({"Unit's data was generated earlier. Unit's path: "_f << unit->GetPath().string(), LogCollector::LogType::Warning});
                 }
 
                 return true;
