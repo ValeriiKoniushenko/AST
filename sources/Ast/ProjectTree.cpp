@@ -410,7 +410,6 @@ namespace Ast
         {
             if (Verify(!!_root))
             {
-                path = _root->GetPath() / path;
                 path = std::filesystem::canonical(path);
                 if (path.empty())
                 {
