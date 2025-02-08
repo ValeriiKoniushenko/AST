@@ -391,9 +391,9 @@ namespace Ast
 
     void ProjectTree::ExcludeFromProject(std::filesystem::path path)
     {
-        if (path.empty())
+        if (path.empty() || path.string() == ".")
         {
-            _logCollector->AddLog({ "Was passed a path to exclude it. But the path is empty", LogCollector::LogType::Warning });
+            _logCollector->AddLog({ "Was passed a path to exclude it. But the path is empty or invalid. The passed path: {}"_f << path.string(), LogCollector::LogType::Warning });
             return;
         }
         _excluded.emplace(std::move(path));
@@ -499,9 +499,13 @@ namespace Ast
 
     void ProjectTree::SetTargetProject(const std::filesystem::path& path)
     {
-        if (Verify(std::filesystem::exists(path), "Incorrect project path"))
+        if (std::filesystem::exists(path))
         {
             _root = Unit::CreatePtrFromPath(path);
+        }
+        else
+        {
+            _logCollector->AddLog({"The project wasn't found: {}"_f << path.string(), LogCollector::LogType::Error});
         }
     }
 
