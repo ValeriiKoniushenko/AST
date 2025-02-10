@@ -35,25 +35,6 @@ namespace
 namespace Ast
 {
 
-    bool ProjectTree::Unit::ReadGeneratedData()
-    {
-        if (!IsFile() || _path.empty())
-        {
-            Assert();
-            return false;
-        }
-
-        const auto genTime = this->ExtrudeGenerationTime();
-        const auto modificationTime = this->GetLastModificationTime();
-
-        GenerateData generateData;
-        generateData.isDirty = genTime != modificationTime;
-        generateData.lastWriteTime = modificationTime;
-        _generateData = generateData;
-
-        return true;
-    }
-
     String ProjectTree::Unit::GetGeneratedDummyHeader() const
     {
         if (!IsFile())
@@ -114,6 +95,8 @@ namespace Ast
     {
         Unit unit;
         unit._path = path;
+        unit._permission = std::filesystem::status(path).permissions();
+        unit._lastWriteTime = std::filesystem::last_write_time(path).time_since_epoch().count();
 
         if (!Verify(unit.IsExistsOnDisk()))
         {
@@ -130,32 +113,28 @@ namespace Ast
         }
         else
         {
-            if (Verify(!!(unit._contentStream = FileContentStream::Ptr(new FileContentStream()), "Impossible to allocate an object")))
+            unit._type = Type::File;
+            unit._contentStream = FileContentStream::Ptr(new FileContentStream());
+            if (Verify(!!unit._contentStream, "Impossible to allocate an object"))
             {
                 Assert(unit._contentStream->ReadFromFile(path), "Can't read a file: "_dyn + String::MakeFrom(path));
             }
-            if (Verify(!!(unit._tree = Tree<FileLexer>::Ptr(new Tree<FileLexer>(unit._contentStream)), "Impossible to allocate an object")))
-            {
-            }
 
-            unit._type = Type::File;
-            if (unit.CheckByPathIfWasGenerated())
+            if (!unit.IsGeneratedFile())
             {
-                using namespace std::chrono;
-                const auto time = unit.ExtrudeGenerationTime();
-                decltype(time) now = duration_cast<seconds>(system_clock::now().time_since_epoch()).count();
+                unit._tree = Tree<FileLexer>::Ptr(new Tree<FileLexer>(unit._contentStream));
+                Assert(!!unit._tree, "Impossible to allocate an object");
 
-                Unit::GenerateData genData;
-                genData.lastWriteTime = now;
-                if (time != now)
+                if (unit.CheckByPathIfWasGenerated())
                 {
-                    genData.isDirty = true;
+                    if (unit._lastWriteTime != unit.ExtrudeGenerationTime())
+                    {
+                        unit._isDirty = true;
+                    }
                 }
-                unit._generateData = genData;
             }
-        }
 
-        unit._permission = std::filesystem::status(path).permissions();
+        }
 
         return unit;
     }

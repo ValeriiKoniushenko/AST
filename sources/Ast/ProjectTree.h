@@ -56,12 +56,6 @@ namespace Ast
 
             using Permission = std::filesystem::perms;
 
-            struct GenerateData
-            {
-                bool isDirty = false;
-                uint32_t lastWriteTime = 0;
-            };
-
             enum class Type
             {
                 None,
@@ -74,14 +68,9 @@ namespace Ast
             Unit() = default;
             ~Unit() override = default;
 
-            bool ReadGeneratedData();
             [[nodiscard]] bool IsGeneratedFile() const { return ProjectTree::IsGeneratedFile(_path); }
-            [[nodiscard]] const std::optional<GenerateData>& GetGenerationData() const noexcept { return _generateData; }
             [[nodiscard]] String GetGeneratedDummyHeader() const;
             [[nodiscard]] String GetTextSource() override;
-
-            [[nodiscard]] static bool IsGenerated(const Unit& unit) noexcept { return unit.IsGenerated(); }
-            [[nodiscard]] bool IsGenerated() const noexcept { return _generateData.has_value(); }
 
             [[nodiscard]] static Ptr Create() { return new Self; }
 
@@ -172,7 +161,15 @@ namespace Ast
             [[nodiscard]] bool HasGeneratedSiblingFile() const;
             [[nodiscard]] std::filesystem::path GetGeneratedSiblingFilePath() const;
 
-            void _SetTree(Tree<FileLexer>&& tree) { _tree = Tree<FileLexer>::Ptr(new Tree<FileLexer>(std::move(tree))); }
+            virtual void RecalculateDirtyBasedOnTree()
+            {
+                // continue checking for is dirty or no
+                if (!_isDirty && _tree)
+                {
+                    // TODO: replace it with events
+                    _isDirty = _tree->HasAtLeastOneMarkedLexer();
+                }
+            }
 
         protected:
             // ================== PIPMPLs =======================
@@ -259,8 +256,10 @@ namespace Ast
             Permission _permission = Permission::none;
             std::filesystem::path _path;
             Type _type = Type::None;
-            // this field using if a file was generated
-            std::optional<GenerateData> _generateData;
+
+            bool _isDirty = false;
+            uint64_t _lastWriteTime = 0;
+
             Tree<FileLexer>::Ptr _tree;
             FileContentStream::Ptr _contentStream;
 
@@ -298,32 +297,17 @@ namespace Ast
             ForEach(
                 [this](Unit* unit)
                 {
-                    if (!unit->IsGenerated() || unit->GetGenerationData()->isDirty)
+                    if constexpr (!std::is_void_v<ContentFilterT>)
                     {
-                        if constexpr (!std::is_void_v<ContentFilterT>)
+                        unit->GetFileContentStream()->ApplyFilters<ContentFilterT>();
+                    }
+
+                    if (auto* tree = unit->GetTree().get(); Verify(tree))
+                    {
+                        if (!unit->IsGeneratedFile())
                         {
-                            unit->GetFileContentStream()->ApplyFilters<ContentFilterT>();
-                        }
-
-                        const bool hasTree = unit->GetTree().get();
-
-                        if ((hasTree && !_config.noRewriteExistingUnitTree) || !hasTree)
-                        {
-                            Tree<FileLexer> tree(unit->GetFileContentStream());
-                            tree.ParseUsing<ParserT>(_logCollector);
-
-                            if (hasTree && !_config.noRewriteExistingUnitTree)
-                            {
-                                _logCollector->AddLog(
-                                    { "The unit '{}' already has an Ast Tree. It will be replace by new tree. If you don't want overwrite an existing tree setup a config(Ast::ProjectTree::Config::noRewriteExistingUnitTree)"_f
-                                          << unit->GetPath().string(),
-                                      LogCollector::LogType::Warning });
-                            }
-
-                            if (!unit->IsGeneratedFile())
-                            {
-                                unit->_SetTree(std::move(tree));
-                            }
+                            tree->ParseUsing<ParserT>(_logCollector);
+                            unit->RecalculateDirtyBasedOnTree();
                         }
                     }
 
