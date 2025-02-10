@@ -2,3 +2,6 @@
 	path = dependencies/Utils
 	url = git@github.com:ValeriiKoniushenko/Utils.git
 	branch = develop
+[submodule "dependencies/rapidxml"]
+	path = dependencies/rapidxml
+	url = git@github.com:0x08088405/rapidxml.git

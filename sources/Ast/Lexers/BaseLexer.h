@@ -25,6 +25,7 @@
 #include "../Readers/Token.h"
 #include "Ast/Utils/ITextSourceReader.h"
 #include "Utils/CopyableAndMoveableBehaviour.h"
+#include "rapidxml.hpp"
 
 #include <boost/smart_ptr/intrusive_ptr.hpp>
 #include <boost/smart_ptr/intrusive_ref_counter.hpp>
