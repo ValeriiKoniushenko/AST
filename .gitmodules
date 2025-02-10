@@ -2,6 +2,8 @@
 	path = dependencies/Utils
 	url = git@github.com:ValeriiKoniushenko/Utils.git
 	branch = develop
+	ignore = dirty
 [submodule "dependencies/rapidxml"]
 	path = dependencies/rapidxml
 	url = git@github.com:0x08088405/rapidxml.git
+    ignore = dirty
