@@ -74,6 +74,9 @@ namespace Ast
             Unit() = default;
             ~Unit() override = default;
 
+            bool ReadGeneratedData();
+            [[nodiscard]] bool IsGeneratedFile() const { return ProjectTree::IsGeneratedFile(_path); }
+            [[nodiscard]] const std::optional<GenerateData>& GetGenerationData() const noexcept { return _generateData; }
             [[nodiscard]] String GetGeneratedDummyHeader() const;
             [[nodiscard]] String GetTextSource() override;
 
@@ -295,7 +298,7 @@ namespace Ast
             ForEach(
                 [this](Unit* unit)
                 {
-                    if (!unit->IsGenerated())
+                    if (!unit->IsGenerated() || unit->GetGenerationData()->isDirty)
                     {
                         if constexpr (!std::is_void_v<ContentFilterT>)
                         {
@@ -317,13 +320,11 @@ namespace Ast
                                       LogCollector::LogType::Warning });
                             }
 
-                            unit->_SetTree(std::move(tree));
+                            if (!unit->IsGeneratedFile())
+                            {
+                                unit->_SetTree(std::move(tree));
+                            }
                         }
-                    }
-                    else
-                    {
-                        _logCollector->AddLog(
-                            { "Unit's data was generated earlier. Unit's path: "_f << unit->GetPath().string(), LogCollector::LogType::Warning });
                     }
 
                     return true;
@@ -386,7 +387,7 @@ namespace Ast
         void SetConfig(const Config& config) noexcept { _config = config; }
 
     protected:
-        [[nodiscard]] bool IsGeneratedFile(const std::filesystem::path& path) const;
+        [[nodiscard]] static bool IsGeneratedFile(const std::filesystem::path& path);
         [[nodiscard]] bool IsValidExtension(const std::filesystem::path& path) const;
         void ProcessFile(const std::filesystem::path& folders, const std::filesystem::path& fullPath);
         void IterateOverDirectory(const std::filesystem::path& path);

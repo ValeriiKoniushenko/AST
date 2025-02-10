@@ -35,6 +35,25 @@ namespace
 namespace Ast
 {
 
+    bool ProjectTree::Unit::ReadGeneratedData()
+    {
+        if (!IsFile() || _path.empty())
+        {
+            Assert();
+            return false;
+        }
+
+        const auto genTime = this->ExtrudeGenerationTime();
+        const auto modificationTime = this->GetLastModificationTime();
+
+        GenerateData generateData;
+        generateData.isDirty = genTime != modificationTime;
+        generateData.lastWriteTime = modificationTime;
+        _generateData = generateData;
+
+        return true;
+    }
+
     String ProjectTree::Unit::GetGeneratedDummyHeader() const
     {
         if (!IsFile())
@@ -307,7 +326,7 @@ namespace Ast
 
     uint64_t ProjectTree::Unit::ExtrudeGenerationTime() const
     {
-        if (Verify(!_contentStream))
+        if (!Verify(!!_contentStream))
         {
             return {};
         }
@@ -393,7 +412,8 @@ namespace Ast
     {
         if (path.empty() || path.string() == ".")
         {
-            _logCollector->AddLog({ "Was passed a path to exclude it. But the path is empty or invalid. The passed path: {}"_f << path.string(), LogCollector::LogType::Warning });
+            _logCollector->AddLog({ "Was passed a path to exclude it. But the path is empty or invalid. The passed path: {}"_f << path.string(),
+                                    LogCollector::LogType::Warning });
             return;
         }
         _excluded.emplace(std::move(path));
@@ -505,7 +525,7 @@ namespace Ast
         }
         else
         {
-            _logCollector->AddLog({"The project wasn't found: {}"_f << path.string(), LogCollector::LogType::Error});
+            _logCollector->AddLog({ "The project wasn't found: {}"_f << path.string(), LogCollector::LogType::Error });
         }
     }
 
@@ -571,7 +591,7 @@ namespace Ast
         return false;
     }
 
-    bool ProjectTree::IsGeneratedFile(const std::filesystem::path& path) const
+    bool ProjectTree::IsGeneratedFile(const std::filesystem::path& path)
     {
         auto file = path.filename();
         if (file.empty())
