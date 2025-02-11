@@ -353,6 +353,7 @@ namespace Ast
 
         if (timeString.IsEmpty())
         {
+            Assert("Time in the generated file wasn't found. Maybe you cleared all comments before time was checked.");
             return std::filesystem::file_time_type().time_since_epoch().count();
         }
 
