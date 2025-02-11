@@ -508,7 +508,7 @@ namespace Ast
 
     bool ProjectTree::IsNeedRegeneration(const Unit& unit) const
     {
-        if (unit.GetTree()->HasAtLeastOneMarkedLexer())
+        if (!unit.IsGeneratedFile() && unit.GetTree()->HasAtLeastOneMarkedLexer())
         {
             if (unit.HasGeneratedSiblingFile())
             {
