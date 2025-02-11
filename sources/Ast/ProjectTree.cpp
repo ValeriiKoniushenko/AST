@@ -517,7 +517,9 @@ namespace Ast
                 {
                     return true;
                 }
-                return generatedUnit->GetLastModificationTime() != unit.GetLastModificationTime();
+                const auto a = generatedUnit->GetLastModificationTime();
+                const auto b = unit.GetLastModificationTime();
+                return a != b;
             }
             return true;
         }
