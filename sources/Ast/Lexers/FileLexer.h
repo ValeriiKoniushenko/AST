@@ -35,7 +35,6 @@ namespace Ast
 
         ~FileLexer() override = default;
 
-        void GetAsXml(Xml& xml) const override;
 
         bool DoParse(LogCollector& logCollector) override;
         [[nodiscard]] static Ptr Create(const ContentStream::Ptr& stream) { return { new FileLexer(stream) }; }
@@ -47,6 +46,9 @@ namespace Ast
         [[nodiscard]] String GetFileName() const { return _lexerName; }
 
         bool GenerateTextSource(TextSourceT& source) override;
+
+    protected:
+        void OnPutAdditionalInfoToXml(Xml& xml, XmlNode* output) const override;
 
     private:
         explicit FileLexer(const ContentStream::Ptr& fileReader);

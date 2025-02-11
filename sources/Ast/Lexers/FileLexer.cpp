@@ -45,12 +45,16 @@ namespace Ast
     {
     }
 
-    void FileLexer::GetAsXml(Xml& xml) const
+    void FileLexer::OnPutAdditionalInfoToXml(Xml& xml, XmlNode* output) const
     {
-        BaseLexer::GetAsXml(xml);
+        if (!Verify(output))
+        {
+            return;
+        }
 
         auto* pragmaOnceNode = xml.allocate_node(rapidxml::node_element, "pragma_once");
         pragmaOnceNode->append_attribute(xml.allocate_attribute("exists", _hasPragmaOnce ? "1" : "0"));
+        output->append_node(pragmaOnceNode);
     }
 
     bool FileLexer::DoParse(LogCollector& logCollector)

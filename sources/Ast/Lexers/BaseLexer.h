@@ -90,6 +90,7 @@ namespace Ast
         };
 
         using Xml = rapidxml::xml_document<String::CharT>;
+        using XmlNode = rapidxml::xml_node<String::CharT>;
     public:
         ~BaseLexer() override = default;
 
@@ -129,7 +130,7 @@ namespace Ast
             return {};
         }
 
-        virtual void GetAsXml(Xml& xml) const;
+        void GetAsXml(Xml& xml) const;
 
         [[nodiscard]] bool WasModified() const noexcept { return _modifierParams.wasModified; }
 
@@ -234,6 +235,8 @@ namespace Ast
         virtual bool DoScopeParse(LogCollector&) { return true; }
         virtual bool DoMarkingParse(LogCollector&) { return true; }
         virtual bool DoPostParse(LogCollector&) { return true; }
+        void OnGetAsXml(Xml& xml, XmlNode* output) const;
+        virtual void OnPutAdditionalInfoToXml(Xml& xml, XmlNode* output) const{}
 
         virtual void OnParse() {}
         virtual void ValidateMark(LogCollector&) {}
