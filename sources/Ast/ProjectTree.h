@@ -297,6 +297,11 @@ namespace Ast
             ForEach(
                 [this](Unit* unit)
                 {
+                    if (unit->IsGeneratedFile())
+                    {
+                        return true;
+                    }
+
                     if constexpr (!std::is_void_v<ContentFilterT>)
                     {
                         unit->GetFileContentStream()->ApplyFilters<ContentFilterT>();
@@ -304,11 +309,8 @@ namespace Ast
 
                     if (auto* tree = unit->GetTree().get(); Verify(tree))
                     {
-                        if (!unit->IsGeneratedFile())
-                        {
-                            tree->ParseUsing<ParserT>(_logCollector);
-                            unit->RecalculateDirtyBasedOnTree();
-                        }
+                        tree->ParseUsing<ParserT>(_logCollector);
+                        unit->RecalculateDirtyBasedOnTree();
                     }
 
                     return true;
