@@ -35,6 +35,8 @@ namespace Ast
 
         ~FileLexer() override = default;
 
+        void GetAsXml(Xml& xml) const override;
+
         bool DoParse(LogCollector& logCollector) override;
         [[nodiscard]] static Ptr Create(const ContentStream::Ptr& stream) { return { new FileLexer(stream) }; }
 
@@ -51,9 +53,6 @@ namespace Ast
 
     private:
         bool _hasPragmaOnce = false;
-
-        template<IsLexerOrBase>
-        friend class FileLexerModifier;
     };
 
 } // namespace Ast

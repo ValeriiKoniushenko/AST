@@ -82,27 +82,37 @@ namespace Ast
         return rule.IsCorrespondingTheRules(this, logCollector, additionalMessage);
     }
 
-    /*
-    BaseLexer::PTree BaseLexer::GetAsXML() const
+    void BaseLexer::GetAsXml(Xml& xml) const
     {
-        PTree tree;
+        xml.clear();
 
-        tree.push_back(PTree::value_type("lexer", PTree()));
-        tree.put("lexer.<xmlattr>.name", GetLexerName().c_str());
-        tree.put("lexer.<xmlattr>.type", GetLexerType().c_str());
+        auto* mainNode = xml.allocate_node(rapidxml::node_element, "lexer");
+        mainNode->append_attribute(xml.allocate_attribute("type", _lexerType.c_str()));
+        mainNode->append_attribute(xml.allocate_attribute("name", _lexerName.c_str()));
+        if (Verify(!!_reader))
+        {
+            mainNode->append_attribute(xml.allocate_attribute("path", _reader->GetFilePath().c_str()));
+        }
+
         if (auto path = GetFullPath().first; Verify(!!path))
         {
-            tree.put("lexer.<xmlattr>.fullPath", path.c_str());
+            mainNode->append_attribute(xml.allocate_attribute("ast_path", path.c_str()));
         }
 
         if (_marking)
         {
-            tree.push_back(PTree::value_type("lexer.mark", PTree()));
-            tree.put("lexer.mark.<xmlattr>.rule", _marking->rule.c_str());
+            auto* markNode = xml.allocate_node(rapidxml::node_element, "marking");
+            markNode->append_attribute(xml.allocate_attribute("rule", _marking->rule.c_str()));
+            for (const auto& param : _marking->params)
+            {
+                auto* paramNode = xml.allocate_node(rapidxml::node_element, "param");
+                paramNode->append_attribute(xml.allocate_attribute("value", param.c_str()));
+            }
+            mainNode->append_node(markNode);
         }
-        return tree;
+
+
     }
-    */
 
     std::pair<const String::CharT* const, const String::CharT* const> BaseLexer::GetReaderLimits() const
     {

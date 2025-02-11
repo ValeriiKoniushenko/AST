@@ -38,12 +38,8 @@ namespace Ast
 
     template<class T>
     concept IsLexer = (std::derived_from<T, BaseLexer> && requires(T) {
-                          {
-                              T::typeName
-                          };
-                          {
-                              T::Create
-                          };
+                          { T::typeName };
+                          { T::Create };
                       } && std::is_class_v<typename T::Ptr>) || std::is_void_v<T>;
 
     template<class T>
@@ -93,6 +89,7 @@ namespace Ast
             bool isDirty = true;
         };
 
+        using Xml = rapidxml::xml_document<String::CharT>;
     public:
         ~BaseLexer() override = default;
 
@@ -131,6 +128,8 @@ namespace Ast
             }
             return {};
         }
+
+        virtual void GetAsXml(Xml& xml) const;
 
         [[nodiscard]] bool WasModified() const noexcept { return _modifierParams.wasModified; }
 

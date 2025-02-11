@@ -45,6 +45,14 @@ namespace Ast
     {
     }
 
+    void FileLexer::GetAsXml(Xml& xml) const
+    {
+        BaseLexer::GetAsXml(xml);
+
+        auto* pragmaOnceNode = xml.allocate_node(rapidxml::node_element, "pragma_once");
+        pragmaOnceNode->append_attribute(xml.allocate_attribute("exists", _hasPragmaOnce ? "1" : "0"));
+    }
+
     bool FileLexer::DoParse(LogCollector& logCollector)
     {
         if (const auto reader = boost::dynamic_pointer_cast<const FileContentStream>(_reader))
