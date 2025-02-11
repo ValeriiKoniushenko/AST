@@ -193,6 +193,15 @@ namespace Ast
             return 0;
         }
 
+        if (IsGeneratedFile())
+        {
+            const auto time = ExtrudeGenerationTime();
+            if (time != 0)
+            {
+                return time;
+            }
+        }
+
         return std::filesystem::last_write_time(_path).time_since_epoch().count();
     }
 
