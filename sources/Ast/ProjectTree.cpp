@@ -339,14 +339,20 @@ namespace Ast
                     return true;
                 }
 
+                String buff;
                 string.SubStr(found - string.c_str());
-                string.Trim(' ');
-                if (string.IsEmpty())
+                string.IterateRegex("[0-9]",[&buff](const String::StdRegexMatchResults& m)
+                {
+                    buff += m.str();
+                    return true;
+                });
+
+                if (buff.IsEmpty())
                 {
                     return true;
                 }
 
-                timeString = string;
+                timeString = std::move(buff);
 
                 return false;
             });
