@@ -44,7 +44,7 @@ namespace Ast
 
         String out;
         out += generatedFileHeader_Head;
-        out += String::MakeFrom(std::chrono::system_clock::now().time_since_epoch().count());
+        out += String::MakeFrom(std::filesystem::last_write_time(_path).time_since_epoch().count());
         out += Code::Endl();
         out += generatedFileHeader_Body;
         out += String::MakeFrom(_path);
