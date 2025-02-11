@@ -110,8 +110,6 @@ namespace Ast
             }
             mainNode->append_node(markNode);
         }
-
-
     }
 
     std::pair<const String::CharT* const, const String::CharT* const> BaseLexer::GetReaderLimits() const
