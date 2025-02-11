@@ -115,7 +115,7 @@ namespace Ast
         {
             unit._type = Type::File;
             unit._contentStream = FileContentStream::Ptr(new FileContentStream());
-            if (Verify(!!unit._contentStream, "Impossible to allocate an object"))
+            if (!Verify(!!unit._contentStream, "Impossible to allocate an object"))
             {
                 Assert(unit._contentStream->ReadFromFile(path), "Can't read a file: "_dyn + String::MakeFrom(path));
             }
