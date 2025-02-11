@@ -38,8 +38,7 @@ TryToHelpInstallBoost()
 
 add_subdirectory(${DEPENDENCIES_DIR}/${BOOST_NAME})
 add_subdirectory(${DEPENDENCIES_DIR}/Utils)
-
-include_directories(${DEPENDENCIES_DIR}/rapidxml)
+add_subdirectory(${DEPENDENCIES_DIR})
 add_subdirectory(sources)
 add_subdirectory(tests)
 
