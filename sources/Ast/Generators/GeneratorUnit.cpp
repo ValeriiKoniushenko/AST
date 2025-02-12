@@ -20,16 +20,23 @@
 
 #include "GeneratorUnit.h"
 
+#include "Ast/LogCollector.h"
+
 namespace Ast
 {
 
-    String GeneratorUnit::Generate() const
+    String GeneratorUnit::GenerateSource(LogCollector* logCollector) const
     {
         String out;
-        out += PreGenerate();
-        out += OnGenerate();
-        out += PostGenerate();
+        out += PreGenerate(logCollector);
+        out += OnGenerate(logCollector);
+        out += PostGenerate(logCollector);
         return out;
+    }
+
+    void GeneratorUnit::GenerateSourceToFile(LogCollector* logCollector) const
+    {
+        RequireValidLexers(logCollector);
     }
 
     bool GeneratorUnit::AddLexer(const BaseLexer* lexer)
@@ -40,6 +47,11 @@ namespace Ast
         }
 
         if (!Verify(lexer->IsValid()))
+        {
+            return false;
+        }
+
+        if (!Verify(lexer->GetLexerType() != _type))
         {
             return false;
         }
@@ -56,10 +68,11 @@ namespace Ast
             return false;
         }
 
-        const auto found = std::ranges::find_if(_lexers, [&lexer](const BaseLexer::CPtr& inputLexer)
-        {
-            return inputLexer ? *inputLexer == *lexer : false;
-        });
+        const auto found = std::ranges::find_if(_lexers,
+                                                [&lexer](const BaseLexer::CPtr& inputLexer)
+                                                {
+                                                    return inputLexer ? *inputLexer == *lexer : false;
+                                                });
 
         if (found != _lexers.end())
         {
@@ -67,6 +80,105 @@ namespace Ast
         }
 
         return found != _lexers.end();
+    }
+
+    void GeneratorUnit::RequireValidLexers(LogCollector* logCollector) const
+    {
+#ifdef AST_DEBUG
+        if (_lexers.empty())
+        {
+            return;
+        }
+        
+        std::filesystem::path validPath;
+
+        auto checkLexer = [&](const BaseLexer::CPtr& inputLexer) -> bool
+        {
+            if (inputLexer == nullptr)
+            {
+                Assert();
+                if (logCollector)
+                {
+                    logCollector->AddLog({ "Nullptr lexer was passed into GeneratorUnit of type '{}'"_f << _type, LogCollector::LogType::Error });
+                }
+                return false;
+            }
+
+            if (!inputLexer->IsValid())
+            {
+                Assert();
+                if (logCollector)
+                {
+                    logCollector->AddLog({ "Invalid lexer was passed into GeneratorUnit of type '{}'"_f << _type, LogCollector::LogType::Error });
+                }
+                return false;
+            }
+
+            if (inputLexer->GetLexerType() != _type)
+            {
+                Assert();
+                if (logCollector)
+                {
+                    logCollector->AddLog({ "Invalid lexer's type was passed into GeneratorUnit of type '{}'. Lexer name is '{}'; and type is '{}'"_f
+                                               << _type << inputLexer->GetLexerName() << inputLexer->GetLexerType(),
+                                           LogCollector::LogType::Error });
+                }
+                return false;
+            }
+
+            if (!inputLexer->GetReader())
+            {
+                Assert();
+                if (logCollector)
+                {
+                    logCollector->AddLog({ "Nullptr lexer's Reader was passed into GeneratorUnit of type '{}'. Lexer name is '{}'; and type is '{}'"_f
+                                               << _type << inputLexer->GetLexerName() << inputLexer->GetLexerType(),
+                                           LogCollector::LogType::Error });
+                }
+                return false;
+            }
+            
+            if (validPath.empty())
+            {
+                const auto strPath = inputLexer->GetReader()->GetFilePath();
+                validPath = std::filesystem::path(strPath.c_str());
+                if (strPath.IsEmpty() || strPath == "none"_atom || validPath.empty() || !std::filesystem::exists(validPath))
+                {
+                    validPath.clear();
+                    Assert();
+                    if (logCollector)
+                    {
+                        logCollector->AddLog({ "Nullptr or invalid lexer's Reader->filePath was passed into GeneratorUnit of type '{}'. Lexer name is '{}'; and type is '{}'"_f
+                                                   << _type << inputLexer->GetLexerName() << inputLexer->GetLexerType(),
+                                               LogCollector::LogType::Error });
+                    }
+                    return false;
+                }
+            }
+
+            if (validPath.empty() || !std::filesystem::exists(validPath))
+            {
+                validPath.clear();
+                Assert();
+                if (logCollector)
+                {
+                    logCollector->AddLog({ "Nullptr or invalid lexer's Reader->filePath was passed into GeneratorUnit of type '{}'. Lexer name is '{}'; and type is '{}'"_f
+                                               << _type << inputLexer->GetLexerName() << inputLexer->GetLexerType(),
+                                           LogCollector::LogType::Error });
+                }
+                return false;
+            }
+
+            return true;
+        };
+
+        if (checkLexer(_lexers.front()))
+        {
+            return;
+        }
+
+        (void)std::ranges::all_of(_lexers, checkLexer);
+#endif
     }
 
 } // namespace Ast

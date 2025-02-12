@@ -38,20 +38,30 @@ namespace Ast
                 auto source = unit->GetGeneratedDummyHeader();
 
                 const auto tree = unit->GetTree();
-                tree->ForEachOverMarked(
-                    [&](const BaseLexer* lexer)
+                tree->ForEachOverSameType(
+                    [this](std::vector<const BaseLexer*>& lexers)
                     {
-                        auto generator = GetGeneratorUnitFor(*lexer);
-                        if (!Verify(!!generator))
+                        if (Verify(!lexers.empty() && lexers.front()))
                         {
-                            _projectTree->GetLogCollector()->AddLog({ "Generator wasn't found for lexer: '{}' by the next path: {}"_f
-                                                                          << lexer->GetLexerType() << lexer->GetFullPath().first,
-                                                                      LogCollector::LogType::Error });
+                            const auto* pinnedLexer = lexers.front();
+
+                            auto generators = GetGeneratorUnitFor(*pinnedLexer);
+                            if (!Verify(!!generators))
+                            {
+                                _projectTree->GetLogCollector()->AddLog({ "Generator wasn't found for lexer: '{}' by the next path: {}"_f
+                                                                              << pinnedLexer->GetLexerType() << pinnedLexer->GetFullPath().first,
+                                                                          LogCollector::LogType::Error });
+                            }
+
+                            for (const auto& generator : *generators)
+                            {
+                                generator->GenerateSourceToFile(_projectTree->GetLogCollector().get());
+                            }
                         }
-                        else
-                        {
-                            // source += generator->Generate(lexer) + Code::Endl();
-                        }
+                    },
+                    [](const BaseLexer* l)
+                    {
+                        return l->IsMarked();
                     });
 
                 std::ofstream out(unit->GetGeneratedSiblingFilePath());
@@ -127,28 +137,20 @@ namespace Ast
             });
     }
 
-    GeneratorUnit::CPtr Generator::GetGeneratorUnitFor(const String& type, std::function<bool(const GeneratorUnit::Ptr&)>&& additionalCondition) const
+    const Generator::GeneratorContainerT* Generator::GetGeneratorUnitFor(const String& type) const
     {
-        auto found = std::find_if(_generatorUnits.begin(), _generatorUnits.end(),
-                                  [&type, &additionalCondition](const GeneratorUnit::Ptr& unit)
-                                  {
-                                      const bool res1 = unit->GetType() == type;
-                                      const bool res2 = additionalCondition ? additionalCondition(unit) : true;
-                                      return res1 && res2;
-                                  });
-
-        return found != _generatorUnits.end() ? *found : nullptr;
+        const auto found = _generatorUnits.find(type);
+        return found != _generatorUnits.end() ? &found->second : nullptr;
     }
 
-    GeneratorUnit::CPtr Generator::GetGeneratorUnitFor(const BaseLexer& lexer,
-                                                       std::function<bool(const GeneratorUnit::Ptr&)>&& additionalCondition) const
+    const Generator::GeneratorContainerT* Generator::GetGeneratorUnitFor(const BaseLexer& lexer) const
     {
-        return GetGeneratorUnitFor(lexer.GetLexerType(), std::forward<decltype(additionalCondition)>(additionalCondition));
+        return GetGeneratorUnitFor(lexer.GetLexerType());
     }
-    GeneratorUnit::CPtr Generator::GetGeneratorUnitFor(const BaseLexer::Ptr& lexer,
-                                                       std::function<bool(const GeneratorUnit::Ptr&)>&& additionalCondition) const
+    const Generator::GeneratorContainerT* Generator::GetGeneratorUnitFor(const BaseLexer::Ptr& lexer) const
     {
-        return Verify(!!lexer) ? GetGeneratorUnitFor(lexer->GetLexerType(), std::forward<decltype(additionalCondition)>(additionalCondition)) : nullptr;
+        return Verify(!!lexer) ? GetGeneratorUnitFor(lexer->GetLexerType())
+                               : nullptr;
     }
 
 } // namespace Ast

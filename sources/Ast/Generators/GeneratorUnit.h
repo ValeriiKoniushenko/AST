@@ -49,7 +49,8 @@ namespace Ast
     public:
         ~GeneratorUnit() override = default;
 
-        [[nodiscard]] String Generate() const;
+        [[nodiscard]] String GenerateSource(LogCollector* logCollector = nullptr) const;
+        void GenerateSourceToFile(LogCollector* logCollector = nullptr) const;
         const String& GetType() const { return _type; }
 
         [[nodiscard]] bool operator==(const GeneratorUnit& other) const { return _type == other._type && OnEqual(other); }
@@ -72,23 +73,29 @@ namespace Ast
         /**
          * @brief Don't call this method directly. Override it & implement needed logic
          */
-        [[nodiscard]] virtual String OnGenerate() const { return String(); }
+        [[nodiscard]] virtual String OnGenerate(LogCollector* logCollector = nullptr) const { return String(); }
 
         /**
          * @brief Don't call this method directly. Override it & implement needed logic
          */
-        [[nodiscard]] virtual String PreGenerate() const { return String(); }
+        [[nodiscard]] virtual String PreGenerate(LogCollector* logCollector = nullptr) const { return String(); }
 
         /**
          * @brief Don't call this method directly. Override it & implement needed logic
          */
-        [[nodiscard]] virtual String PostGenerate() const { return String(); }
+        [[nodiscard]] virtual String PostGenerate(LogCollector* logCollector = nullptr) const { return String(); }
 
         /**
          * @brief Override this method if you need more complex comparison corresponding to
          * your inherited class
          */
         [[nodiscard]] virtual bool OnEqual(const GeneratorUnit& other) const { return true; }
+
+        /**
+         * @brief Will check only in debug mode for valid lexers.
+         * @details Override this method if you need more complex validation of every lexer. Use only with #ifdef AST_DEBUG
+         */
+        virtual void RequireValidLexers(LogCollector* logCollector = nullptr) const;
 
     protected:
         const String _type;

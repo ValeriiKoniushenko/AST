@@ -42,7 +42,9 @@ namespace Ast
             std::vector<BaseLexer::Ptr> participantLexers;
         };
 
-        using GeneratorContainerT = std::unordered_set<GeneratorUnit::Ptr, GeneratorUnit::HasherPtr>;
+
+        using GeneratorContainerT = std::vector<GeneratorUnit::Ptr>;
+        using GeneratorMapContainerT = std::unordered_map<String, GeneratorContainerT>;
         using Code = ITextSourceReader::Code;
 
     public:
@@ -50,25 +52,29 @@ namespace Ast
         ~Generator() override = default;
 
         void SetTargetProject(const ProjectTree::Ptr& project);
+
         virtual void Generate();
+
         [[nodiscard]] bool IsNeedRegenerate() const;
+
         void ForEachOverRegenerateableUnits(std::function<void(const ProjectTree::Unit*)> callback) const;
         void ForEachOverRegenerateableUnits(std::function<void(ProjectTree::Unit*)> callback);
 
-        [[nodiscard]] const GeneratorContainerT& GetGeneratorUnits() const noexcept { return _generatorUnits; }
-        [[nodiscard]] GeneratorUnit::CPtr GetGeneratorUnitFor(const String& type, std::function<bool(const GeneratorUnit::Ptr&)>&& additionalCondition = nullptr) const;
-        [[nodiscard]] GeneratorUnit::CPtr GetGeneratorUnitFor(const BaseLexer& lexer, std::function<bool(const GeneratorUnit::Ptr&)>&& additionalCondition = nullptr) const;
-        [[nodiscard]] GeneratorUnit::CPtr GetGeneratorUnitFor(const BaseLexer::Ptr& lexer, std::function<bool(const GeneratorUnit::Ptr&)>&& additionalCondition = nullptr) const;
+        [[nodiscard]] const GeneratorMapContainerT& GetGeneratorUnits() const noexcept { return _generatorUnits; }
+        [[nodiscard]] const GeneratorContainerT* GetGeneratorUnitFor(const String& type) const;
+        [[nodiscard]] const GeneratorContainerT* GetGeneratorUnitFor(const BaseLexer& lexer) const;
+        [[nodiscard]] const GeneratorContainerT* GetGeneratorUnitFor(const BaseLexer::Ptr& lexer) const;
 
-        template<IsGeneratorUnit Generator>
+        template<IsGeneratorUnit Generator, IsLexer Lexer>
         void AddGenerator()
         {
-            _generatorUnits.emplace( new Generator() );
+            auto& vec = _generatorUnits[Lexer::typeName];
+            vec.emplace( new Generator() );
         }
 
     protected:
         ProjectTree::Ptr _projectTree;
-        GeneratorContainerT _generatorUnits;
+        GeneratorMapContainerT _generatorUnits;
     };
 
 } // namespace Ast
