@@ -42,7 +42,6 @@ namespace Ast
             std::vector<BaseLexer::Ptr> participantLexers;
         };
 
-
         using GeneratorContainerT = std::vector<GeneratorUnit::Ptr>;
         using GeneratorMapContainerT = std::unordered_map<String, GeneratorContainerT>;
         using Code = ITextSourceReader::Code;
@@ -69,7 +68,7 @@ namespace Ast
         void AddGenerator()
         {
             auto& vec = _generatorUnits[Lexer::typeName];
-            vec.emplace( new Generator() );
+            vec.emplace(new Generator());
         }
 
     protected:

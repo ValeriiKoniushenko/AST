@@ -22,6 +22,8 @@
 
 #include "Ast/LogCollector.h"
 
+#include <fstream>
+
 namespace Ast
 {
 
@@ -37,6 +39,38 @@ namespace Ast
     void GeneratorUnit::GenerateSourceToFile(LogCollector* logCollector) const
     {
         RequireValidLexers(logCollector);
+        if (_lexers.empty())
+        {
+            return;
+        }
+
+        const auto path = GetGenerationPath(logCollector);
+        if (path.empty())
+        {
+            Assert();
+            if (logCollector)
+            {
+                logCollector->AddLog(
+                    { "Impossible to generate a code to the file. Invalid lexer's path was passed into GeneratorUnit of type '{}'"_f << _type,
+                      LogCollector::LogType::Error });
+            }
+            return;
+        }
+
+        const auto sources = GenerateSource(logCollector);
+        std::ofstream file(path);
+        if (!file.is_open())
+        {
+            Assert();
+            if (logCollector)
+            {
+                logCollector->AddLog(
+                    { "Impossible to generate a code to the file, because the file can't be created by some reasons. Problem in: GeneratorUnit of type '{}'"_f << _type,
+                      LogCollector::LogType::Error });
+            }
+            return;
+        }
+        file.write(sources.c_str(), sources.Size() * sizeof(*sources.c_str()));
     }
 
     bool GeneratorUnit::AddLexer(const BaseLexer* lexer)
@@ -89,7 +123,7 @@ namespace Ast
         {
             return;
         }
-        
+
         std::filesystem::path validPath;
 
         auto checkLexer = [&](const BaseLexer::CPtr& inputLexer) -> bool
@@ -137,7 +171,7 @@ namespace Ast
                 }
                 return false;
             }
-            
+
             if (validPath.empty())
             {
                 const auto strPath = inputLexer->GetReader()->GetFilePath();
@@ -148,9 +182,10 @@ namespace Ast
                     Assert();
                     if (logCollector)
                     {
-                        logCollector->AddLog({ "Nullptr or invalid lexer's Reader->filePath was passed into GeneratorUnit of type '{}'. Lexer name is '{}'; and type is '{}'"_f
-                                                   << _type << inputLexer->GetLexerName() << inputLexer->GetLexerType(),
-                                               LogCollector::LogType::Error });
+                        logCollector->AddLog(
+                            { "Nullptr or invalid lexer's Reader->filePath was passed into GeneratorUnit of type '{}'. Lexer name is '{}'; and type is '{}'"_f
+                                  << _type << inputLexer->GetLexerName() << inputLexer->GetLexerType(),
+                              LogCollector::LogType::Error });
                     }
                     return false;
                 }
@@ -162,9 +197,10 @@ namespace Ast
                 Assert();
                 if (logCollector)
                 {
-                    logCollector->AddLog({ "Nullptr or invalid lexer's Reader->filePath was passed into GeneratorUnit of type '{}'. Lexer name is '{}'; and type is '{}'"_f
-                                               << _type << inputLexer->GetLexerName() << inputLexer->GetLexerType(),
-                                           LogCollector::LogType::Error });
+                    logCollector->AddLog(
+                        { "Nullptr or invalid lexer's Reader->filePath was passed into GeneratorUnit of type '{}'. Lexer name is '{}'; and type is '{}'"_f
+                              << _type << inputLexer->GetLexerName() << inputLexer->GetLexerType(),
+                          LogCollector::LogType::Error });
                 }
                 return false;
             }

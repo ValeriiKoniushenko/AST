@@ -149,8 +149,7 @@ namespace Ast
     }
     const Generator::GeneratorContainerT* Generator::GetGeneratorUnitFor(const BaseLexer::Ptr& lexer) const
     {
-        return Verify(!!lexer) ? GetGeneratorUnitFor(lexer->GetLexerType())
-                               : nullptr;
+        return Verify(!!lexer) ? GetGeneratorUnitFor(lexer->GetLexerType()) : nullptr;
     }
 
 } // namespace Ast
