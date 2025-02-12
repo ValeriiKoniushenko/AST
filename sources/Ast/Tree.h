@@ -120,8 +120,8 @@ namespace Ast
         // ===========================================================
         /**
          * @brief Can take a functions of next types:
-         * 1. bool([const] Lexer*, Param) - this function will work until it gets 'false' in return
-         * 2. void([const] Lexer*, Param) - will iterate without stopping through all a tree
+         * 1. bool([const] Lexer*, [Param]) - this function will work until it gets 'false' in return
+         * 2. void([const] Lexer*, [Param]) - will iterate without stopping through all a tree
          */
         template<IsLexer Lexer = void, class FuncT>
         void ForEach(FuncT&& callback)
@@ -132,8 +132,8 @@ namespace Ast
 
          /**
          * @brief Can take a functions of next types:
-         * 1. bool(const Lexer*, Param) - this function will work until it gets 'false' in return
-         * 2. void(const Lexer*, Param) - will iterate without stopping through all a tree
+         * 1. bool(const Lexer*, [Param]) - this function will work until it gets 'false' in return
+         * 2. void(const Lexer*, [Param]) - will iterate without stopping through all a tree
          */
         template<IsLexer Lexer = void, class FuncT>
         void ForEach(FuncT&& callback) const
@@ -144,8 +144,8 @@ namespace Ast
 
         /**
         * @brief Can take a functions of next types:
-        * 1. bool([const] Lexer*, Param) - this function will work until it gets 'false' in return
-        * 2. void([const] Lexer*, Param) - will iterate without stopping through all a tree
+        * 1. bool([const] Lexer*, [Param]) - this function will work until it gets 'false' in return
+        * 2. void([const] Lexer*, [Param]) - will iterate without stopping through all a tree
         */
         template<IsLexer Lexer = void, class FuncT>
         void ForEachOverMarked(FuncT&& callback) const
@@ -156,8 +156,8 @@ namespace Ast
 
         /**
         * @brief Can take a functions of next types:
-        * 1. bool([const] Lexer*, Param) - this function will work until it gets 'false' in return
-        * 2. void([const] Lexer*, Param) - will iterate without stopping through all a tree
+        * 1. bool([const] Lexer*, [Param]) - this function will work until it gets 'false' in return
+        * 2. void([const] Lexer*, [Param]) - will iterate without stopping through all a tree
         */
         template<IsLexer Lexer = void, class FuncT>
         void ForEachOverMarked(FuncT&& callback)
@@ -165,6 +165,31 @@ namespace Ast
             Params params;
             ForEachImpl<FuncT, Lexer, false, true>(std::forward<decltype(callback)>(callback), _rootLexer.get(), params);
         }
+
+        /**
+        * @brief Will iterate over tree, and it will pass to a callback the argument with vector of pointers to the lexers of the same types
+        * 1. bool(std::vector<[const] Lexer*>) - this function will work until it gets 'false' in return
+        * 2. void(std::vector<[const] Lexer*>) - will iterate without stopping through all a tree
+        */
+        template<class FuncT>
+        void ForEachOverSameType(FuncT&& callback, std::function<bool(const BaseLexer*)>&& cond = nullptr)
+        {
+            Params params;
+            ForEachOverSameTypeImpl<FuncT, false>(std::forward<decltype(callback)>(callback), _rootLexer.get(), params, std::forward<decltype(cond)>(cond));
+        }
+
+        /**
+        * @brief Will iterate over tree, and it will pass to a callback the argument with vector of pointers to the lexers of the same types
+        * 1. bool(std::vector<[const] Lexer*>) - this function will work until it gets 'false' in return
+        * 2. void(std::vector<[const] Lexer*>) - will iterate without stopping through all a tree
+        */
+        template<class FuncT>
+        void ForEachOverSameType(FuncT&& callback, std::function<bool(const BaseLexer*)>&& cond = nullptr) const
+        {
+            Params params;
+            ForEachOverSameTypeImpl<FuncT, true>(std::forward<decltype(callback)>(callback), _rootLexer.get(), params, std::forward<decltype(cond)>(cond));
+        }
+
 
         template<IsLexer Lexer = void>
         [[nodiscard]] BaseLexer::Ptr FindFirstByName(const String& lexerName)
@@ -227,7 +252,6 @@ namespace Ast
 
     private:
         // ======================= PIMPLs =======================
-
         template<class FuncT, IsLexer Lexer = void, bool IsConst = false, bool OnlyMarked = false>
         static bool ForEachImpl(FuncT&& callback, BaseLexer::AdaptiveRawPtr<IsConst> base, Params& params)
         {
@@ -297,6 +321,51 @@ namespace Ast
                     }
                 }
                 --params.nesting;
+            }
+
+            return true;
+        }
+
+        template<class FuncT, bool IsConst = false>
+        static bool ForEachOverSameTypeImpl(FuncT&& callback, BaseLexer::AdaptiveRawPtr<IsConst> base, Params& params, std::function<bool(const BaseLexer*)>&& cond)
+        {
+            if (!base)
+            {
+                return false;
+            }
+
+            std::unordered_map<String, std::vector<BaseLexer::AdaptiveRawPtr<IsConst>>> lexersMap;
+            auto iterateFunc = [&lexersMap, &cond](const BaseLexer* lexer)
+            {
+                if (cond && !std::invoke(cond, lexer))
+                {
+                    return;
+                }
+
+                auto& vec = lexersMap[lexer->GetLexerType()];
+                vec.push_back(lexer);
+            };
+
+            ForEachImpl<decltype(iterateFunc), void, IsConst>(std::move(iterateFunc), base, params);
+
+            for (auto& [lexerType, vec] : lexersMap)
+            {
+                if (vec.empty())
+                {
+                    continue;
+                }
+
+                if constexpr (std::is_void_v<decltype(callback(vec))>)
+                {
+                    std::invoke(std::forward<decltype(callback)>(callback), vec);
+                }
+                else
+                {
+                    if (!std::invoke(std::forward<decltype(callback)>(callback), vec))
+                    {
+                        break;
+                    }
+                }
             }
 
             return true;

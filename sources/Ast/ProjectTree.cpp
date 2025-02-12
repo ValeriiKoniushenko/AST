@@ -341,11 +341,12 @@ namespace Ast
 
                 String buff;
                 string.SubStr(found - string.c_str());
-                string.IterateRegex("[0-9]",[&buff](const String::StdRegexMatchResults& m)
-                {
-                    buff += m.str();
-                    return true;
-                });
+                string.IterateRegex("[0-9]",
+                                    [&buff](const String::StdRegexMatchResults& m)
+                                    {
+                                        buff += m.str();
+                                        return true;
+                                    });
 
                 if (buff.IsEmpty())
                 {
