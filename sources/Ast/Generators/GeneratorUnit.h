@@ -44,14 +44,21 @@ namespace Ast
             size_t operator()(const Ptr& gen) const { return gen->GetType().MakeHash(); }
         };
 
+        using LexerContainerT = std::vector<BaseLexer::CPtr>;
+
     public:
         ~GeneratorUnit() override = default;
 
-        [[nodiscard]] String Generate(const BaseLexer* lexer) const;
+        [[nodiscard]] String Generate() const;
         const String& GetType() const { return _type; }
 
         [[nodiscard]] bool operator==(const GeneratorUnit& other) const { return _type == other._type && OnEqual(other); }
         [[nodiscard]] bool operator==(const CPtr& other) const { return *this == *other; }
+
+        [[nodiscard]] LexerContainerT& GetLexers() { return _lexers; }
+        [[nodiscard]] const LexerContainerT& GetLexers() const { return _lexers; }
+        bool AddLexer(const BaseLexer* lexer);
+        bool RemoveLexer(const BaseLexer* lexer);
 
     protected:
         template<IsLexer Lexer>
@@ -62,16 +69,30 @@ namespace Ast
         explicit GeneratorUnit(const String& type)
             : _type{ type } {};
 
-        // Don't call this method directly. Override it & implement needed logic
-        [[nodiscard]] virtual String OnGenerate(const BaseLexer* lexer) const { return String(); }
+        /**
+         * @brief Don't call this method directly. Override it & implement needed logic
+         */
+        [[nodiscard]] virtual String OnGenerate() const { return String(); }
 
-        [[nodiscard]] virtual String PreGenerate(const BaseLexer* lexer) const { return String(); }
-        [[nodiscard]] virtual String PostGenerate(const BaseLexer* lexer) const { return String(); }
+        /**
+         * @brief Don't call this method directly. Override it & implement needed logic
+         */
+        [[nodiscard]] virtual String PreGenerate() const { return String(); }
 
+        /**
+         * @brief Don't call this method directly. Override it & implement needed logic
+         */
+        [[nodiscard]] virtual String PostGenerate() const { return String(); }
+
+        /**
+         * @brief Override this method if you need more complex comparison corresponding to
+         * your inherited class
+         */
         [[nodiscard]] virtual bool OnEqual(const GeneratorUnit& other) const { return true; }
 
     protected:
         const String _type;
+        LexerContainerT _lexers;
     };
 
     template<class T>

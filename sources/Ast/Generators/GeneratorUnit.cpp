@@ -23,13 +23,50 @@
 namespace Ast
 {
 
-    String GeneratorUnit::Generate(const BaseLexer* lexer) const
+    String GeneratorUnit::Generate() const
     {
         String out;
-        out += PreGenerate(lexer);
-        out += OnGenerate(lexer);
-        out += PostGenerate(lexer);
+        out += PreGenerate();
+        out += OnGenerate();
+        out += PostGenerate();
         return out;
     }
 
-}
+    bool GeneratorUnit::AddLexer(const BaseLexer* lexer)
+    {
+        if (lexer == nullptr)
+        {
+            return false;
+        }
+
+        if (!Verify(lexer->IsValid()))
+        {
+            return false;
+        }
+
+        _lexers.push_back(lexer);
+
+        return true;
+    }
+
+    bool GeneratorUnit::RemoveLexer(const BaseLexer* lexer)
+    {
+        if (lexer == nullptr)
+        {
+            return false;
+        }
+
+        const auto found = std::ranges::find_if(_lexers, [&lexer](const BaseLexer::CPtr& inputLexer)
+        {
+            return inputLexer ? *inputLexer == *lexer : false;
+        });
+
+        if (found != _lexers.end())
+        {
+            _lexers.erase(found);
+        }
+
+        return found != _lexers.end();
+    }
+
+} // namespace Ast

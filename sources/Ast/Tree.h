@@ -130,7 +130,7 @@ namespace Ast
             ForEachImpl<FuncT, Lexer, false>(std::forward<decltype(callback)>(callback), _rootLexer.get(), params);
         }
 
-         /**
+        /**
          * @brief Can take a functions of next types:
          * 1. bool(const Lexer*, [Param]) - this function will work until it gets 'false' in return
          * 2. void(const Lexer*, [Param]) - will iterate without stopping through all a tree
@@ -143,10 +143,10 @@ namespace Ast
         }
 
         /**
-        * @brief Can take a functions of next types:
-        * 1. bool([const] Lexer*, [Param]) - this function will work until it gets 'false' in return
-        * 2. void([const] Lexer*, [Param]) - will iterate without stopping through all a tree
-        */
+         * @brief Can take a functions of next types:
+         * 1. bool([const] Lexer*, [Param]) - this function will work until it gets 'false' in return
+         * 2. void([const] Lexer*, [Param]) - will iterate without stopping through all a tree
+         */
         template<IsLexer Lexer = void, class FuncT>
         void ForEachOverMarked(FuncT&& callback) const
         {
@@ -155,10 +155,10 @@ namespace Ast
         }
 
         /**
-        * @brief Can take a functions of next types:
-        * 1. bool([const] Lexer*, [Param]) - this function will work until it gets 'false' in return
-        * 2. void([const] Lexer*, [Param]) - will iterate without stopping through all a tree
-        */
+         * @brief Can take a functions of next types:
+         * 1. bool([const] Lexer*, [Param]) - this function will work until it gets 'false' in return
+         * 2. void([const] Lexer*, [Param]) - will iterate without stopping through all a tree
+         */
         template<IsLexer Lexer = void, class FuncT>
         void ForEachOverMarked(FuncT&& callback)
         {
@@ -167,29 +167,30 @@ namespace Ast
         }
 
         /**
-        * @brief Will iterate over tree, and it will pass to a callback the argument with vector of pointers to the lexers of the same types
-        * 1. bool(std::vector<[const] Lexer*>) - this function will work until it gets 'false' in return
-        * 2. void(std::vector<[const] Lexer*>) - will iterate without stopping through all a tree
-        */
+         * @brief Will iterate over tree, and it will pass to a callback the argument with vector of pointers to the lexers of the same types
+         * 1. bool(std::vector<[const] Lexer*>) - this function will work until it gets 'false' in return
+         * 2. void(std::vector<[const] Lexer*>) - will iterate without stopping through all a tree
+         */
         template<class FuncT>
         void ForEachOverSameType(FuncT&& callback, std::function<bool(const BaseLexer*)>&& cond = nullptr)
         {
             Params params;
-            ForEachOverSameTypeImpl<FuncT, false>(std::forward<decltype(callback)>(callback), _rootLexer.get(), params, std::forward<decltype(cond)>(cond));
+            ForEachOverSameTypeImpl<FuncT, false>(std::forward<decltype(callback)>(callback), _rootLexer.get(), params,
+                                                  std::forward<decltype(cond)>(cond));
         }
 
         /**
-        * @brief Will iterate over tree, and it will pass to a callback the argument with vector of pointers to the lexers of the same types
-        * 1. bool(std::vector<[const] Lexer*>) - this function will work until it gets 'false' in return
-        * 2. void(std::vector<[const] Lexer*>) - will iterate without stopping through all a tree
-        */
+         * @brief Will iterate over tree, and it will pass to a callback the argument with vector of pointers to the lexers of the same types
+         * 1. bool(std::vector<[const] Lexer*>) - this function will work until it gets 'false' in return
+         * 2. void(std::vector<[const] Lexer*>) - will iterate without stopping through all a tree
+         */
         template<class FuncT>
         void ForEachOverSameType(FuncT&& callback, std::function<bool(const BaseLexer*)>&& cond = nullptr) const
         {
             Params params;
-            ForEachOverSameTypeImpl<FuncT, true>(std::forward<decltype(callback)>(callback), _rootLexer.get(), params, std::forward<decltype(cond)>(cond));
+            ForEachOverSameTypeImpl<FuncT, true>(std::forward<decltype(callback)>(callback), _rootLexer.get(), params,
+                                                 std::forward<decltype(cond)>(cond));
         }
-
 
         template<IsLexer Lexer = void>
         [[nodiscard]] BaseLexer::Ptr FindFirstByName(const String& lexerName)
@@ -241,10 +242,11 @@ namespace Ast
 
         [[nodiscard]] bool HasAtLeastOneMarkedLexer() const
         {
-            return !!FindIf([](auto* lexer)
-            {
-                return lexer->IsMarked();
-            });
+            return !!FindIf(
+                [](auto* lexer)
+                {
+                    return lexer->IsMarked();
+                });
         }
 
         [[nodiscard]] BaseLexer::Ptr GetRootLexer() { return _rootLexer; }
@@ -327,7 +329,8 @@ namespace Ast
         }
 
         template<class FuncT, bool IsConst = false>
-        static bool ForEachOverSameTypeImpl(FuncT&& callback, BaseLexer::AdaptiveRawPtr<IsConst> base, Params& params, std::function<bool(const BaseLexer*)>&& cond)
+        static bool ForEachOverSameTypeImpl(FuncT&& callback, BaseLexer::AdaptiveRawPtr<IsConst> base, Params& params,
+                                            std::function<bool(const BaseLexer*)>&& cond)
         {
             if (!base)
             {

@@ -50,7 +50,7 @@ namespace Ast
                         }
                         else
                         {
-                            source += generator->Generate(lexer) + Code::Endl();
+                            // source += generator->Generate(lexer) + Code::Endl();
                         }
                     });
 
