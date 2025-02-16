@@ -101,6 +101,7 @@ namespace Ast
          * @brief Override this method with needed of generation. For example: /path/to/folder/file.generated.h
          */
         [[nodiscard]] virtual std::filesystem::path GetGenerationPath(LogCollector* logCollector = nullptr) const = 0;
+
     protected:
         const String _type;
         LexerContainerT _lexers;

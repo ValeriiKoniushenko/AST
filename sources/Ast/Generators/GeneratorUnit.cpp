@@ -65,7 +65,8 @@ namespace Ast
             if (logCollector)
             {
                 logCollector->AddLog(
-                    { "Impossible to generate a code to the file, because the file can't be created by some reasons. Problem in: GeneratorUnit of type '{}'"_f << _type,
+                    { "Impossible to generate a code to the file, because the file can't be created by some reasons. Problem in: GeneratorUnit of type '{}'"_f
+                          << _type,
                       LogCollector::LogType::Error });
             }
             return;
