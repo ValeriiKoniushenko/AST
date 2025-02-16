@@ -68,7 +68,7 @@ namespace Ast
         void AddGenerator()
         {
             auto& vec = _generatorUnits[Lexer::typeName];
-            vec.push_back(Generator::Ptr( new Generator ));
+            vec.push_back(Generator::Ptr(new Generator));
         }
 
     protected:

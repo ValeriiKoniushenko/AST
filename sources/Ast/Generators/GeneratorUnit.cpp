@@ -96,6 +96,19 @@ namespace Ast
         return true;
     }
 
+    bool GeneratorUnit::AddLexers(std::vector<const BaseLexer*> lexers)
+    {
+        if (lexers.empty())
+        {
+            return false;
+        }
+
+        for (const auto& lexer : lexers)
+        {
+            AddLexer(lexer);
+        }
+    }
+
     bool GeneratorUnit::RemoveLexer(const BaseLexer* lexer)
     {
         if (lexer == nullptr)

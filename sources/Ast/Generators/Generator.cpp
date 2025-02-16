@@ -55,6 +55,7 @@ namespace Ast
 
                             for (const auto& generator : *generators)
                             {
+                                generator->AddLexers(lexers);
                                 generator->GenerateSourceToFile(_projectTree->GetLogCollector().get());
                             }
                         }

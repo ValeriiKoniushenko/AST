@@ -59,14 +59,10 @@ namespace Ast
         [[nodiscard]] LexerContainerT& GetLexers() { return _lexers; }
         [[nodiscard]] const LexerContainerT& GetLexers() const { return _lexers; }
         bool AddLexer(const BaseLexer* lexer);
+        bool AddLexers(std::vector<const BaseLexer*> lexers);
         bool RemoveLexer(const BaseLexer* lexer);
 
     protected:
-        template<IsLexer Lexer>
-        [[nodiscard]] static GeneratorUnit Create()
-        {
-            return GeneratorUnit(Lexer::typeName);
-        }
         explicit GeneratorUnit(const String& type)
             : _type{ type } {};
 
