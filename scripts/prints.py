@@ -7,14 +7,19 @@ def SupportsColor():
 if SupportsColor():
     RED = "\033[91m"
     GREEN = "\033[92m"
+    YELLOW = "\033[93m"
     RESET = "\033[0m"
 else:
     RED = ""
     GREEN = ""
+    YELLOW = ""
     RESET = ""
 
 def printError(msg):
     print(f"{RED}Error:{RESET} " + msg)
+
+def printWarning(msg):
+    print(f"{YELLOW}Warning:{RESET} " + msg)
 
 def printSuccess(msg):
     print(f"{GREEN}Success:{RESET} " + msg)

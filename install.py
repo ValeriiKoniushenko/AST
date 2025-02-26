@@ -1,7 +1,7 @@
 import os
 import subprocess
 import scripts.installBoost
-from scripts.prints import printError, printSuccess, frameMessage
+from scripts.prints import *
 
 
 def CheckCommand(command, url):
@@ -9,7 +9,7 @@ def CheckCommand(command, url):
         subprocess.run([command, '--version'], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         printSuccess(f"'{command}' was found!")
     except (subprocess.CalledProcessError, FileNotFoundError):
-        printError(f"{command} wasn't found. Install it ({url}) and try again.")
+        printWarning(f"{command} wasn't found. Install it ({url}) and try again.")
         return False
     return True
 
@@ -37,9 +37,6 @@ def IsGitSafeDirectory(path):
         return False
 
 def CheckCommands():
-    if CheckCommand("cppcheck", "https://sourceforge.net/projects/cppcheck/#download") == False:
-        return False
-
     if CheckCommand("cmake", "https://cmake.org/download/") == False:
         return False
 
@@ -65,7 +62,9 @@ def ProcessGitSafeDir():
                 break
             else:
                 print("Invalid input. Please enter Y or N.")
-    
+    else:
+        printSuccess("The project is inside git safe directory.")
+
     return True
 
 def ProcessGitSubmodules():
@@ -95,6 +94,8 @@ def ProcessGitSubmodules():
                 break
             else:
                 print("Invalid input. Please enter Y or N.")
+    else:
+        printSuccess("Git submodules don't need in update.")
 
     return True
 
@@ -123,8 +124,7 @@ def ProcessBoost():
 
     return True
 
-if CheckCommands() == False:
-    exit(1)
+CheckCommands()
 
 if ProcessGitSafeDir() == False:
     exit(2)
