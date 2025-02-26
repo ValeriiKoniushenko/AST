@@ -1,29 +1,15 @@
 import os
 import subprocess
-import sys
 import scripts.installBoost
+from scripts.prints import printError, printSuccess, frameMessage
 
-# Function to check if the terminal supports colors
-def SupportsColor():
-    return sys.stdout.isatty() and (os.environ.get("TERM") in ["xterm-color", "xterm-256color", "screen-256color"])
 
-# ANSI escape code for red color
-if SupportsColor():
-    RED = "\033[91m"
-    GREEN = "\033[92m"
-    RESET = "\033[0m"
-else:
-    RED = ""
-    GREEN = ""
-    RESET = ""
-
-# Function to check if a command is available in the system's PATH
 def CheckCommand(command, url):
     try:
         subprocess.run([command, '--version'], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        print(f"{GREEN}Success:{RESET} '{command}' was found!")
+        printSuccess(f"'{command}' was found!")
     except (subprocess.CalledProcessError, FileNotFoundError):
-        print(f"{RED}Error:{RESET} {command} wasn't found. Install it ({url}) and try again.")
+        printError(f"{command} wasn't found. Install it ({url}) and try again.")
         return False
     return True
 
@@ -47,7 +33,7 @@ def IsGitSafeDirectory(path):
         return normalized_path in safe_directories
 
     except subprocess.CalledProcessError:
-        print(f"{RED}Error:{RESET} Failed to retrieve Git safe directories.")
+        printError("Failed to retrieve Git safe directories.")
         return False
 
 def CheckCommands():
@@ -71,7 +57,7 @@ def ProcessGitSafeDir():
                 try:
                     subprocess.run(git_config_command, check=True)
                 except (subprocess.CalledProcessError, FileNotFoundError):
-                    print(f"{RED}Error:{RESET} Was met some errors while executing of git command.")
+                    printError("Was met some errors while executing of git command.")
                     return False
                 break
             elif user_input in ["n", "no"]:
@@ -87,7 +73,7 @@ def ProcessGitSubmodules():
     try:
         dependencies = os.listdir(dependency_folder)
     except FileNotFoundError:
-        print(f"{RED}Error:{RESET} The folder '{dependency_folder}' does not exist.")
+        printError("The folder '{dependency_folder}' does not exist.")
         return False
 
     count = len(dependencies)
@@ -101,7 +87,7 @@ def ProcessGitSubmodules():
                     subprocess.run(git_submodule_command, check=True)
                     print("Git submodules updated successfully.")
                 except subprocess.CalledProcessError:
-                    print(f"{RED}Error:{RESET} Was met some error while trying to update git submodules.")
+                    printError("Was met some error while trying to update git submodules.")
                     return False
                 break
             elif user_input in ["n", "no"]:
@@ -126,7 +112,7 @@ def ProcessBoost():
     while True:
         user_input = input("Do you want to install boost? [Y/n]: ").strip().lower()
         if user_input in ["y", "yes", ""]:
-            if scripts.installBoost.Install(PreferedShellExt()) == False:
+            if scripts.installBoost.Install(PreferedShellExt(), "dependencies") == False:
                 return False
             break
         elif user_input in ["n", "no"]:
@@ -136,21 +122,6 @@ def ProcessBoost():
             print("Invalid input. Please enter Y or N.")
 
     return True
-
-def SuccessMessage():
-    print(f"{GREEN}")
-    width = 50
-    printStr = "SUCCESS INSTALL"
-    if len(printStr) % 2 != 0:
-        printStr += " "
-
-    strGap = int((width - len(printStr)) / 2)
-    print("╔" + "═" * width + "╗")
-    print("║" + " " * strGap + printStr + " " * strGap + "║")
-    print("╚" + "═" * width + "╝" + f"{RESET}")
-
-SuccessMessage()
-exit(0)
 
 if CheckCommands() == False:
     exit(1)
@@ -164,4 +135,4 @@ if ProcessGitSubmodules() == False:
 if ProcessBoost() == False:
     exit(4)
 
-SuccessMessage()
+frameMessage("SUCCESS INSTALL!")

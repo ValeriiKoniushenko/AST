@@ -3,6 +3,7 @@ import sys
 import shutil
 import subprocess
 import urllib.request
+from scripts.prints import printError
 
 def MakeScriptsExecutable(root_dir, ext):
     for dirpath, _, filenames in os.walk(root_dir):
@@ -12,36 +13,37 @@ def MakeScriptsExecutable(root_dir, ext):
                 try:
                     subprocess.run(["chmod", "+x", script_path])
                 except (subprocess.CalledProcessError, FileNotFoundError):
-                    print(f"Was met an error while trying to apply chmod +x to .{ext} files.")
+                    printError(f"Was met an error while trying to apply chmod +x to .{ext} files.")
 
-def Install(preferedShellExt):
+def Install(preferedShellExt, dependenciesDir):
     # Change to script directory
     script_dir = os.path.dirname(os.path.abspath(__file__))
     os.chdir(script_dir)
 
     # Change to dependencies directory
-    dependency_folder = os.path.join("..", "dependencies")
+    dependency_folder = os.path.join("..", dependenciesDir)
     if not os.path.exists(dependency_folder):
-        print("Folder 'dependencies' not found")
+        printError(f"Folder '{dependenciesDir}' not found")
         return False
 
     os.chdir(dependency_folder)
 
     # Download and extract boost if not exists
     boost_folder = "boost-1.86.0"
-    boost_zip = "boost.zip"
-    boost_url = "https://github.com/boostorg/boost/releases/download/boost-1.86.0/boost-1.86.0-cmake.zip"
 
     if not os.path.exists(boost_folder):
         print("Downloading Boost...")
+        boost_zip = "boost.zip"
+        boost_url = "https://github.com/boostorg/boost/releases/download/boost-1.86.0/boost-1.86.0-cmake.zip"
         urllib.request.urlretrieve(boost_url, boost_zip)
+
         print("Extracting Boost...")
         shutil.unpack_archive(boost_zip, ".")
         os.remove(boost_zip)
 
     # Change to boost directory
     if not os.path.exists(boost_folder):
-        print("Can't find the unzipped boost directory")
+        printError("Can't find the unzipped boost directory")
         return False
 
     os.chdir(boost_folder)
@@ -59,7 +61,7 @@ def Install(preferedShellExt):
             installBootstrap = False
             break
         else:
-            print("Invalid input. Please enter correct answer")
+            printError("Invalid input. Please enter correct answer")
 
     if installBootstrap == True:
         subprocess.call(f"./bootstrap.{preferedShellExt}", shell=True)
@@ -74,7 +76,7 @@ def Install(preferedShellExt):
             installB2 = False
             break
         else:
-            print("Invalid input. Please enter correct answer")
+            printError("Invalid input. Please enter correct answer")
 
     if installB2:
         subprocess.call("./b2 install", shell=True)
