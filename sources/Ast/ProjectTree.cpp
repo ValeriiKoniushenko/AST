@@ -642,6 +642,7 @@ namespace Ast
         }
     }
 
+    // TODO: change to stack-based recurse
     void ProjectTree::IterateOverDirectory(const std::filesystem::path& path)
     {
         for (const auto& i : std::filesystem::directory_iterator(path))
