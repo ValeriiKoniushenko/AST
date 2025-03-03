@@ -20,55 +20,47 @@
 
 #include "GeneratorUnit.h"
 
-#include "Ast/LogCollector.h"
+#include "spdlog/spdlog.h"
 
+#include <bits/ranges_algo.h>
 #include <fstream>
 
 namespace Ast
 {
 
-    String GeneratorUnit::GenerateSource(LogCollector* logCollector) const
+    String GeneratorUnit::GenerateSource() const
     {
         String out;
-        out += PreGenerate(logCollector);
-        out += OnGenerate(logCollector);
-        out += PostGenerate(logCollector);
+        out += PreGenerate();
+        out += OnGenerate();
+        out += PostGenerate();
         return out;
     }
 
-    void GeneratorUnit::GenerateSourceToFile(LogCollector* logCollector) const
+    void GeneratorUnit::GenerateSourceToFile() const
     {
-        RequireValidLexers(logCollector);
+        RequireValidLexers();
         if (_lexers.empty())
         {
             return;
         }
 
-        const auto path = GetGenerationPath(logCollector);
+        const auto path = GetGenerationPath();
         if (path.empty())
         {
             Assert();
-            if (logCollector)
-            {
-                logCollector->AddLog(
-                    { "Impossible to generate a code to the file. Invalid lexer's path was passed into GeneratorUnit of type '{}'"_f << _type,
-                      LogCollector::LogType::Error });
-            }
+            spdlog::error(("Impossible to generate a code to the file. Invalid lexer's path was passed into GeneratorUnit of type '{}'"_f << _type).ToStdStringView());
             return;
         }
 
-        const auto sources = GenerateSource(logCollector);
+        const auto sources = GenerateSource();
         std::ofstream file(path);
         if (!file.is_open())
         {
             Assert();
-            if (logCollector)
-            {
-                logCollector->AddLog(
-                    { "Impossible to generate a code to the file, because the file can't be created by some reasons. Problem in: GeneratorUnit of type '{}'"_f
-                          << _type,
-                      LogCollector::LogType::Error });
-            }
+            spdlog::error((
+                "Impossible to generate a code to the file, because the file can't be created by some reasons. Problem in: GeneratorUnit of type '{}'"_f
+                << _type).ToStdStringView());
             return;
         }
         file.write(sources.c_str(), sources.Size() * sizeof(*sources.c_str()));
@@ -107,6 +99,8 @@ namespace Ast
         {
             AddLexer(lexer);
         }
+
+        return true;
     }
 
     bool GeneratorUnit::RemoveLexer(const BaseLexer* lexer)
@@ -130,7 +124,7 @@ namespace Ast
         return found != _lexers.end();
     }
 
-    void GeneratorUnit::RequireValidLexers(LogCollector* logCollector) const
+    void GeneratorUnit::RequireValidLexers() const
     {
 #ifdef AST_DEBUG
         if (_lexers.empty())
@@ -145,44 +139,30 @@ namespace Ast
             if (inputLexer == nullptr)
             {
                 Assert();
-                if (logCollector)
-                {
-                    logCollector->AddLog({ "Nullptr lexer was passed into GeneratorUnit of type '{}'"_f << _type, LogCollector::LogType::Error });
-                }
+                spdlog::error(("Nullptr lexer was passed into GeneratorUnit of type '{}'"_f << _type).ToStdStringView());
                 return false;
             }
 
             if (!inputLexer->IsValid())
             {
                 Assert();
-                if (logCollector)
-                {
-                    logCollector->AddLog({ "Invalid lexer was passed into GeneratorUnit of type '{}'"_f << _type, LogCollector::LogType::Error });
-                }
+                spdlog::error(("Invalid lexer was passed into GeneratorUnit of type '{}'"_f << _type).ToStdStringView());
                 return false;
             }
 
             if (inputLexer->GetLexerType() != _type)
             {
                 Assert();
-                if (logCollector)
-                {
-                    logCollector->AddLog({ "Invalid lexer's type was passed into GeneratorUnit of type '{}'. Lexer name is '{}'; and type is '{}'"_f
-                                               << _type << inputLexer->GetLexerName() << inputLexer->GetLexerType(),
-                                           LogCollector::LogType::Error });
-                }
+                spdlog::error(("Invalid lexer's type was passed into GeneratorUnit of type '{}'. Lexer name is '{}'; and type is '{}'"_f
+                              << _type << inputLexer->GetLexerName() << inputLexer->GetLexerType()).ToStdStringView());
                 return false;
             }
 
             if (!inputLexer->GetReader())
             {
                 Assert();
-                if (logCollector)
-                {
-                    logCollector->AddLog({ "Nullptr lexer's Reader was passed into GeneratorUnit of type '{}'. Lexer name is '{}'; and type is '{}'"_f
-                                               << _type << inputLexer->GetLexerName() << inputLexer->GetLexerType(),
-                                           LogCollector::LogType::Error });
-                }
+                spdlog::error(("Nullptr lexer's Reader was passed into GeneratorUnit of type '{}'. Lexer name is '{}'; and type is '{}'"_f
+                              << _type << inputLexer->GetLexerName() << inputLexer->GetLexerType()).ToStdStringView());
                 return false;
             }
 
@@ -194,13 +174,9 @@ namespace Ast
                 {
                     validPath.clear();
                     Assert();
-                    if (logCollector)
-                    {
-                        logCollector->AddLog(
-                            { "Nullptr or invalid lexer's Reader->filePath was passed into GeneratorUnit of type '{}'. Lexer name is '{}'; and type is '{}'"_f
-                                  << _type << inputLexer->GetLexerName() << inputLexer->GetLexerType(),
-                              LogCollector::LogType::Error });
-                    }
+                    spdlog::error((
+                        "Nullptr or invalid lexer's Reader->filePath was passed into GeneratorUnit of type '{}'. Lexer name is '{}'; and type is '{}'"_f
+                        << _type << inputLexer->GetLexerName() << inputLexer->GetLexerType()).ToStdStringView());
                     return false;
                 }
             }
@@ -209,13 +185,8 @@ namespace Ast
             {
                 validPath.clear();
                 Assert();
-                if (logCollector)
-                {
-                    logCollector->AddLog(
-                        { "Nullptr or invalid lexer's Reader->filePath was passed into GeneratorUnit of type '{}'. Lexer name is '{}'; and type is '{}'"_f
-                              << _type << inputLexer->GetLexerName() << inputLexer->GetLexerType(),
-                          LogCollector::LogType::Error });
-                }
+                spdlog::error(( "Nullptr or invalid lexer's Reader->filePath was passed into GeneratorUnit of type '{}'. Lexer name is '{}'; and type is '{}'"_f
+                              << _type << inputLexer->GetLexerName() << inputLexer->GetLexerType()).ToStdStringView());
                 return false;
             }
 

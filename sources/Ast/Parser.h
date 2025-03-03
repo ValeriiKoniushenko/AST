@@ -20,7 +20,6 @@
 
 #pragma once
 
-#include "Ast/LogCollector.h"
 #include "Lexers/BaseLexer.h"
 
 #include <filesystem>
@@ -33,7 +32,7 @@ namespace Ast
         Parser() = default;
         ~Parser() override = default;
 
-        virtual void Parse(const ContentStream::Ptr& content, LogCollector::Ptr logCollector) = 0;
+        virtual void Parse(const ContentStream::Ptr& content) = 0;
         virtual void IterateOverLexers(std::function<bool(BaseLexer*)>&& callback) = 0;
     };
 

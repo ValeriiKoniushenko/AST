@@ -48,15 +48,14 @@ namespace Ast
                             auto generators = GetGeneratorUnitFor(*pinnedLexer);
                             if (!Verify(!!generators))
                             {
-                                _projectTree->GetLogCollector()->AddLog({ "Generator wasn't found for lexer: '{}' by the next path: {}"_f
-                                                                              << pinnedLexer->GetLexerType() << pinnedLexer->GetFullPath().first,
-                                                                          LogCollector::LogType::Error });
+                                spdlog::error(("Generator wasn't found for lexer: '{}' by the next path: {}"_f
+                                                                              << pinnedLexer->GetLexerType() << pinnedLexer->GetFullPath().first ).ToStdStringView());
                             }
 
                             for (const auto& generator : *generators)
                             {
                                 generator->AddLexers(lexers);
-                                generator->GenerateSourceToFile(_projectTree->GetLogCollector().get());
+                                generator->GenerateSourceToFile();
                             }
                         }
                     },

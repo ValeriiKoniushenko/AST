@@ -25,6 +25,7 @@
 #include "Readers/ContentStream.h"
 #include "Utils/CopyableAndMoveableBehaviour.h"
 #include "Utils/ITextSourceReader.h"
+#include "spdlog/spdlog.h"
 
 namespace Ast
 {
@@ -68,31 +69,31 @@ namespace Ast
         }
 
         template<IsParser ParserT>
-        [[nodiscard]] static Tree<RootLexerT> From(const ParserT& parser, LogCollector::Ptr logCollector = nullptr)
+        [[nodiscard]] static Tree<RootLexerT> From(const ParserT& parser)
         {
             Tree<RootLexerT> tree(parser.GetContentStream());
-            tree.template ParseUsing<ParserT>(logCollector ? logCollector : new LogCollector());
+            tree.template ParseUsing<ParserT>();
             return tree;
         }
 
         template<IsParser ParserT>
-        void ParseUsing(LogCollector::Ptr logCollector)
+        void ParseUsing()
         {
             if (!Verify(!!_contentStream, "File reader was nullptr"))
             {
-                logCollector->AddLog({ "File reader was nullptr", LogCollector::LogType::Error });
+                spdlog::error("File reader was nullptr");
                 return;
             }
 
             ParserT parser;
-            parser.Parse(_contentStream, logCollector);
+            parser.Parse(_contentStream);
 
             parser.IterateOverLexers(
                 [&](BaseLexer* lexer)
                 {
                     if (!Verify(lexer, "Some lexer was nullptr but expected a valid object."))
                     {
-                        logCollector->AddLog({ "Some lexer was nullptr but expected a valid object.", LogCollector::LogType::Error });
+                        spdlog::error("Some lexer was nullptr but expected a valid object.");
                         return true;
                     }
 
@@ -108,7 +109,7 @@ namespace Ast
             {
                 _rootLexer->SetLexerName(_contentStream->GetFilePath());
             }
-            _rootLexer->DoParse(*logCollector);
+            _rootLexer->DoParse();
         }
 
         [[nodiscard]] ContentStream::Ptr GetReader() const { return _contentStream; }

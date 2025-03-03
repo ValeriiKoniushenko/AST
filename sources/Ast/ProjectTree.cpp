@@ -151,7 +151,7 @@ namespace Ast
             return nullptr;
         }
 
-        const auto pathVector = Core::WStringAtom(relative.native().c_str()).ToASCII().Split(separator);
+        const auto pathVector = String(relative.generic_string().c_str()).Split(separator);
         if (pathVector.empty())
         {
             return nullptr;
@@ -369,11 +369,6 @@ namespace Ast
         return ret;
     }
 
-    ProjectTree::ProjectTree()
-    {
-        _logCollector = LogCollector::Ptr(new LogCollector());
-    }
-
     bool ProjectTree::IsValid() const
     {
         if (_root != nullptr)
@@ -407,8 +402,7 @@ namespace Ast
     {
         if (path.empty() || path.string() == ".")
         {
-            _logCollector->AddLog({ "Was passed a path to exclude it. But the path is empty or invalid. The passed path: {}"_f << path.string(),
-                                    LogCollector::LogType::Warning });
+            spdlog::warn(("Was passed a path to exclude it. But the path is empty or invalid. The passed path: {}"_f << path.string() ).ToStdStringView());
             return;
         }
         _excluded.emplace(std::move(path));
@@ -428,7 +422,7 @@ namespace Ast
                 path = std::filesystem::canonical(path);
                 if (path.empty())
                 {
-                    _logCollector->AddLog({ "Was trying to convert a path to absolute, but met some problem.", LogCollector::LogType::Error });
+                    spdlog::error("Was trying to convert a path to absolute, but met some problem.");
                     return false;
                 }
             }
@@ -448,7 +442,7 @@ namespace Ast
 
                     if (p.empty())
                     {
-                        _logCollector->AddLog({ "Was trying to convert a path to absolute, but met some problem.", LogCollector::LogType::Error });
+                        spdlog::error("Was trying to convert a path to absolute, but met some problem.");
                         return false;
                     }
                 }
@@ -476,7 +470,7 @@ namespace Ast
         }
         else
         {
-            _logCollector->AddLog({ "The project wasn't found: {}"_f << path.string(), LogCollector::LogType::Error });
+            spdlog::error(("The project wasn't found: {}"_f << path.string()).ToStdStringView());
         }
     }
 
@@ -484,12 +478,12 @@ namespace Ast
     {
         if (_fileExtensions.empty())
         {
-            _logCollector->AddLog({ "File reader was nullptr", LogCollector::LogType::Error });
+            spdlog::error("File reader was nullptr");
             return false;
         }
         if (!_root)
         {
-            _logCollector->AddLog({ "Target path is invalid", LogCollector::LogType::Error });
+            spdlog::error("Target path is invalid");
             return false;
         }
 
@@ -656,8 +650,7 @@ namespace Ast
             const auto rootPath = _root->GetPath().string();
             if (!Verify(tmp.Find(rootPath)))
             {
-                _logCollector->AddLog(
-                    { "Can't process the next file: {} - it's not a part of the project"_f << tmp, LogCollector::LogType::Warning });
+                spdlog::warn( ( "Can't process the next file: {} - it's not a part of the project"_f << tmp ).ToStdStringView());
                 continue;
             }
 

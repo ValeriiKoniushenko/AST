@@ -21,7 +21,7 @@
 #pragma once
 
 #include "CommonTypes.h"
-#include "LogCollector.h"
+
 
 #include <boost/smart_ptr/intrusive_ptr.hpp>
 #include <boost/smart_ptr/intrusive_ref_counter.hpp>
@@ -35,27 +35,10 @@ namespace Ast
     public:
         AST_CLASS(Rule)
 
-        [[nodiscard]] virtual bool IsCorrespondingTheRules(const BaseLexer* lexer, LogCollector& logCollector,
+        [[nodiscard]] virtual bool IsCorrespondingTheRules(const BaseLexer* lexer,
                                                            const char* additionalMessage = nullptr) const = 0;
 
     protected:
-    };
-
-    class OverrideRuleLogType : public virtual ::Utils::CopyableAndMoveable
-    {
-    public:
-        [[nodiscard]] LogCollector::LogType GetLogType() const noexcept { return _logType; }
-        void OverrideLogType(LogCollector::LogType type) noexcept { _logType = type; }
-
-    protected:
-        explicit OverrideRuleLogType(LogCollector::LogType type = LogCollector::LogType::Error)
-            : _logType{ type }
-        {
-        }
-        ~OverrideRuleLogType() override = default;
-
-    private:
-        LogCollector::LogType _logType = LogCollector::LogType::Error;
     };
 
 } // namespace Ast

@@ -20,12 +20,10 @@
 
 #pragma once
 
-#include "LogCollector.h"
 #include "Readers/ContentStream.h"
 #include "Tree.h"
 #include "Utils/CopyableAndMoveableBehaviour.h"
 
-#include <ppltasks.h>
 #include <set>
 #include <unordered_set>
 
@@ -309,16 +307,13 @@ namespace Ast
 
                     if (auto* tree = unit->GetTree().get(); Verify(tree))
                     {
-                        tree->ParseUsing<ParserT>(_logCollector);
+                        tree->ParseUsing<ParserT>();
                         unit->RecalculateDirtyBasedOnTree();
                     }
 
                     return true;
                 });
         }
-
-        [[nodiscard]] LogCollector::Ptr GetLogCollector() { return _logCollector; }
-        [[nodiscard]] LogCollector::CPtr GetLogCollector() const { return _logCollector; }
 
         // ==========================================================
         // ================== WORKING WITH UNITS ====================
@@ -381,7 +376,6 @@ namespace Ast
     protected:
         std::set<String> _fileExtensions;
         Unit::Ptr _root;
-        LogCollector::Ptr _logCollector;
         std::unordered_set<std::filesystem::path> _excluded;
         Config _config;
     };

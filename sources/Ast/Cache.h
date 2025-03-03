@@ -21,6 +21,7 @@
 #pragma once
 
 #include "CommonTypes.h"
+#include "Core/Enum.h"
 #include "ProjectTree.h"
 
 #include <boost/foreach.hpp>

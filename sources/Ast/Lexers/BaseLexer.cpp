@@ -21,10 +21,10 @@
 #include "BaseLexer.h"
 
 #include "../Readers/ContentStream.h"
-#include "Ast/LogCollector.h"
 #include "Ast/Rule.h"
 #include "Ast/Utils/Scopes.h"
 #include "Core/Assert.h"
+#include "spdlog/spdlog.h"
 
 namespace Ast
 {
@@ -40,36 +40,35 @@ namespace Ast
         _token = token;
     }
 
-    bool BaseLexer::Parse(LogCollector& logCollector)
+    bool BaseLexer::Parse()
     {
-        if (!DoParse(logCollector))
+        if (!DoParse())
         {
             return false;
         }
-        if (!DoScopeParse(logCollector))
+        if (!DoScopeParse())
         {
             return false;
         }
-        if (!DoMarkingParse(logCollector))
+        if (!DoMarkingParse())
         {
             return false;
         }
-        if (!DoPostParse(logCollector))
+        if (!DoPostParse())
         {
             return false;
         }
 
-        logCollector.AddLog(
-            { String::Format("Successful parsing of the {}: '{}'", _lexerType.CStr(), _lexerName.CStr()), LogCollector::LogType::Success });
+        spdlog::info(( "Successful parsing of the {}: '{}'"_f << _lexerType << _lexerName ).ToStdStringView());
 
         return IsValid();
     }
 
-    void BaseLexer::ValidateAfterParse(LogCollector& logCollector)
+    void BaseLexer::ValidateAfterParse()
     {
         OnParse();
 
-        ValidateMark(logCollector);
+        ValidateMark();
     }
 
     bool BaseLexer::IsValid() const
@@ -77,9 +76,9 @@ namespace Ast
         return !_lexerType.IsEmpty() && !_lexerName.IsEmpty() && _reader;
     }
 
-    bool BaseLexer::IsCorrespondingToRule(const Rule& rule, LogCollector& logCollector, const char* additionalMessage /* = nullptr*/) const
+    bool BaseLexer::IsCorrespondingToRule(const Rule& rule, const char* additionalMessage /* = nullptr*/) const
     {
-        return rule.IsCorrespondingTheRules(this, logCollector, additionalMessage);
+        return rule.IsCorrespondingTheRules(this, additionalMessage);
     }
 
     void BaseLexer::GetAsXml(Xml& xml) const

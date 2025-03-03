@@ -69,14 +69,13 @@ namespace Ast::experimental
             catch (std::filesystem::filesystem_error& e)
             {
                 Assert(false);
-                _projectTree->GetLogCollector()->AddLog(
-                    { "Impossible to create a cache directory by the next reason: {}"_f << e.what(), LogCollector::LogType::Error });
+                spdlog::error( ("Impossible to create a cache directory by the next reason: {}"_f << e.what()).ToStdStringView());
                 return false;
             }
 
             if (!std::filesystem::exists(_cachePath))
             {
-                _projectTree->GetLogCollector()->AddLog({ "By some reasons a cache directory wasn't created", LogCollector::LogType::Error });
+                spdlog::error("By some reasons a cache directory wasn't created");
                 return false;
             }
         }

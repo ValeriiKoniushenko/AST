@@ -57,7 +57,7 @@ namespace Ast
         output->append_node(pragmaOnceNode);
     }
 
-    bool FileLexer::DoParse(LogCollector& logCollector)
+    bool FileLexer::DoParse()
     {
         if (const auto reader = boost::dynamic_pointer_cast<const FileContentStream>(_reader))
         {

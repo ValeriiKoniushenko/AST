@@ -7,3 +7,6 @@
 	path = dependencies/rapidxml
 	url = git@github.com:0x08088405/rapidxml.git
     ignore = dirty
+[submodule "dependencies/spdlog"]
+	path = dependencies/spdlog
+	url = git@github.com:gabime/spdlog.git

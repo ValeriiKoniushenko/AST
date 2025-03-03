@@ -20,8 +20,8 @@
 
 #pragma once
 
-#include "Ast/LogCollector.h"
 #include "Ast/ProjectTree.h"
+#include "Core/Enum.h"
 #include "GeneratorUnit.h"
 
 namespace Ast

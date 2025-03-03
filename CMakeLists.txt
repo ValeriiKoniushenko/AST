@@ -40,6 +40,7 @@ TryToHelpInstallBoost()
 
 add_subdirectory(${DEPENDENCIES_DIR}/${BOOST_NAME})
 add_subdirectory(${DEPENDENCIES_DIR}/Utils)
+add_subdirectory(${DEPENDENCIES_DIR}/spdlog)
 add_subdirectory(${DEPENDENCIES_DIR})
 add_subdirectory(sources)
 add_subdirectory(tests)

@@ -33,7 +33,6 @@
 namespace Ast
 {
     class Rule;
-    class LogCollector;
     class BaseLexer;
 
     template<class T>
@@ -97,12 +96,12 @@ namespace Ast
         [[nodiscard]] bool operator==(const BaseLexer&) const;
 
         void SetToken(const TokenReader& token);
-        bool Parse(LogCollector& logCollector);
-        void ValidateAfterParse(LogCollector& logCollector);
+        bool Parse();
+        void ValidateAfterParse();
 
         [[nodiscard]] bool IsValid() const;
 
-        bool IsCorrespondingToRule(const Rule& rule, LogCollector& logCollector, const char* additionalMessage = nullptr) const;
+        bool IsCorrespondingToRule(const Rule& rule, const char* additionalMessage = nullptr) const;
 
         template<IsLexer Lexer>
         [[nodiscard]] bool IsTypeOf() const noexcept
@@ -231,15 +230,15 @@ namespace Ast
         [[nodiscard]] String GetTextSource() final;
 
     protected:
-        virtual bool DoParse(LogCollector&) = 0;
-        virtual bool DoScopeParse(LogCollector&) { return true; }
-        virtual bool DoMarkingParse(LogCollector&) { return true; }
-        virtual bool DoPostParse(LogCollector&) { return true; }
+        virtual bool DoParse() = 0;
+        virtual bool DoScopeParse() { return true; }
+        virtual bool DoMarkingParse() { return true; }
+        virtual bool DoPostParse() { return true; }
         void OnGetAsXml(Xml& xml, XmlNode* output) const;
         virtual void OnPutAdditionalInfoToXml(Xml& xml, XmlNode* output) const{}
 
         virtual void OnParse() {}
-        virtual void ValidateMark(LogCollector&) {}
+        virtual void ValidateMark() {}
 
         BaseLexer(const ContentStream::Ptr& reader, const String& type);
 
