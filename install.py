@@ -2,8 +2,8 @@ try:
     from .scripts.globals import *
 except ImportError:
     from scripts.globals import *
-    
-def Install():
+
+def InstallAST():
     CheckCommands()
     
     if ProcessGitSafeDir() == False:
@@ -18,4 +18,4 @@ def Install():
     prints.frameMessage("SUCCESS INSTALL!")
 
 if __name__ == '__main__':
-    Install()
+    InstallAST()
