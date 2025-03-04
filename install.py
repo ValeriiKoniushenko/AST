@@ -1,16 +1,18 @@
-from scripts.globals import *
+from scripts import globals
 
 def Install():
-    if ProcessGitSafeDir() == False:
+    globals.CheckCommands()
+    
+    if globals.ProcessGitSafeDir() == False:
         exit(2)
 
-    if ProcessGitSubmodules() == False:
+    if globals.ProcessGitSubmodules() == False:
         exit(3)
 
-    if ProcessBoost() == False:
+    if globals.ProcessBoost() == False:
         exit(4)
 
-    prints.frameMessage("SUCCESS INSTALL!")
+    globals.prints.frameMessage("SUCCESS INSTALL!")
 
 if __name__ == '__main__':
     Install()

@@ -123,5 +123,3 @@ def ProcessBoost():
             print("Invalid input. Please enter Y or N.")
 
     return True
-
-CheckCommands()
