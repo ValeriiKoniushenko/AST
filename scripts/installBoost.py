@@ -3,7 +3,7 @@ import sys
 import shutil
 import subprocess
 import urllib.request
-from scripts.prints import printError, printSuccess
+from . import prints
 
 def MakeScriptsExecutable(root_dir, ext):
     for dirpath, _, filenames in os.walk(root_dir):
@@ -13,7 +13,7 @@ def MakeScriptsExecutable(root_dir, ext):
                 try:
                     subprocess.run(["chmod", "+x", script_path])
                 except (subprocess.CalledProcessError, FileNotFoundError):
-                    printError(f"Was met an error while trying to apply chmod +x to .{ext} files.")
+                    prints.printError(f"Was met an error while trying to apply chmod +x to .{ext} files.")
 
 def Install(preferedShellExt, dependenciesDir):
     # Change to script directory
@@ -23,7 +23,7 @@ def Install(preferedShellExt, dependenciesDir):
     # Change to dependencies directory
     dependency_folder = os.path.join("..", dependenciesDir)
     if not os.path.exists(dependency_folder):
-        printError(f"Folder '{dependenciesDir}' not found")
+        prints.printError(f"Folder '{dependenciesDir}' not found")
         return False
 
     os.chdir(dependency_folder)
@@ -36,23 +36,23 @@ def Install(preferedShellExt, dependenciesDir):
         boost_zip = "boost.zip"
         boost_url = "https://github.com/boostorg/boost/releases/download/boost-1.86.0/boost-1.86.0-cmake.zip"
         urllib.request.urlretrieve(boost_url, boost_zip)
-        printSuccess("Boost was downloaded")
+        prints.printSuccess("Boost was downloaded")
         
         print("Extracting Boost...")
         shutil.unpack_archive(boost_zip, ".")
         os.remove(boost_zip)
-        printSuccess("Boost was unpacked")
+        prints.printSuccess("Boost was unpacked")
 
     # Change to boost directory
     if not os.path.exists(boost_folder):
-        printError("Can't find the unzipped boost directory")
+        prints.printError("Can't find the unzipped boost directory")
         return False
 
     os.chdir(boost_folder)
 
     if sys.platform.startswith("linux"):
         MakeScriptsExecutable(os.getcwd(), preferedShellExt)        
-        printSuccess(f"All boost/**/*.{preferedShellExt} was recursived marked as executable")
+        prints.printSuccess(f"All boost/**/*.{preferedShellExt} was recursived marked as executable")
 
     installBootstrap = False
     while True:
@@ -64,11 +64,11 @@ def Install(preferedShellExt, dependenciesDir):
             installBootstrap = False
             break
         else:
-            printError("Invalid input. Please enter correct answer")
+            prints.printError("Invalid input. Please enter correct answer")
 
     if installBootstrap == True:
         subprocess.call(f"./bootstrap.{preferedShellExt}", shell=True)
-        printSuccess("Bootstrap has finished!")
+        prints.printSuccess("Bootstrap has finished!")
 
     installB2 = False
     while True:
@@ -80,10 +80,10 @@ def Install(preferedShellExt, dependenciesDir):
             installB2 = False
             break
         else:
-            printError("Invalid input. Please enter correct answer")
+            prints.printError("Invalid input. Please enter correct answer")
 
     if installB2:
         subprocess.call("./b2 install", shell=True)
-        printSuccess("b2 has finished!")
+        prints.printSuccess("b2 has finished!")
 
     return True
