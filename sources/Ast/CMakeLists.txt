@@ -14,14 +14,17 @@ target_link_libraries(ASTCore PUBLIC Utils boost_smart_ptr boost_property_tree b
 
 include(CheckCXXCompilerFlag)
 
+set(CMAKE_CXX_FLAGS "-Wall -Wextra -Wno-unused-parameter")
+
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-	check_cxx_compiler_flag("-O3" COMPILER_SUPPORTS_O3)
-	if(COMPILER_SUPPORTS_O3)
+	check_cxx_compiler_flag("-g" COMPILER_SUPPORTS_OG)
+	if(COMPILER_SUPPORTS_OG)
 		target_compile_options(ASTCore PRIVATE -O3)
 	endif()
 else()
-	check_cxx_compiler_flag("-O0" COMPILER_SUPPORTS_O0)
-	if(COMPILER_SUPPORTS_O0)
-		target_compile_options(ASTCore PRIVATE -O0)
+	check_cxx_compiler_flag("-O3" COMPILER_SUPPORTS_O3)
+	if(COMPILER_SUPPORTS_O3)
+		target_compile_options(ASTCore PRIVATE -g)
 	endif()
 endif()
+

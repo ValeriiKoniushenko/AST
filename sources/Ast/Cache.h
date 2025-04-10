@@ -33,7 +33,7 @@
 namespace Ast::experimental
 {
 
-    class Cache : public boost::intrusive_ref_counter<Cache>, public Utils::NotCopyableButMoveable
+    /*class Cache : public boost::intrusive_ref_counter<Cache>, public Utils::NotCopyableButMoveable
     {
     public:
         AST_CLASS(Cache)
@@ -62,6 +62,6 @@ namespace Ast::experimental
     protected:
         ProjectTree::Ptr _projectTree;
         std::filesystem::path _cachePath = defaultPath;
-    };
+    };*/
 
 } // namespace Ast::experimental

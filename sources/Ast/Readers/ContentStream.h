@@ -67,7 +67,7 @@ namespace Ast
         void ApplyFilters()
         {
             (Filter{}.MakeTransform(_content), ...);
-            _content.ShrinkToFit();
+            _content.shrink_to_fit();
         }
 
         [[nodiscard]] virtual String GetFilePath() const { return "none"_atom; }

@@ -49,7 +49,7 @@ namespace Ast
                             if (!Verify(!!generators))
                             {
                                 spdlog::error(("Generator wasn't found for lexer: '{}' by the next path: {}"_f
-                                                                              << pinnedLexer->GetLexerType() << pinnedLexer->GetFullPath().first ).ToStdStringView());
+                                                                              << pinnedLexer->GetLexerType() << pinnedLexer->GetFullPath().first ).toStdStringView());
                             }
 
                             for (const auto& generator : *generators)

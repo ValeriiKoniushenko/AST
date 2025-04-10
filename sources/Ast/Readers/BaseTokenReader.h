@@ -58,7 +58,7 @@ namespace Ast
 
             [[nodiscard]] const TokenReader operator->() const override { return _token; }
 
-            void Swap(Iterator& other) override;
+            void swap(Iterator& other) override;
 
             [[nodiscard]] TokenReader operator*() noexcept override { return _token; }
 

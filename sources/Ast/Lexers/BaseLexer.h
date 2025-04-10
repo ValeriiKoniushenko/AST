@@ -299,12 +299,12 @@ namespace Ast
             {
                 do
                 {
-                    path.PushFront(i->GetLexerName());
+                    path.push_front(i->GetLexerName());
                     pathLexers.push_back(i);
                     i = i->GetParentLexer().get();
                     if (i->HasParent())
                     {
-                        path.PushFront("::"_atom);
+                        path.push_front("::"_atom);
                     }
                 } while (i->HasParent());
             }

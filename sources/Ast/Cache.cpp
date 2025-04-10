@@ -23,7 +23,7 @@
 namespace Ast::experimental
 {
 
-    bool Cache::IsExist() const
+    /*bool Cache::IsExist() const
     {
         using std::filesystem::directory_iterator;
         std::size_t count = 0;
@@ -69,7 +69,7 @@ namespace Ast::experimental
             catch (std::filesystem::filesystem_error& e)
             {
                 Assert(false);
-                spdlog::error( ("Impossible to create a cache directory by the next reason: {}"_f << e.what()).ToStdStringView());
+                spdlog::error( ("Impossible to create a cache directory by the next reason: {}"_f << e.what()).toStdStringView());
                 return false;
             }
 
@@ -83,6 +83,6 @@ namespace Ast::experimental
 
 
         return true;
-    }
+    }*/
 
 } // namespace Ast::experimental

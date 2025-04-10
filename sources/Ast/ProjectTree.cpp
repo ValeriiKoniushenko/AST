@@ -151,7 +151,7 @@ namespace Ast
             return nullptr;
         }
 
-        const auto pathVector = String(relative.generic_string().c_str()).Split(separator);
+        const auto pathVector = String(relative.generic_string().c_str()).split(separator);
         if (pathVector.empty())
         {
             return nullptr;
@@ -164,7 +164,7 @@ namespace Ast
             bool isFound = false;
             for (const auto& child : temp->_childs)
             {
-                if (child->GetPath().string() == (temp->_path / name.ToStdStringView()).string())
+                if (child->GetPath().string() == (temp->_path / name.toStdStringView()).string())
                 {
                     temp = child.get();
                     isFound = true;
@@ -213,7 +213,7 @@ namespace Ast
         }
 
         auto unit = Unit::Create();
-        unit->_path = _path / name.ToStdStringView();
+        unit->_path = _path / name.toStdStringView();
         unit->_type = Type::Folder;
         unit->_parent = this;
         unit->_permission = _permission;
@@ -237,7 +237,7 @@ namespace Ast
             return nullptr;
         }
 
-        auto unit = CreatePtrFromPath(_path / name.ToStdString());
+        auto unit = CreatePtrFromPath(_path / name.toStdStringView());
 
         if (!Verify(!!unit))
         {
@@ -318,37 +318,37 @@ namespace Ast
             return {};
         }
 
-        if (!Verify(!_contentStream->Data().IsEmpty()))
+        if (!Verify(!_contentStream->Data().isEmpty()))
         {
             return {};
         }
 
         String timeString;
 
-        _contentStream->Data().ForEachByLine(
+        _contentStream->Data().forEachByLine(
             [&timeString](String string)
             {
-                const auto* found = string.Find(generatedFileHeader_Head);
+                const auto* found = string.find(generatedFileHeader_Head);
                 if (!found)
                 {
                     return true;
                 }
 
-                if (!(found = string.Find(":")))
+                if (!(found = string.find(":")))
                 {
                     return true;
                 }
 
                 String buff;
-                string.SubStr(found - string.c_str());
-                string.IterateRegex("[0-9]",
-                                    [&buff](const String::StdRegexMatchResults& m)
+                string.subStr(found - string.c_str());
+                string.regexIterate("[0-9]",
+                                    [&buff, &string](const Core::BaseRegexMatch::MatchedData m)
                                     {
-                                        buff += m.str();
+                                        buff += m.convertBasedOn(string);
                                         return true;
                                     });
 
-                if (buff.IsEmpty())
+                if (buff.isEmpty())
                 {
                     return true;
                 }
@@ -358,13 +358,13 @@ namespace Ast
                 return false;
             });
 
-        if (timeString.IsEmpty())
+        if (timeString.isEmpty())
         {
             Assert("Time in the generated file wasn't found. Maybe you cleared all comments before time was checked.");
             return std::filesystem::file_time_type().time_since_epoch().count();
         }
 
-        const auto ret = timeString.ConvertTo<uint64_t>();
+        const auto ret = timeString.convertTo<uint64_t>();
         Assert(ret != 0);
         return ret;
     }
@@ -388,11 +388,11 @@ namespace Ast
     {
         for (auto& extension : extensions)
         {
-            extension.Trim('*');
-            extension.Trim('.');
-            if (Verify(!extension.IsEmpty(), "Was passed invalid extension"))
+            extension.trim('*');
+            extension.trim('.');
+            if (Verify(!extension.isEmpty(), "Was passed invalid extension"))
             {
-                extension.PushFront('.');
+                extension.push_front('.');
                 _fileExtensions.emplace(std::move(extension));
             }
         }
@@ -402,7 +402,7 @@ namespace Ast
     {
         if (path.empty() || path.string() == ".")
         {
-            spdlog::warn(("Was passed a path to exclude it. But the path is empty or invalid. The passed path: {}"_f << path.string() ).ToStdStringView());
+            spdlog::warn(("Was passed a path to exclude it. But the path is empty or invalid. The passed path: {}"_f << path.string() ).toStdStringView());
             return;
         }
         _excluded.emplace(std::move(path));
@@ -470,7 +470,7 @@ namespace Ast
         }
         else
         {
-            spdlog::error(("The project wasn't found: {}"_f << path.string()).ToStdStringView());
+            spdlog::error(("The project wasn't found: {}"_f << path.string()).toStdStringView());
         }
     }
 
@@ -596,11 +596,11 @@ namespace Ast
         }
 
         Unit* i = nullptr;
-        for (const auto& folder : String(folders.string()).Split(separator))
+        for (const auto& folder : String(folders.string()).split(separator))
         {
             if (i)
             {
-                auto ptr = _root->GetUnitByPath(i->GetPath() / folder.ToStdStringView());
+                auto ptr = _root->GetUnitByPath(i->GetPath() / folder.toStdStringView());
                 if (!ptr)
                 {
                     auto* newUnit = i->LinkSubFolder(folder);
@@ -616,7 +616,7 @@ namespace Ast
             }
             else
             {
-                const auto finalPath = _root->GetPath() / folder.ToStdStringView();
+                const auto finalPath = _root->GetPath() / folder.toStdStringView();
                 if (auto found = _root->GetUnitByPath(finalPath))
                 {
                     i = found.get();
@@ -649,9 +649,9 @@ namespace Ast
         {
             auto tmp = String(i.path().string());
             const auto rootPath = _root->GetPath().string();
-            if (!Verify(tmp.Find(rootPath)))
+            if (!Verify(tmp.find(rootPath)))
             {
-                spdlog::warn( ( "Can't process the next file: {} - it's not a part of the project"_f << tmp ).ToStdStringView());
+                spdlog::warn( ( "Can't process the next file: {} - it's not a part of the project"_f << tmp ).toStdStringView());
                 continue;
             }
 
@@ -665,9 +665,9 @@ namespace Ast
             }
 
             const auto targetPathSize = rootPath.size();
-            tmp.SubStr(targetPathSize).TrimStart('\\');
+            tmp.subStr(targetPathSize).trimStart('\\');
 
-            if (Verify(!tmp.IsEmpty()))
+            if (Verify(!tmp.isEmpty()))
             {
                 auto newPath = std::filesystem::path(tmp.c_str());
 

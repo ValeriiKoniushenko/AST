@@ -36,7 +36,7 @@ namespace Ast
             source.source += "#pragma once" + Code::Endl() + Code::Endl();
         }
 
-        source.carets["write-point"_atom] = source.source.Size();
+        source.carets["write-point"_atom] = source.source.size();
         return true;
     }
 
@@ -64,7 +64,8 @@ namespace Ast
             _lexerName = reader->GetFilePath();
         }
 
-        if (!_reader->Data().FindRegex("#pragma +once", 0, std::regex_constants::format_first_only).empty())
+        std::cerr << "HERE BIG PROBLEM - FIX IT ASAP" << std::endl;
+        if (_reader->Data().regexFind("#pragma +once"))
         {
             _hasPragmaOnce = true;
         }

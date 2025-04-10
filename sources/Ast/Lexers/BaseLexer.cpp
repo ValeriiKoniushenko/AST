@@ -59,7 +59,7 @@ namespace Ast
             return false;
         }
 
-        spdlog::info(( "Successful parsing of the {}: '{}'"_f << _lexerType << _lexerName ).ToStdStringView());
+        spdlog::info(( "Successful parsing of the {}: '{}'"_f << _lexerType << _lexerName ).toStdStringView());
 
         return IsValid();
     }
@@ -73,7 +73,7 @@ namespace Ast
 
     bool BaseLexer::IsValid() const
     {
-        return !_lexerType.IsEmpty() && !_lexerName.IsEmpty() && _reader;
+        return !_lexerType.isEmpty() && !_lexerName.isEmpty() && _reader;
     }
 
     bool BaseLexer::IsCorrespondingToRule(const Rule& rule, const char* additionalMessage /* = nullptr*/) const
@@ -91,7 +91,7 @@ namespace Ast
     {
         if (Verify(!!_reader))
         {
-            return std::make_pair(_reader->Data().c_str() - 1, _reader->Data().c_str() + _reader->Data().Size());
+            return std::make_pair(_reader->Data().c_str() - 1, _reader->Data().c_str() + _reader->Data().size());
         }
         return std::make_pair(nullptr, nullptr);
     }
@@ -186,7 +186,7 @@ namespace Ast
         _token.Clear();
         _openScope.reset();
         _closeScope.reset();
-        _lexerName.Clear();
+        _lexerName.clear();
         _parentLexer.reset();
         _childLexers.clear();
     }
@@ -261,7 +261,7 @@ namespace Ast
           _lexerType{ type }
     {
         Assert(!!_reader);
-        Assert(!_lexerType.IsEmpty());
+        Assert(!_lexerType.isEmpty());
     }
 
 } // namespace Ast

@@ -118,8 +118,8 @@ namespace Ast
 
         struct Code
         {
-            [[nodiscard]] static String Endl() { return TextSourceConfig::Instance().GetEndLine(); }
-            [[nodiscard]] static String Tab(const int8_t count = 1) { return TextSourceConfig::Instance().GetTab(count); }
+            [[nodiscard]] static String Endl() { return TextSourceConfig::instance().GetEndLine(); }
+            [[nodiscard]] static String Tab(const int8_t count = 1) { return TextSourceConfig::instance().GetTab(count); }
         };
 
     protected:

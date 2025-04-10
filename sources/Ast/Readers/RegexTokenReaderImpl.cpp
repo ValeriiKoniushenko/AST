@@ -45,7 +45,7 @@ namespace Ast
         if (!tempToken.IsValid())
         {
             tempToken.beginData = data.c_str();
-            tempToken.endData = data.c_str() + data.Size() - 1ull;
+            tempToken.endData = data.c_str() + data.size() - 1ull;
         }
 
         if (!Verify(tempToken.IsValid()))
@@ -54,33 +54,33 @@ namespace Ast
         }
 
         std::size_t offset = 0;
-        if (tempToken.endData != data.c_str() + data.Size() - 1ull)
+        if (tempToken.endData != data.c_str() + data.size() - 1ull)
         {
             offset = static_cast<std::size_t>(tempToken.endData - data.c_str());
         }
         bool wasFoundAtLeastOneToken = false;
 
-        data.IterateRegex(
+        data.regexIterate(
             _regexExpr,
-            [&](const String::StdRegexMatchResults& match)
+            [&](const Core::RegexMatch::MatchedData& match)
             {
                 wasFoundAtLeastOneToken = true;
-                auto s = match[0];
+                auto str = match.convertBasedOn(data);
 
-                tempToken.beginData = data.c_str() + (match[0].first - data.begin());
+                tempToken.beginData = data.c_str() + match.offset;
                 while (String::Toolset::IsSpace(*tempToken.beginData))
                 {
                     ++tempToken.beginData;
                 }
 
-                tempToken.endData = data.c_str() + (match[0].second - data.begin());
+                tempToken.endData = data.c_str() + match.offset + match.size;
 
                 tempToken.startLine = String::GetLinesCountInText(data.c_str(), tempToken.beginData);
                 tempToken.endLine = String::GetLinesCountInText(data.c_str(), tempToken.endData) - 1; // 1 - to ignore the last '\n'
 
                 return false;
             },
-            offset, std::regex_constants::match_default);
+            offset);
 
         if (!wasFoundAtLeastOneToken)
         {

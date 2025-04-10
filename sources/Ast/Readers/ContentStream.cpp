@@ -29,22 +29,22 @@ namespace Ast
     {
         _content = std::move(content);
         _content.shrink_to_fit();
-        if (!_content.IsEmpty())
+        if (!_content.isEmpty())
         {
             OnPut();
         }
-        return !_content.IsEmpty();
+        return !_content.isEmpty();
     }
 
     bool ContentStream::Put(const String::CharT* content)
     {
         _content = String(content);
         _content.shrink_to_fit();
-        if (!_content.IsEmpty())
+        if (!_content.isEmpty())
         {
             OnPut();
         }
-        return !_content.IsEmpty();
+        return !_content.isEmpty();
     }
 
     const String& ContentStream::Data() const noexcept
@@ -56,12 +56,12 @@ namespace Ast
     {
         _path = path;
         _content = Utils::GetTextFileContentAs<String>(path);
-        if (!_content.IsEmpty())
+        if (!_content.isEmpty())
         {
-            _content.ShrinkToFit();
+            _content.shrink_to_fit();
         }
 
-        return !_content.IsEmpty();
+        return !_content.isEmpty();
     }
 
     void FileContentStream::OnPut()
@@ -72,7 +72,7 @@ namespace Ast
             return;
         }
 
-        out.write(_content.c_str(), _content.Size() * sizeof(String::CharT));
+        out.write(_content.c_str(), _content.size() * sizeof(String::CharT));
     }
 
 } // namespace Ast

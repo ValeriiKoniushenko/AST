@@ -28,7 +28,7 @@ namespace Ast
         return _baseTokenReader == other._baseTokenReader && _token.beginData == other._token.beginData;
     }
 
-    void BaseTokenReader::Iterator::Swap(Iterator& other)
+    void BaseTokenReader::Iterator::swap(Iterator& other)
     {
         auto temp = *this;
         _token = other._token;

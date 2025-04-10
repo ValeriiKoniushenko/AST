@@ -49,7 +49,7 @@ namespace Ast
         if (path.empty())
         {
             Assert();
-            spdlog::error(("Impossible to generate a code to the file. Invalid lexer's path was passed into GeneratorUnit of type '{}'"_f << _type).ToStdStringView());
+            spdlog::error(("Impossible to generate a code to the file. Invalid lexer's path was passed into GeneratorUnit of type '{}'"_f << _type).toStdStringView());
             return;
         }
 
@@ -60,10 +60,10 @@ namespace Ast
             Assert();
             spdlog::error((
                 "Impossible to generate a code to the file, because the file can't be created by some reasons. Problem in: GeneratorUnit of type '{}'"_f
-                << _type).ToStdStringView());
+                << _type).toStdStringView());
             return;
         }
-        file.write(sources.c_str(), sources.Size() * sizeof(*sources.c_str()));
+        file.write(sources.c_str(), sources.size() * sizeof(*sources.c_str()));
     }
 
     bool GeneratorUnit::AddLexer(const BaseLexer* lexer)
@@ -139,14 +139,14 @@ namespace Ast
             if (inputLexer == nullptr)
             {
                 Assert();
-                spdlog::error(("Nullptr lexer was passed into GeneratorUnit of type '{}'"_f << _type).ToStdStringView());
+                spdlog::error(("Nullptr lexer was passed into GeneratorUnit of type '{}'"_f << _type).toStdStringView());
                 return false;
             }
 
             if (!inputLexer->IsValid())
             {
                 Assert();
-                spdlog::error(("Invalid lexer was passed into GeneratorUnit of type '{}'"_f << _type).ToStdStringView());
+                spdlog::error(("Invalid lexer was passed into GeneratorUnit of type '{}'"_f << _type).toStdStringView());
                 return false;
             }
 
@@ -154,7 +154,7 @@ namespace Ast
             {
                 Assert();
                 spdlog::error(("Invalid lexer's type was passed into GeneratorUnit of type '{}'. Lexer name is '{}'; and type is '{}'"_f
-                              << _type << inputLexer->GetLexerName() << inputLexer->GetLexerType()).ToStdStringView());
+                              << _type << inputLexer->GetLexerName() << inputLexer->GetLexerType()).toStdStringView());
                 return false;
             }
 
@@ -162,7 +162,7 @@ namespace Ast
             {
                 Assert();
                 spdlog::error(("Nullptr lexer's Reader was passed into GeneratorUnit of type '{}'. Lexer name is '{}'; and type is '{}'"_f
-                              << _type << inputLexer->GetLexerName() << inputLexer->GetLexerType()).ToStdStringView());
+                              << _type << inputLexer->GetLexerName() << inputLexer->GetLexerType()).toStdStringView());
                 return false;
             }
 
@@ -170,13 +170,13 @@ namespace Ast
             {
                 const auto strPath = inputLexer->GetReader()->GetFilePath();
                 validPath = std::filesystem::path(strPath.c_str());
-                if (strPath.IsEmpty() || strPath == "none"_atom || validPath.empty() || !std::filesystem::exists(validPath))
+                if (strPath.isEmpty() || strPath == "none"_atom || validPath.empty() || !std::filesystem::exists(validPath))
                 {
                     validPath.clear();
                     Assert();
                     spdlog::error((
                         "Nullptr or invalid lexer's Reader->filePath was passed into GeneratorUnit of type '{}'. Lexer name is '{}'; and type is '{}'"_f
-                        << _type << inputLexer->GetLexerName() << inputLexer->GetLexerType()).ToStdStringView());
+                        << _type << inputLexer->GetLexerName() << inputLexer->GetLexerType()).toStdStringView());
                     return false;
                 }
             }
@@ -186,7 +186,7 @@ namespace Ast
                 validPath.clear();
                 Assert();
                 spdlog::error(( "Nullptr or invalid lexer's Reader->filePath was passed into GeneratorUnit of type '{}'. Lexer name is '{}'; and type is '{}'"_f
-                              << _type << inputLexer->GetLexerName() << inputLexer->GetLexerType()).ToStdStringView());
+                              << _type << inputLexer->GetLexerName() << inputLexer->GetLexerType()).toStdStringView());
                 return false;
             }
 

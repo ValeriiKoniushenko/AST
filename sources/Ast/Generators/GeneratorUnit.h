@@ -37,11 +37,11 @@ namespace Ast
 
         struct Hasher
         {
-            size_t operator()(const GeneratorUnit& gen) const { return gen.GetType().MakeHash(); }
+            size_t operator()(const GeneratorUnit& gen) const { return gen.GetType().makeHash(); }
         };
         struct HasherPtr
         {
-            size_t operator()(const Ptr& gen) const { return gen->GetType().MakeHash(); }
+            size_t operator()(const Ptr& gen) const { return gen->GetType().makeHash(); }
         };
 
         using LexerContainerT = std::vector<BaseLexer::CPtr>;
