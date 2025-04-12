@@ -148,11 +148,13 @@ namespace Ast
                                        return child->GetLexerName() == lexer->GetLexerName();
                                    });
 
-            if (Verify(it == _childLexers.cend(), "Such child already exists"))
+            if (it != _childLexers.cend())
             {
-                _childLexers.push_back(child);
-                child->_parentLexer = this;
+                _childLexers.erase(it);
             }
+
+            _childLexers.push_back(child);
+            child->_parentLexer = this;
         }
     }
 
