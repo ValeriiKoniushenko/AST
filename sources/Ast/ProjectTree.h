@@ -266,7 +266,7 @@ namespace Ast
         };
 
     public:
-        ProjectTree();
+        ProjectTree() = default;
         ~ProjectTree() override = default;
         ProjectTree(ProjectTree&&) = default;
         ProjectTree& operator=(ProjectTree&&) = default;
