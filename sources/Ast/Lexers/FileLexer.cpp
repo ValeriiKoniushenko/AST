@@ -64,12 +64,6 @@ namespace Ast
             _lexerName = reader->GetFilePath();
         }
 
-        std::cerr << "HERE BIG PROBLEM - FIX IT ASAP" << std::endl;
-        if (_reader->Data().regexFind("#pragma +once"))
-        {
-            _hasPragmaOnce = true;
-        }
-
         return true;
     }
 
