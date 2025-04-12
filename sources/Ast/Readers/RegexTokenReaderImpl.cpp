@@ -80,7 +80,7 @@ namespace Ast
 
                 return false;
             },
-            offset);
+            offset, 0, 0, PCRE2_MULTILINE);
 
         if (!wasFoundAtLeastOneToken)
         {
