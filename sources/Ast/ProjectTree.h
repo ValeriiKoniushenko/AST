@@ -294,8 +294,6 @@ namespace Ast
         template<IsParser ParserT, IsContentFilter ContentFilterT = void>
         void ParseUsing()
         {
-            Clear();
-
             ForEach(
                 [this](Unit* unit)
                 {
