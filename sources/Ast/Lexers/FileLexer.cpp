@@ -25,36 +25,9 @@
 namespace Ast
 {
 
-    bool FileLexer::GenerateTextSource(TextSourceT& source)
-    {
-        if (!ITextSourceReader::GenerateTextSource(source))
-        {
-            return false;
-        }
-        if (_hasPragmaOnce)
-        {
-            source.source += "#pragma once" + Code::Endl() + Code::Endl();
-        }
-
-        source.carets["write-point"_atom] = source.source.size();
-        return true;
-    }
-
     FileLexer::FileLexer(const ContentStream::Ptr& fileReader)
         : BaseLexer(fileReader, typeName)
     {
-    }
-
-    void FileLexer::OnPutAdditionalInfoToXml(Xml& xml, XmlNode* output) const
-    {
-        if (!Verify(output))
-        {
-            return;
-        }
-
-        auto* pragmaOnceNode = xml.allocate_node(rapidxml::node_element, "pragma_once");
-        pragmaOnceNode->append_attribute(xml.allocate_attribute("exists", _hasPragmaOnce ? "1" : "0"));
-        output->append_node(pragmaOnceNode);
     }
 
     bool FileLexer::DoParse()
