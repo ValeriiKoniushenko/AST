@@ -369,6 +369,13 @@ namespace Ast
         return ret;
     }
 
+    void ProjectTree::Clear()
+    {
+        _fileExtensions.clear();
+        _root = nullptr;
+        _excluded.clear();
+        _config = {};
+    }
     bool ProjectTree::IsValid() const
     {
         if (_root != nullptr)

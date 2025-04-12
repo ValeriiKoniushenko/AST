@@ -273,6 +273,8 @@ namespace Ast
 
         [[nodiscard]] static Ptr Create() { return new Self; }
 
+        void Clear();
+
         [[nodiscard]] bool IsValid() const;
 
         [[nodiscard]] bool operator!() const { return IsValid(); }
@@ -292,6 +294,8 @@ namespace Ast
         template<IsParser ParserT, IsContentFilter ContentFilterT = void>
         void ParseUsing()
         {
+            Clear();
+
             ForEach(
                 [this](Unit* unit)
                 {
