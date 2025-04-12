@@ -38,9 +38,6 @@ namespace Ast
         bool DoParse() override;
         [[nodiscard]] static Ptr Create(const ContentStream::Ptr& stream) { return { new FileLexer(stream) }; }
 
-        void SetPragmaOnce(bool value = true) { _hasPragmaOnce = value; }
-        [[nodiscard]] bool HasPragmaOnce() const noexcept { return _hasPragmaOnce; }
-
         void SetFileName(const String& name) { SetLexerName(name); }
         [[nodiscard]] String GetFileName() const { return _lexerName; }
 
@@ -49,9 +46,6 @@ namespace Ast
     protected:
         void OnPutAdditionalInfoToXml(Xml& xml, XmlNode* output) const override;
         explicit FileLexer(const ContentStream::Ptr& fileReader);
-
-    private:
-        bool _hasPragmaOnce = false;
     };
 
 } // namespace Ast
