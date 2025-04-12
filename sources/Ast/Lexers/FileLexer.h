@@ -26,7 +26,7 @@ namespace Ast
 {
     class ContentStream;
 
-    class FileLexer final : public BaseLexer
+    class FileLexer : public BaseLexer
     {
     public:
         AST_CLASS(FileLexer);
@@ -34,7 +34,6 @@ namespace Ast
         inline static const auto typeName = "file"_atom;
 
         ~FileLexer() override = default;
-
 
         bool DoParse() override;
         [[nodiscard]] static Ptr Create(const ContentStream::Ptr& stream) { return { new FileLexer(stream) }; }
@@ -49,8 +48,6 @@ namespace Ast
 
     protected:
         void OnPutAdditionalInfoToXml(Xml& xml, XmlNode* output) const override;
-
-    private:
         explicit FileLexer(const ContentStream::Ptr& fileReader);
 
     private:
