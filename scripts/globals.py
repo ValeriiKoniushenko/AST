@@ -69,8 +69,12 @@ def ProcessGitSafeDir():
 
 def ProcessGitSubmodules():
     dependency_folder = "dependencies"
+    pathToThis = os.path.dirname(os.path.abspath(__file__))
+
+    targetPath = os.path.join(os.path.dirname(pathToThis), dependency_folder)
+
     try:
-        dependencies = os.listdir(dependency_folder)
+        dependencies = os.listdir(targetPath)
     except FileNotFoundError:
         prints.printError(f"The folder '{dependency_folder}' does not exist.")
         return False
@@ -111,7 +115,7 @@ def PreferedShellExt():
 
 def ProcessBoost():
     while True:
-        user_input = input("Do you want to install boost? [Y/n]: ").strip().lower()
+        user_input = input("Do you want to [re]install boost? [Y/n]: ").strip().lower()
         if user_input in ["y", "yes", ""]:
             if installBoost.Install(PreferedShellExt(), "dependencies") == False:
                 return False
