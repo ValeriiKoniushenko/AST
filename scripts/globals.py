@@ -72,7 +72,7 @@ def ProcessGitSubmodules():
     try:
         dependencies = os.listdir(dependency_folder)
     except FileNotFoundError:
-        prints.printError("The folder '{dependency_folder}' does not exist.")
+        prints.printError(f"The folder '{dependency_folder}' does not exist.")
         return False
 
     count = len(dependencies)
