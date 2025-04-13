@@ -73,13 +73,15 @@ namespace Ast
             return false;
         }
 
-        if (!Verify(lexer->IsValid()))
+        if (!lexer->IsValid())
         {
+            Assert();
             return false;
         }
 
-        if (Verify(lexer->GetLexerType() != _type))
+        if (lexer->GetLexerType() != _type)
         {
+            Assert();
             return false;
         }
 
