@@ -78,7 +78,7 @@ namespace Ast
             return false;
         }
 
-        if (!Verify(lexer->GetLexerType() != _type))
+        if (Verify(lexer->GetLexerType() != _type))
         {
             return false;
         }
