@@ -20,6 +20,7 @@
 
 #include "GeneratorUnit.h"
 
+#include "Ast/ProjectTree.h"
 #include "spdlog/spdlog.h"
 
 #include <bits/ranges_algo.h>
@@ -37,15 +38,15 @@ namespace Ast
         return out;
     }
 
-    void GeneratorUnit::GenerateSourceToFile() const
+    void GeneratorUnit::GenerateSourceToFile(const ProjectTree::Unit* unit) const
     {
         RequireValidLexers();
-        if (_lexers.empty())
+        if (_lexers.empty() || unit)
         {
             return;
         }
 
-        const auto path = GetGenerationPath();
+        const auto path = GetGenerationPath(unit);
         if (path.empty())
         {
             Assert();

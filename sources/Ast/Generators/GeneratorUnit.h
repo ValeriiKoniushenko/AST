@@ -22,6 +22,7 @@
 
 #include "../CommonTypes.h"
 #include "../Lexers/BaseLexer.h"
+#include "Ast/ProjectTree.h"
 #include "Utils/CopyableAndMoveableBehaviour.h"
 
 #include <boost/smart_ptr/intrusive_ptr.hpp>
@@ -50,7 +51,7 @@ namespace Ast
         ~GeneratorUnit() override = default;
 
         [[nodiscard]] String GenerateSource() const;
-        void GenerateSourceToFile() const;
+        void GenerateSourceToFile(const ProjectTree::Unit* unit) const;
         const String& GetType() const { return _type; }
 
         [[nodiscard]] bool operator==(const GeneratorUnit& other) const { return _type == other._type && OnEqual(other); }
@@ -96,7 +97,7 @@ namespace Ast
         /**
          * @brief Override this method with needed of generation. For example: /path/to/folder/file.generated.h
          */
-        [[nodiscard]] virtual std::filesystem::path GetGenerationPath() const = 0;
+        [[nodiscard]] virtual std::filesystem::path GetGenerationPath(const ProjectTree::Unit* unit = nullptr) const = 0;
 
     protected:
         const String _type;

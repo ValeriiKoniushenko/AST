@@ -39,7 +39,7 @@ namespace Ast
 
                 const auto tree = unit->GetTree();
                 tree->ForEachOverSameType(
-                    [this](std::vector<const BaseLexer*>& lexers)
+                    [&](std::vector<const BaseLexer*>& lexers)
                     {
                         if (Verify(!lexers.empty() && lexers.front()))
                         {
@@ -55,7 +55,7 @@ namespace Ast
                             for (const auto& generator : *generators)
                             {
                                 generator->AddLexers(lexers);
-                                generator->GenerateSourceToFile();
+                                generator->GenerateSourceToFile(unit);
                             }
                         }
                     },
