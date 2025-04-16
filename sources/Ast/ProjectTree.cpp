@@ -442,7 +442,7 @@ namespace Ast
                 if (Verify(!!_root))
                 {
                     p = _root->GetPath() / p;
-                    if (std::filesystem::exists(p))
+                    if (std::filesystem::exists(p) && !std::filesystem::is_symlink(p))
                     {
                         p = std::filesystem::canonical(p);
                     }
