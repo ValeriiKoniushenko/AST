@@ -4,7 +4,7 @@
 cmake-build-*/
 build*/
 out
-dependencies/boost*
+dependencies/*
 scripts/check.py
 scripts/file_validator.py
 scripts/project_config.py

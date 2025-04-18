@@ -63,14 +63,14 @@ namespace Ast
             };
 
         public:
-            Unit() = default;
+            explicit Unit(ProjectTree* projectTree) : _projectTree(projectTree){};
             ~Unit() override = default;
 
             [[nodiscard]] bool IsGeneratedFile() const { return ProjectTree::IsGeneratedFile(_path); }
             [[nodiscard]] String GetGeneratedDummyHeader() const;
             [[nodiscard]] String GetTextSource() override;
 
-            [[nodiscard]] static Ptr Create() { return new Self; }
+            [[nodiscard]] static Ptr Create(ProjectTree* projectTree) { return new Self(projectTree); }
 
             [[nodiscard]] Type GetType() const { return _type; }
             [[nodiscard]] bool IsFile() const { return _type == Type::File; }
@@ -109,8 +109,8 @@ namespace Ast
             [[nodiscard]] const Ptr& GetParent() const noexcept { return _parent; }
             [[nodiscard]] Ptr GetParent() { return _parent; }
 
-            [[nodiscard]] static Unit CreateFromPath(const std::filesystem::path& path);
-            [[nodiscard]] static Ptr CreatePtrFromPath(const std::filesystem::path& path);
+            [[nodiscard]] static Unit CreateFromPath(const std::filesystem::path& path, ProjectTree* projectTree);
+            [[nodiscard]] static Ptr CreatePtrFromPath(const std::filesystem::path& path, ProjectTree* projectTree);
 
             [[nodiscard]] Ptr GetUnitByPath(const std::filesystem::path& path);
             [[nodiscard]] bool IsExistUnitByPath(const std::filesystem::path& path);
@@ -263,6 +263,7 @@ namespace Ast
 
             std::set<Ptr> _childs;
             Ptr _parent;
+            ProjectTree* const _projectTree;
         };
 
     public:
@@ -288,6 +289,9 @@ namespace Ast
 
         void SetTargetProject(const std::filesystem::path& path);
         [[nodiscard]] std::filesystem::path GetTargetProject() const noexcept { return _root ? _root->GetPath() : std::filesystem::path(); }
+
+        void SetPreferableExtensionForGeneration(String str) { _preferableExtension = std::move(str); }
+        [[nodiscard]] const String& GetPreferableExtensionForGeneration() const { return _preferableExtension; }
 
         bool Process();
 
@@ -380,6 +384,7 @@ namespace Ast
         Unit::Ptr _root;
         std::unordered_set<std::filesystem::path> _excluded;
         Config _config;
+        String _preferableExtension;
     };
 
 } // namespace Ast

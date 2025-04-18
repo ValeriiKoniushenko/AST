@@ -91,16 +91,16 @@ namespace Ast
         return nullptr;
     }
 
-    ProjectTree::Unit ProjectTree::Unit::CreateFromPath(const std::filesystem::path& path)
+    ProjectTree::Unit ProjectTree::Unit::CreateFromPath(const std::filesystem::path& path, ProjectTree* projectTree)
     {
-        Unit unit;
+        Unit unit(projectTree);
         unit._path = path;
         unit._permission = std::filesystem::status(path).permissions();
         unit._lastWriteTime = std::filesystem::last_write_time(path).time_since_epoch().count();
 
         if (!Verify(unit.IsExistsOnDisk()))
         {
-            return {};
+            return ProjectTree::Unit{nullptr};
         }
 
         if (std::filesystem::is_directory(path))
@@ -138,9 +138,9 @@ namespace Ast
         return unit;
     }
 
-    ProjectTree::Unit::Ptr ProjectTree::Unit::CreatePtrFromPath(const std::filesystem::path& path)
+    ProjectTree::Unit::Ptr ProjectTree::Unit::CreatePtrFromPath(const std::filesystem::path& path, ProjectTree* projectTree)
     {
-        return Ptr(new Unit(std::move(CreateFromPath(path))));
+        return Ptr(new Unit(CreateFromPath(path, projectTree)));
     }
 
     ProjectTree::Unit::Ptr ProjectTree::Unit::GetUnitByPath(const std::filesystem::path& path)
@@ -212,7 +212,9 @@ namespace Ast
             return nullptr;
         }
 
-        auto unit = Unit::Create();
+        Assert(_projectTree);
+
+        auto unit = Unit::Create(_projectTree);
         unit->_path = _path / name.toStdStringView();
         unit->_type = Type::Folder;
         unit->_parent = this;
@@ -237,7 +239,7 @@ namespace Ast
             return nullptr;
         }
 
-        auto unit = CreatePtrFromPath(_path / name.toStdStringView());
+        auto unit = CreatePtrFromPath(_path / name.toStdStringView(), _projectTree);
 
         if (!Verify(!!unit))
         {
@@ -276,8 +278,16 @@ namespace Ast
             return {};
         }
 
+        if (!_projectTree)
+        {
+            Assert();
+            return {};
+        }
+
         auto path = _path;
-        path.replace_extension(generatedSuffixDecl + _path.extension().string());
+        const auto prefExt = _projectTree->GetPreferableExtensionForGeneration();
+        std::string ext = !prefExt ? _path.extension().string() : prefExt.toStdString();
+        path.replace_extension(generatedSuffixDecl + ext);
         return path;
     }
 
@@ -473,7 +483,7 @@ namespace Ast
     {
         if (std::filesystem::exists(path))
         {
-            _root = Unit::CreatePtrFromPath(path);
+            _root = Unit::CreatePtrFromPath(path, this);
         }
         else
         {
@@ -630,7 +640,7 @@ namespace Ast
                 }
                 else
                 {
-                    auto* newUnit = _root->TryToAddChild(Unit::CreateFromPath(finalPath));
+                    auto* newUnit = _root->TryToAddChild(Unit::CreateFromPath(finalPath, this));
                     if (Verify(newUnit, "Impossible to create new unit"))
                     {
                         i = newUnit;

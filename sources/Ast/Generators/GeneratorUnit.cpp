@@ -41,12 +41,12 @@ namespace Ast
     void GeneratorUnit::GenerateSourceToFile(const ProjectTree::Unit* unit) const
     {
         RequireValidLexers();
-        if (_lexers.empty() || unit)
+        if (_lexers.empty() || !unit)
         {
             return;
         }
 
-        const auto path = GetGenerationPath(unit);
+        const auto path = unit->GetGeneratedSiblingFilePath();
         if (path.empty())
         {
             Assert();
