@@ -22,7 +22,7 @@
 
 #include "CommonTypes.h"
 #include "Core/Enum.h"
-#include "ProjectTree.h"
+#include "deprProjectTree.h"
 
 #include <boost/foreach.hpp>
 #include <boost/property_tree/ptree.hpp>

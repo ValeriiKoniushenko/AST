@@ -20,6 +20,8 @@
 
 #pragma once
 
+#ifdef false
+
 #include "Readers/ContentStream.h"
 #include "Tree.h"
 #include "Utils/CopyableAndMoveableBehaviour.h"
@@ -29,10 +31,10 @@
 
 namespace Ast::Deprecated
 {
-    class ProjectTree : public Utils::NotCopyableButMoveable, public boost::intrusive_ref_counter<ProjectTree>
+    class deprProjectTree : public Utils::NotCopyableButMoveable, public boost::intrusive_ref_counter<deprProjectTree>
     {
     public:
-        AST_CLASS(ProjectTree)
+        AST_CLASS(deprProjectTree)
 
         struct Config
         {
@@ -63,14 +65,14 @@ namespace Ast::Deprecated
             };
 
         public:
-            explicit Unit(ProjectTree* projectTree) : _projectTree(projectTree){};
+            explicit Unit(deprProjectTree* projectTree) : _projectTree(projectTree){};
             ~Unit() override = default;
 
-            [[nodiscard]] bool IsGeneratedFile() const { return ProjectTree::IsGeneratedFile(_path); }
+            [[nodiscard]] bool IsGeneratedFile() const { return deprProjectTree::IsGeneratedFile(_path); }
             [[nodiscard]] String GetGeneratedDummyHeader() const;
             [[nodiscard]] String GetTextSource() override;
 
-            [[nodiscard]] static Ptr Create(ProjectTree* projectTree) { return new Self(projectTree); }
+            [[nodiscard]] static Ptr Create(deprProjectTree* projectTree) { return new Self(projectTree); }
 
             [[nodiscard]] Type GetType() const { return _type; }
             [[nodiscard]] bool IsFile() const { return _type == Type::File; }
@@ -109,8 +111,8 @@ namespace Ast::Deprecated
             [[nodiscard]] const Ptr& GetParent() const noexcept { return _parent; }
             [[nodiscard]] Ptr GetParent() { return _parent; }
 
-            [[nodiscard]] static Unit CreateFromPath(const std::filesystem::path& path, ProjectTree* projectTree);
-            [[nodiscard]] static Ptr CreatePtrFromPath(const std::filesystem::path& path, ProjectTree* projectTree);
+            [[nodiscard]] static Unit CreateFromPath(const std::filesystem::path& path, deprProjectTree* projectTree);
+            [[nodiscard]] static Ptr CreatePtrFromPath(const std::filesystem::path& path, deprProjectTree* projectTree);
 
             [[nodiscard]] Ptr GetUnitByPath(const std::filesystem::path& path);
             [[nodiscard]] bool IsExistUnitByPath(const std::filesystem::path& path);
@@ -263,14 +265,14 @@ namespace Ast::Deprecated
 
             std::set<Ptr> _childs;
             Ptr _parent;
-            ProjectTree* const _projectTree;
+            deprProjectTree* const _projectTree;
         };
 
     public:
-        ProjectTree() = default;
-        ~ProjectTree() override = default;
-        ProjectTree(ProjectTree&&) = default;
-        ProjectTree& operator=(ProjectTree&&) = default;
+        deprProjectTree() = default;
+        ~deprProjectTree() override = default;
+        deprProjectTree(deprProjectTree&&) = default;
+        deprProjectTree& operator=(deprProjectTree&&) = default;
 
         [[nodiscard]] static Ptr Create() { return new Self; }
 
@@ -388,3 +390,5 @@ namespace Ast::Deprecated
     };
 
 } // namespace Ast
+
+#endif

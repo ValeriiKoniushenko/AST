@@ -18,7 +18,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include "ProjectTree.h"
+#ifdef false
+
+#include "deprProjectTree.h"
 
 #include "Utils/Functions.h"
 
@@ -35,7 +37,7 @@ namespace
 namespace Ast::Deprecated
 {
 
-    String ProjectTree::Unit::GetGeneratedDummyHeader() const
+    String deprProjectTree::Unit::GetGeneratedDummyHeader() const
     {
         if (!IsFile())
         {
@@ -53,18 +55,18 @@ namespace Ast::Deprecated
         return out;
     }
 
-    String ProjectTree::Unit::GetTextSource()
+    String deprProjectTree::Unit::GetTextSource()
     {
         return _contentStream->Data();
     }
 
-    bool ProjectTree::Unit::IsExistsOnDisk() const
+    bool deprProjectTree::Unit::IsExistsOnDisk() const
     {
         std::error_code ec;
         return std::filesystem::exists(_path, ec);
     }
 
-    bool ProjectTree::Unit::HasChild(const Unit& unit) const
+    bool deprProjectTree::Unit::HasChild(const Unit& unit) const
     {
         auto found = std::find_if(_childs.cbegin(), _childs.cend(),
                                   [&unit](const Ptr& a)
@@ -75,7 +77,7 @@ namespace Ast::Deprecated
         return found != _childs.cend();
     }
 
-    const ProjectTree::Unit::Ptr ProjectTree::Unit::FindChild(const Unit& unit) const
+    const deprProjectTree::Unit::Ptr deprProjectTree::Unit::FindChild(const Unit& unit) const
     {
         auto found = std::find_if(_childs.cbegin(), _childs.cend(),
                                   [&unit](const Ptr& a)
@@ -91,7 +93,7 @@ namespace Ast::Deprecated
         return nullptr;
     }
 
-    ProjectTree::Unit ProjectTree::Unit::CreateFromPath(const std::filesystem::path& path, ProjectTree* projectTree)
+    deprProjectTree::Unit deprProjectTree::Unit::CreateFromPath(const std::filesystem::path& path, deprProjectTree* projectTree)
     {
         Unit unit(projectTree);
         unit._path = path;
@@ -100,7 +102,7 @@ namespace Ast::Deprecated
 
         if (!Verify(unit.IsExistsOnDisk()))
         {
-            return ProjectTree::Unit{nullptr};
+            return deprProjectTree::Unit{nullptr};
         }
 
         if (std::filesystem::is_directory(path))
@@ -138,12 +140,12 @@ namespace Ast::Deprecated
         return unit;
     }
 
-    ProjectTree::Unit::Ptr ProjectTree::Unit::CreatePtrFromPath(const std::filesystem::path& path, ProjectTree* projectTree)
+    deprProjectTree::Unit::Ptr deprProjectTree::Unit::CreatePtrFromPath(const std::filesystem::path& path, deprProjectTree* projectTree)
     {
         return Ptr(new Unit(CreateFromPath(path, projectTree)));
     }
 
-    ProjectTree::Unit::Ptr ProjectTree::Unit::GetUnitByPath(const std::filesystem::path& path)
+    deprProjectTree::Unit::Ptr deprProjectTree::Unit::GetUnitByPath(const std::filesystem::path& path)
     {
         auto relative = std::filesystem::relative(path, _path);
         if (relative.empty())
@@ -181,12 +183,12 @@ namespace Ast::Deprecated
         return temp;
     }
 
-    bool ProjectTree::Unit::IsExistUnitByPath(const std::filesystem::path& path)
+    bool deprProjectTree::Unit::IsExistUnitByPath(const std::filesystem::path& path)
     {
         return !!GetUnitByPath(path);
     }
 
-    uint64_t ProjectTree::Unit::GetLastModificationTime() const
+    uint64_t deprProjectTree::Unit::GetLastModificationTime() const
     {
         if (_path.empty())
         {
@@ -205,7 +207,7 @@ namespace Ast::Deprecated
         return std::filesystem::last_write_time(_path).time_since_epoch().count();
     }
 
-    ProjectTree::Unit* ProjectTree::Unit::LinkSubFolder(const String& name)
+    deprProjectTree::Unit* deprProjectTree::Unit::LinkSubFolder(const String& name)
     {
         if (!Verify(std::filesystem::exists(_path), "Invalid unit"))
         {
@@ -232,7 +234,7 @@ namespace Ast::Deprecated
         return nullptr;
     }
 
-    ProjectTree::Unit* ProjectTree::Unit::LinkSubFile(const String& name)
+    deprProjectTree::Unit* deprProjectTree::Unit::LinkSubFile(const String& name)
     {
         if (!Verify(std::filesystem::exists(_path), "Invalid unit"))
         {
@@ -255,7 +257,7 @@ namespace Ast::Deprecated
         return RawAddToChilds(std::move(unit));
     }
 
-    bool ProjectTree::Unit::HasGeneratedSiblingFile() const
+    bool deprProjectTree::Unit::HasGeneratedSiblingFile() const
     {
         if (!IsFile())
         {
@@ -271,7 +273,7 @@ namespace Ast::Deprecated
         return siblingFile.empty() ? false : std::filesystem::exists(siblingFile);
     }
 
-    std::filesystem::path ProjectTree::Unit::GetGeneratedSiblingFilePath() const
+    std::filesystem::path deprProjectTree::Unit::GetGeneratedSiblingFilePath() const
     {
         if (_path.empty() || !_path.has_extension())
         {
@@ -291,7 +293,7 @@ namespace Ast::Deprecated
         return path;
     }
 
-    ProjectTree::Unit* ProjectTree::Unit::RawAddToChilds(Ptr&& unit)
+    deprProjectTree::Unit* deprProjectTree::Unit::RawAddToChilds(Ptr&& unit)
     {
         auto it = _childs.emplace(std::move(unit));
         Assert(it.second, "Undefined error. Impossible to add new subfolder to the childs");
@@ -299,7 +301,7 @@ namespace Ast::Deprecated
         return it.second ? it.first->get() : nullptr;
     }
 
-    bool ProjectTree::Unit::CheckByPathIfWasGenerated() const
+    bool deprProjectTree::Unit::CheckByPathIfWasGenerated() const
     {
         if (IsFile())
         {
@@ -321,7 +323,7 @@ namespace Ast::Deprecated
         return false;
     }
 
-    uint64_t ProjectTree::Unit::ExtrudeGenerationTime() const
+    uint64_t deprProjectTree::Unit::ExtrudeGenerationTime() const
     {
         if (!Verify(!!_contentStream))
         {
@@ -379,14 +381,14 @@ namespace Ast::Deprecated
         return ret;
     }
 
-    void ProjectTree::Clear()
+    void deprProjectTree::Clear()
     {
         _fileExtensions.clear();
         _root = nullptr;
         _excluded.clear();
         _config = {};
     }
-    bool ProjectTree::IsValid() const
+    bool deprProjectTree::IsValid() const
     {
         if (_root != nullptr)
         {
@@ -401,7 +403,7 @@ namespace Ast::Deprecated
         }
         return false;
     }
-    void ProjectTree::SetFileExtensions(std::vector<String> extensions)
+    void deprProjectTree::SetFileExtensions(std::vector<String> extensions)
     {
         for (auto& extension : extensions)
         {
@@ -415,7 +417,7 @@ namespace Ast::Deprecated
         }
     }
 
-    void ProjectTree::ExcludeFromProject(std::filesystem::path path)
+    void deprProjectTree::ExcludeFromProject(std::filesystem::path path)
     {
         if (path.empty() || path.string() == ".")
         {
@@ -425,7 +427,7 @@ namespace Ast::Deprecated
         _excluded.emplace(std::move(path));
     }
 
-    bool ProjectTree::IsExcludedPath(std::filesystem::path path) const
+    bool deprProjectTree::IsExcludedPath(std::filesystem::path path) const
     {
         if (_excluded.contains(path))
         {
@@ -474,12 +476,12 @@ namespace Ast::Deprecated
         return false;
     }
 
-    const std::unordered_set<std::filesystem::path>& ProjectTree::GetExcludedPaths() const noexcept
+    const std::unordered_set<std::filesystem::path>& deprProjectTree::GetExcludedPaths() const noexcept
     {
         return _excluded;
     }
 
-    void ProjectTree::SetTargetProject(const std::filesystem::path& path)
+    void deprProjectTree::SetTargetProject(const std::filesystem::path& path)
     {
         if (std::filesystem::exists(path))
         {
@@ -491,7 +493,7 @@ namespace Ast::Deprecated
         }
     }
 
-    bool ProjectTree::Process()
+    bool deprProjectTree::Process()
     {
         if (_fileExtensions.empty())
         {
@@ -509,32 +511,32 @@ namespace Ast::Deprecated
         return true;
     }
 
-    ProjectTree::Unit::AdaptivePtr<> ProjectTree::GetGeneratedFileOfUnit(const Unit::Ptr& unit)
+    deprProjectTree::Unit::AdaptivePtr<> deprProjectTree::GetGeneratedFileOfUnit(const Unit::Ptr& unit)
     {
         return GetUnitByPath(unit->GetGeneratedSiblingFilePath());
     }
 
-    ProjectTree::Unit::AdaptivePtr<true> ProjectTree::GetGeneratedFileOfUnit(const Unit::CPtr& unit) const
+    deprProjectTree::Unit::AdaptivePtr<true> deprProjectTree::GetGeneratedFileOfUnit(const Unit::CPtr& unit) const
     {
         return GetUnitByPath(unit->GetGeneratedSiblingFilePath());
     }
 
-    ProjectTree::Unit::AdaptivePtr<> ProjectTree::GetGeneratedFileOfUnit(const Unit& unit)
+    deprProjectTree::Unit::AdaptivePtr<> deprProjectTree::GetGeneratedFileOfUnit(const Unit& unit)
     {
         return GetUnitByPath(unit.GetGeneratedSiblingFilePath());
     }
 
-    ProjectTree::Unit::AdaptivePtr<true> ProjectTree::GetGeneratedFileOfUnit(const Unit& unit) const
+    deprProjectTree::Unit::AdaptivePtr<true> deprProjectTree::GetGeneratedFileOfUnit(const Unit& unit) const
     {
         return GetUnitByPath(unit.GetGeneratedSiblingFilePath());
     }
 
-    bool ProjectTree::IsNeedRegeneration(const Unit::CPtr& unit) const
+    bool deprProjectTree::IsNeedRegeneration(const Unit::CPtr& unit) const
     {
         return Verify(!!unit) ? IsNeedRegeneration(*unit) : false;
     }
 
-    bool ProjectTree::IsNeedRegeneration(const Unit& unit) const
+    bool deprProjectTree::IsNeedRegeneration(const Unit& unit) const
     {
         if (!unit.IsGeneratedFile() && unit.GetTree()->HasAtLeastOneMarkedLexer())
         {
@@ -555,7 +557,7 @@ namespace Ast::Deprecated
         return false;
     }
 
-    bool ProjectTree::IsGeneratedFile(const std::filesystem::path& path)
+    bool deprProjectTree::IsGeneratedFile(const std::filesystem::path& path)
     {
         auto file = path.filename();
         if (file.empty())
@@ -577,7 +579,7 @@ namespace Ast::Deprecated
         return file.extension().string() == Unit::generatedSuffixDecl;
     }
 
-    bool ProjectTree::IsValidExtension(const std::filesystem::path& path) const
+    bool deprProjectTree::IsValidExtension(const std::filesystem::path& path) const
     {
         String mainExt;
         if (path.has_extension())
@@ -605,7 +607,7 @@ namespace Ast::Deprecated
         return false;
     }
 
-    void ProjectTree::ProcessFile(const std::filesystem::path& folders, const std::filesystem::path& fullPath)
+    void deprProjectTree::ProcessFile(const std::filesystem::path& folders, const std::filesystem::path& fullPath)
     {
         if (!Verify(!!_root))
         {
@@ -660,7 +662,7 @@ namespace Ast::Deprecated
     }
 
     // TODO: change to stack-based recurse
-    void ProjectTree::IterateOverDirectory(const std::filesystem::path& path)
+    void deprProjectTree::IterateOverDirectory(const std::filesystem::path& path)
     {
         for (const auto& i : std::filesystem::directory_iterator(path))
         {
@@ -697,3 +699,5 @@ namespace Ast::Deprecated
     }
 
 } // namespace Ast
+
+#endif
