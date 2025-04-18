@@ -32,7 +32,7 @@ namespace
     }();
 } // namespace
 
-namespace Ast
+namespace Ast::Deprecated
 {
 
     String ProjectTree::Unit::GetGeneratedDummyHeader() const

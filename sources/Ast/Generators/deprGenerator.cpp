@@ -18,13 +18,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include "Generator.h"
-
-#include <fstream>
-
 namespace Ast
 {
-
+#if false
     void Generator::SetTargetProject(const ProjectTree::Ptr& project)
     {
         _projectTree = project;
@@ -151,5 +147,5 @@ namespace Ast
     {
         return Verify(!!lexer) ? GetGeneratorUnitFor(lexer->GetLexerType()) : nullptr;
     }
-
+#endif
 } // namespace Ast

@@ -27,7 +27,7 @@
 #include <set>
 #include <unordered_set>
 
-namespace Ast
+namespace Ast::Deprecated
 {
     class ProjectTree : public Utils::NotCopyableButMoveable, public boost::intrusive_ref_counter<ProjectTree>
     {

@@ -18,17 +18,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include "GeneratorUnit.h"
-
-#include "Ast/ProjectTree.h"
 #include "spdlog/spdlog.h"
-
-#include <bits/ranges_algo.h>
-#include <fstream>
 
 namespace Ast
 {
-
+#if false
     String GeneratorUnit::GenerateSource() const
     {
         String out;
@@ -36,35 +30,6 @@ namespace Ast
         out += OnGenerate();
         out += PostGenerate();
         return out;
-    }
-
-    void GeneratorUnit::GenerateSourceToFile(const ProjectTree::Unit* unit) const
-    {
-        RequireValidLexers();
-        if (_lexers.empty() || !unit)
-        {
-            return;
-        }
-
-        const auto path = unit->GetGeneratedSiblingFilePath();
-        if (path.empty())
-        {
-            Assert();
-            spdlog::error(("Impossible to generate a code to the file. Invalid lexer's path was passed into GeneratorUnit of type '{}'"_f << _type).toStdStringView());
-            return;
-        }
-
-        const auto sources = GenerateSource();
-        std::ofstream file(path);
-        if (!file.is_open())
-        {
-            Assert();
-            spdlog::error((
-                "Impossible to generate a code to the file, because the file can't be created by some reasons. Problem in: GeneratorUnit of type '{}'"_f
-                << _type).toStdStringView());
-            return;
-        }
-        file.write(sources.c_str(), sources.size() * sizeof(*sources.c_str()));
     }
 
     bool GeneratorUnit::AddLexer(const BaseLexer* lexer)
@@ -204,5 +169,7 @@ namespace Ast
         (void)std::ranges::all_of(_lexers, checkLexer);
 #endif
     }
+
+#endif
 
 } // namespace Ast

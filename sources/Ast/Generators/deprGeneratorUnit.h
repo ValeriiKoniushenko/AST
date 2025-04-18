@@ -22,7 +22,6 @@
 
 #include "../CommonTypes.h"
 #include "../Lexers/BaseLexer.h"
-#include "Ast/ProjectTree.h"
 #include "Utils/CopyableAndMoveableBehaviour.h"
 
 #include <boost/smart_ptr/intrusive_ptr.hpp>
@@ -30,7 +29,7 @@
 
 namespace Ast
 {
-
+#if 0 != 0
     class GeneratorUnit : public Utils::CopyableAndMoveable, public boost::intrusive_ref_counter<GeneratorUnit>
     {
     public:
@@ -51,7 +50,6 @@ namespace Ast
         ~GeneratorUnit() override = default;
 
         [[nodiscard]] String GenerateSource() const;
-        void GenerateSourceToFile(const ProjectTree::Unit* unit) const;
         const String& GetType() const { return _type; }
 
         [[nodiscard]] bool operator==(const GeneratorUnit& other) const { return _type == other._type && OnEqual(other); }
@@ -101,5 +99,6 @@ namespace Ast
 
     template<class T>
     concept IsGeneratorUnit = std::derived_from<T, GeneratorUnit>;
+#endif
 
 } // namespace Ast

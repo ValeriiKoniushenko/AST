@@ -20,13 +20,11 @@
 
 #pragma once
 
-#include "Ast/ProjectTree.h"
 #include "Core/Enum.h"
-#include "GeneratorUnit.h"
 
 namespace Ast
 {
-
+#if false
     class Generator : public Utils::CopyableAndMoveable, public boost::intrusive_ref_counter<Generator>
     {
     public:
@@ -50,7 +48,7 @@ namespace Ast
         Generator() = default;
         ~Generator() override = default;
 
-        void SetTargetProject(const ProjectTree::Ptr& project);
+        // void SetTargetProject(const ProjectTree::Ptr& project);
 
         virtual void Generate();
 
@@ -75,5 +73,5 @@ namespace Ast
         ProjectTree::Ptr _projectTree;
         GeneratorMapContainerT _generatorUnits;
     };
-
+#endif
 } // namespace Ast
