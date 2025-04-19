@@ -22,6 +22,8 @@
 
 namespace Ast
 {
+    const char __BaseLogHeader_DiskUnit[] = "FileSystem";
+
     void DiskUnit::_trySetParent(const Ptr& parent)
     {
         if (_parent)
@@ -55,7 +57,36 @@ namespace Ast
         auto unit = Ptr(new DiskUnit());
 
         unit->_name = path.stem().generic_string();
+        unit->_name.shrink_to_fit();
+
+        const auto status = std::filesystem::status(path);
+
+        if (std::filesystem::is_directory(status))
+        {
+            unit->_type = DiskUnit::Type::Directory;
+        }
+        else if (std::filesystem::is_regular_file(status))
+        {
+            unit->_type = DiskUnit::Type::File;
+        }
+        else if (std::filesystem::is_symlink(status))
+        {
+            unit->_type = DiskUnit::Type::Symlink;
+        }
+        else
+        {
+            logger->warn("Impossible to identify unit type(folder, file, etc) for this path: {}", path.generic_string());
+        }
+
+        unit->_lastWriteTime = std::filesystem::last_write_time(path).time_since_epoch().count();
+        unit->_permissions = status.permissions();
 
         return unit;
+    }
+
+    bool DiskUnit::isWriteable() const noexcept
+    {
+        using T = std::filesystem::perms;
+        return (T::owner_read & _permissions) == T::owner_read && (T::owner_write & _permissions) == T::owner_write;
     }
 } // namespace Ast

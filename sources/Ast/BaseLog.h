@@ -18,25 +18,19 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include "Ast/DiskUnits.h"
+#pragma once
 
-#include <gtest/gtest.h>
+#include "spdlog/spdlog.h"
+#include "spdlog/sinks/stdout_color_sinks.h"
 
-using namespace Ast;
-
-namespace
+namespace Ast
 {
 
-    const std::filesystem::path projectDir = PATH_TO_TEST_PROJECT_1;
+    template <const char* sinkName>
+    class BaseLog
+    {
+    public:
+        inline static std::shared_ptr<spdlog::logger> logger = spdlog::stdout_color_mt(sinkName);
+    };
 
-} // namespace
-
-TEST(ProjectTreeTest, SimpleActionsWithDiskUnit)
-{
-    auto unit = DiskUnit::CreateFromPath(projectDir);
-
-    ASSERT_TRUE(unit);
-    EXPECT_EQ("small_project", unit->getName());
-    EXPECT_EQ(DiskUnit::Type::Directory, unit->getType());
-    EXPECT_TRUE(unit->isWriteable());
-}
+} // namespace Ast

@@ -20,6 +20,7 @@
 
 #pragma once
 
+#include "BaseLog.h"
 #include "Core/Enum.h"
 #include "Readers/ContentStream.h"
 #include "Tree.h"
@@ -30,21 +31,23 @@
 
 namespace Ast
 {
-    class DiskUnit : public Utils::NotCopyableButMoveable, public boost::intrusive_ref_counter<DiskUnit>
+    extern const char __BaseLogHeader_DiskUnit[];
+
+    class DiskUnit : public BaseLog<__BaseLogHeader_DiskUnit>, public Utils::NotCopyableButMoveable, public boost::intrusive_ref_counter<DiskUnit>
     {
     public:
         AST_CLASS(DiskUnit)
 
         struct Hash
         {
-            [[nodiscard]] bool operator()(const DiskUnit::Ptr& unit) const { return std::hash<std::filesystem::path>{}(unit->_name); }
+            [[nodiscard]] bool operator()(const DiskUnit::Ptr& unit) const { return unit->_name.makeHash(); }
         };
 
         enum class Type
         {
             None,
             File,
-            Folder,
+            Directory,
             Symlink
         };
 
@@ -55,26 +58,30 @@ namespace Ast
         static Ptr CreateFromPath(const std::filesystem::path& path);
 
         [[nodiscard]] Type getType() const noexcept { return _type; }
-        void _setType(Type type) noexcept { _type = type; }
 
-        [[nodiscard]] const std::filesystem::path& getName() const noexcept { return _name; }
-        void _setName(const std::filesystem::path& name) { _name = name; }
+        [[nodiscard]] const String& getName() const noexcept { return _name; }
 
         [[nodiscard]] uint64_t getLastWriteTime() const noexcept { return _lastWriteTime; }
-        void _setType(uint64_t time) noexcept { _lastWriteTime = time; }
 
-        void _trySetParent(const Ptr& parent);
-        void _forceSetParent(const Ptr& parent);
+        [[nodiscard]] std::filesystem::perms getPermissions() const noexcept { return _permissions; }
+        [[nodiscard]] bool isWriteable() const noexcept;
+
         [[nodiscard]] CPtr getParent() const { return _parent; }
         [[nodiscard]] Ptr getParent() { return _parent; }
         [[nodiscard]] bool hasParent() const noexcept { return _parent != nullptr; }
 
+        void _setType(Type type) noexcept { _type = type; }
+        void _setName(const String& name) { _name = name; _name.shrink_to_fit(); }
+        void _setType(uint64_t time) noexcept { _lastWriteTime = time; }
+        void _trySetParent(const Ptr& parent);
+        void _forceSetParent(const Ptr& parent);
+
     protected:
         uint64_t _lastWriteTime = 0;
-        std::filesystem::path _name;
-
+        String _name;
+        std::filesystem::perms _permissions;
         Type _type = Type::None;
+
         Ptr _parent = nullptr;
-        std::unordered_set<Ptr, Hash> _childs;
     };
 } // namespace Ast
