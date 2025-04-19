@@ -47,8 +47,19 @@ TEST(ProjectTreeTest, SimpleActionsWithFolder)
     auto unit = DirectoryUnit::CreateFromPath(projectDir);
 
     ASSERT_TRUE(unit);
+    ASSERT_TRUE(unit->isValid());
     EXPECT_EQ(projectDir.string(), unit->getPath().string());
     EXPECT_EQ(DiskUnit::Type::Directory, unit->getType());
     EXPECT_TRUE(unit->isWriteable());
     EXPECT_TRUE(unit->isExistOnDisk());
+
+    auto dir = DirectoryUnit::Create();
+    dir->_setType(DirectoryUnit::Type::Directory);
+    dir->_setPath("hello/world");
+
+    ASSERT_TRUE(dir);
+    ASSERT_TRUE(dir->isValid());
+    EXPECT_EQ("hello/world", dir->getPath().string());
+    EXPECT_EQ(DiskUnit::Type::Directory, dir->getType());
+    EXPECT_FALSE(dir->isExistOnDisk());
 }

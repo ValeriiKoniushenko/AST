@@ -74,10 +74,10 @@ namespace Ast
 
         [[nodiscard]] bool isValid() const;
 
-        virtual void Clear();
+        virtual void clear();
 
         void _setType(Type type) noexcept { _type = type; }
-        void _setName(const std::filesystem::path& name) { _path = name; }
+        void _setPath(const std::filesystem::path& name) { _path = name; }
         void _setType(uint64_t time) noexcept { _lastWriteTime = time; }
         void _trySetParent(const Ptr& parent);
         void _forceSetParent(const Ptr& parent);
@@ -88,7 +88,7 @@ namespace Ast
     protected:
         uint64_t _lastWriteTime = 0;
         std::filesystem::path _path;
-        std::filesystem::perms _permissions;
+        std::filesystem::perms _permissions = std::filesystem::perms::none;
         Type _type = Type::None;
 
         Ptr _parent = nullptr;
@@ -99,11 +99,12 @@ namespace Ast
     public:
         AST_CLASS(DirectoryUnit)
 
+        static Ptr Create() { return { new DirectoryUnit() }; }
         static Ptr CreateFromPath(const std::filesystem::path& path);
 
-        void Clear() override;
+        void clear() override;
 
-        void addChild(const DiskUnit::Ptr& child);
+        void _addChild(const DiskUnit::Ptr& child);
         [[nodiscard]] bool existChild(const DiskUnit::Ptr& child) const;
         void removeChild(const DiskUnit::Ptr& child);
 

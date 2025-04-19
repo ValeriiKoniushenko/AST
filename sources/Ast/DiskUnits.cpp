@@ -103,15 +103,16 @@ namespace Ast
 
     bool DiskUnit::isValid() const
     {
-        return !_path.empty() && _type != DiskUnit::Type::None && _lastWriteTime != 0;
+        return !_path.empty() && _type != DiskUnit::Type::None;
     }
 
-    void DiskUnit::Clear()
+    void DiskUnit::clear()
     {
         _parent = nullptr;
         _path.clear();
         _lastWriteTime = 0;
         _type = DiskUnit::Type::None;
+        _permissions = std::filesystem::perms::none;
     }
 
     DirectoryUnit::Ptr DirectoryUnit::CreateFromPath(const std::filesystem::path& path)
@@ -143,15 +144,22 @@ namespace Ast
         return unit;
     }
 
-    void DirectoryUnit::Clear()
+    void DirectoryUnit::clear()
     {
-        DiskUnit::Clear();
+        DiskUnit::clear();
 
         _childs.clear();
     }
 
-    void DirectoryUnit::addChild(const DiskUnit::Ptr& child)
+    void DirectoryUnit::_addChild(const DiskUnit::Ptr& child)
     {
+        if (!child->isExistOnDisk())
+        {
+            Assert();
+            logger->error("Impossible to add child: {} - which not exists on the disk.", child->getPath().string());
+            return;
+        }
+
         _childs.insert(child);
     }
 
