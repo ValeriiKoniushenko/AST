@@ -39,13 +39,16 @@ TEST(ProjectTreeTest, SimpleActionsWithDiskUnit)
     EXPECT_EQ(projectDir.string(), unit->getPath().string());
     EXPECT_EQ(DiskUnit::Type::Directory, unit->getType());
     EXPECT_TRUE(unit->isWriteable());
-
+    EXPECT_TRUE(unit->isExistOnDisk());
 }
 
-TEST(ProjectTreeTest, SimpleActionsWithDiskUnit2)
+TEST(ProjectTreeTest, SimpleActionsWithFolder)
 {
-    auto unit = DiskUnit::CreateFromPath(projectDir);
+    auto unit = DirectoryUnit::CreateFromPath(projectDir);
 
     ASSERT_TRUE(unit);
-
+    EXPECT_EQ(projectDir.string(), unit->getPath().string());
+    EXPECT_EQ(DiskUnit::Type::Directory, unit->getType());
+    EXPECT_TRUE(unit->isWriteable());
+    EXPECT_TRUE(unit->isExistOnDisk());
 }

@@ -46,18 +46,8 @@ namespace Ast
         _parent = parent;
     }
 
-    DiskUnit::Ptr DiskUnit::CreateFromPath(const std::filesystem::path& path)
+    void DiskUnit::FillBaseInfo(DiskUnit* unit, const std::filesystem::path& path)
     {
-        if (path.empty() || !std::filesystem::exists(path))
-        {
-            Assert();
-            return nullptr;
-        }
-
-        auto unit = Ptr(new DiskUnit());
-
-        unit->_path = path;
-
         const auto status = std::filesystem::status(path);
 
         if (std::filesystem::is_directory(status))
@@ -77,8 +67,30 @@ namespace Ast
             logger->warn("Impossible to identify unit type(folder, file, etc) for this path: {}", path.generic_string());
         }
 
+        unit->_path = path;
         unit->_lastWriteTime = std::filesystem::last_write_time(path).time_since_epoch().count();
         unit->_permissions = status.permissions();
+    }
+
+    DiskUnit::Ptr DiskUnit::CreateFromPath(const std::filesystem::path& path)
+    {
+        if (path.empty() || !std::filesystem::exists(path))
+        {
+            logger->error("Impossible to find a disk unit by the next path: ", path.generic_string());
+            Assert();
+            return nullptr;
+        }
+
+        auto unit = Ptr(new DiskUnit());
+
+        FillBaseInfo(unit.get(), path);
+
+        if (!unit->isValid())
+        {
+            logger->error("Unit's component is invalid: {}", path.generic_string());
+            Assert();
+            return nullptr;
+        }
 
         return unit;
     }
@@ -88,4 +100,69 @@ namespace Ast
         using T = std::filesystem::perms;
         return (T::owner_read & _permissions) == T::owner_read && (T::owner_write & _permissions) == T::owner_write;
     }
+
+    bool DiskUnit::isValid() const
+    {
+        return !_path.empty() && _type != DiskUnit::Type::None && _lastWriteTime != 0;
+    }
+
+    void DiskUnit::Clear()
+    {
+        _parent = nullptr;
+        _path.clear();
+        _lastWriteTime = 0;
+        _type = DiskUnit::Type::None;
+    }
+
+    DirectoryUnit::Ptr DirectoryUnit::CreateFromPath(const std::filesystem::path& path)
+    {
+        if (path.empty() || !std::filesystem::exists(path))
+        {
+            logger->error("Impossible to find a disk unit by the next path: {}", path.generic_string());
+            Assert();
+            return nullptr;
+        }
+
+        auto unit = Ptr(new DirectoryUnit());
+
+        FillBaseInfo(unit.get(), path);
+        if (unit->_type != DiskUnit::Type::Directory)
+        {
+            logger->error("Attempt to read a disk unit as a directory is failed: {}", path.generic_string());
+            Assert();
+            return nullptr;
+        }
+
+        if (!unit->isValid())
+        {
+            logger->error("Unit's component is invalid: {}", path.generic_string());
+            Assert();
+            return nullptr;
+        }
+
+        return unit;
+    }
+
+    void DirectoryUnit::Clear()
+    {
+        DiskUnit::Clear();
+
+        _childs.clear();
+    }
+
+    void DirectoryUnit::addChild(const DiskUnit::Ptr& child)
+    {
+        _childs.insert(child);
+    }
+
+    bool DirectoryUnit::existChild(const DiskUnit::Ptr& child) const
+    {
+        return _childs.contains(child);
+    }
+
+    void DirectoryUnit::removeChild(const DiskUnit::Ptr& child)
+    {
+        _childs.erase(child);
+    }
+
 } // namespace Ast

@@ -59,6 +59,8 @@ namespace Ast
 
         [[nodiscard]] Type getType() const noexcept { return _type; }
 
+        [[nodiscard]] bool isExistOnDisk() const { return std::filesystem::exists(_path); }
+
         [[nodiscard]] const std::filesystem::path& getPath() const noexcept { return _path; }
 
         [[nodiscard]] uint64_t getLastWriteTime() const noexcept { return _lastWriteTime; }
@@ -70,11 +72,18 @@ namespace Ast
         [[nodiscard]] Ptr getParent() { return _parent; }
         [[nodiscard]] bool hasParent() const noexcept { return _parent != nullptr; }
 
+        [[nodiscard]] bool isValid() const;
+
+        virtual void Clear();
+
         void _setType(Type type) noexcept { _type = type; }
         void _setName(const std::filesystem::path& name) { _path = name; }
         void _setType(uint64_t time) noexcept { _lastWriteTime = time; }
         void _trySetParent(const Ptr& parent);
         void _forceSetParent(const Ptr& parent);
+
+    protected:
+        static void FillBaseInfo(DiskUnit* unit, const std::filesystem::path& path);
 
     protected:
         uint64_t _lastWriteTime = 0;
@@ -84,4 +93,22 @@ namespace Ast
 
         Ptr _parent = nullptr;
     };
+
+    class DirectoryUnit final : public DiskUnit
+    {
+    public:
+        AST_CLASS(DirectoryUnit)
+
+        static Ptr CreateFromPath(const std::filesystem::path& path);
+
+        void Clear() override;
+
+        void addChild(const DiskUnit::Ptr& child);
+        [[nodiscard]] bool existChild(const DiskUnit::Ptr& child) const;
+        void removeChild(const DiskUnit::Ptr& child);
+
+    protected:
+        std::unordered_set<DiskUnit::Ptr> _childs;
+    };
+
 } // namespace Ast
