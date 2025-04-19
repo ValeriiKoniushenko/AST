@@ -25,10 +25,14 @@
 namespace
 {
 
+    const std::filesystem::path projectDir = PATH_TO_TEST_PROJECT_1;
 
 } // namespace
 
 TEST(ProjectTreeTest, SimpleActionsWithDiskUnit)
 {
-    Ast::DiskUnit u;
+    auto unit = Ast::DiskUnit::CreateFromPath(projectDir);
+
+    ASSERT_TRUE(unit);
+    EXPECT_EQ("small_project", unit->getName());
 }

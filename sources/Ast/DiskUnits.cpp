@@ -46,12 +46,16 @@ namespace Ast
 
     DiskUnit::Ptr DiskUnit::CreateFromPath(const std::filesystem::path& path)
     {
-        if (!path.empty() || !std::filesystem::exists(path))
+        if (path.empty() || !std::filesystem::exists(path))
         {
             Assert();
             return nullptr;
         }
 
         auto unit = Ptr(new DiskUnit());
+
+        unit->_name = path.stem().generic_string();
+
+        return unit;
     }
 } // namespace Ast
