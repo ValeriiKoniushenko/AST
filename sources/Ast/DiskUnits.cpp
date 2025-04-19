@@ -56,8 +56,7 @@ namespace Ast
 
         auto unit = Ptr(new DiskUnit());
 
-        unit->_name = path.stem().generic_string();
-        unit->_name.shrink_to_fit();
+        unit->_path = path;
 
         const auto status = std::filesystem::status(path);
 

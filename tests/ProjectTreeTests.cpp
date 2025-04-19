@@ -36,7 +36,16 @@ TEST(ProjectTreeTest, SimpleActionsWithDiskUnit)
     auto unit = DiskUnit::CreateFromPath(projectDir);
 
     ASSERT_TRUE(unit);
-    EXPECT_EQ("small_project", unit->getName());
+    EXPECT_EQ(projectDir.string(), unit->getPath().string());
     EXPECT_EQ(DiskUnit::Type::Directory, unit->getType());
     EXPECT_TRUE(unit->isWriteable());
+
+}
+
+TEST(ProjectTreeTest, SimpleActionsWithDiskUnit2)
+{
+    auto unit = DiskUnit::CreateFromPath(projectDir);
+
+    ASSERT_TRUE(unit);
+
 }

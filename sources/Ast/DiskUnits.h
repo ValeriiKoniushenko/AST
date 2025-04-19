@@ -40,7 +40,7 @@ namespace Ast
 
         struct Hash
         {
-            [[nodiscard]] bool operator()(const DiskUnit::Ptr& unit) const { return unit->_name.makeHash(); }
+            [[nodiscard]] bool operator()(const DiskUnit::Ptr& unit) const { return std::hash<std::filesystem::path>()(unit->_path); }
         };
 
         enum class Type
@@ -59,7 +59,7 @@ namespace Ast
 
         [[nodiscard]] Type getType() const noexcept { return _type; }
 
-        [[nodiscard]] const String& getName() const noexcept { return _name; }
+        [[nodiscard]] const std::filesystem::path& getPath() const noexcept { return _path; }
 
         [[nodiscard]] uint64_t getLastWriteTime() const noexcept { return _lastWriteTime; }
 
@@ -71,14 +71,14 @@ namespace Ast
         [[nodiscard]] bool hasParent() const noexcept { return _parent != nullptr; }
 
         void _setType(Type type) noexcept { _type = type; }
-        void _setName(const String& name) { _name = name; _name.shrink_to_fit(); }
+        void _setName(const std::filesystem::path& name) { _path = name; }
         void _setType(uint64_t time) noexcept { _lastWriteTime = time; }
         void _trySetParent(const Ptr& parent);
         void _forceSetParent(const Ptr& parent);
 
     protected:
         uint64_t _lastWriteTime = 0;
-        String _name;
+        std::filesystem::path _path;
         std::filesystem::perms _permissions;
         Type _type = Type::None;
 
