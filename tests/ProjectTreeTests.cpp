@@ -1,22 +1,24 @@
-// Copyright (c) 2024 Valerii Koniushenko
+//  MIT License
 //
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
+//  Copyright (c) 2019-2025 Valerii Koniushenko
 //
-// The above copyright notice and this permission notice shall be included in all
-// copies or substantial portions of the Software.
+//  Permission is hereby granted, free of charge, to any person obtaining a copy
+//  of this software and associated documentation files (the "Software"), to deal
+//  in the Software without restriction, including without limitation the rights
+//  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+//  copies of the Software, and to permit persons to whom the Software is
+//  furnished to do so, subject to the following conditions:
 //
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-// SOFTWARE.
+//  The above copyright notice and this permission notice shall be included in all
+//  copies or substantial portions of the Software.
+//
+//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+//  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+//  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+//  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+//  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+//  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+//  SOFTWARE.
 
 #include "Ast/DiskUnits.h"
 
@@ -54,12 +56,65 @@ TEST(ProjectTreeTest, SimpleActionsWithFolder)
     EXPECT_TRUE(unit->isExistOnDisk());
 
     auto dir = DirectoryUnit::Create();
-    dir->_setType(DirectoryUnit::Type::Directory);
-    dir->_setPath("hello/world");
-
     ASSERT_TRUE(dir);
+
+    dir->setType(DirectoryUnit::Type::Directory);
+    ASSERT_TRUE(dir->setName("someNewFolder"));
     ASSERT_TRUE(dir->isValid());
-    EXPECT_EQ("hello/world", dir->getPath().string());
+
+    EXPECT_EQ("someNewFolder", dir->getPath().string());
+    EXPECT_EQ("someNewFolder", dir->getName());
     EXPECT_EQ(DiskUnit::Type::Directory, dir->getType());
     EXPECT_FALSE(dir->isExistOnDisk());
+}
+
+TEST(ProjectTreeTest, NameValidator)
+{
+    EXPECT_TRUE(DiskUnit::NameValidator::IsValid("hello"));
+    EXPECT_TRUE(DiskUnit::NameValidator::IsValid("hello world"));
+    EXPECT_TRUE(DiskUnit::NameValidator::IsValid("hello world."));
+    EXPECT_TRUE(DiskUnit::NameValidator::IsValid(".config"));
+    EXPECT_TRUE(DiskUnit::NameValidator::IsValid(".512config14123"));
+    EXPECT_TRUE(DiskUnit::NameValidator::IsValid("123.512config14123"));
+    EXPECT_TRUE(DiskUnit::NameValidator::IsValid("...--_--_--.512config14123"));
+    EXPECT_FALSE(DiskUnit::NameValidator::IsValid("how are you?"));
+    EXPECT_FALSE(DiskUnit::NameValidator::IsValid("how are you123###"));
+}
+
+TEST(ProjectTreeTest, WorkingWithChildsInFolder)
+{
+    auto root = DirectoryUnit::CreateFromPath(projectDir);
+
+    ASSERT_TRUE(root);
+    ASSERT_TRUE(root->isValid());
+    EXPECT_TRUE(std::filesystem::path(root->getPath().c_str()).is_absolute());
+
+    auto dir = DirectoryUnit::Create();
+    ASSERT_TRUE(dir);
+    dir->setType(DirectoryUnit::Type::Directory);
+    ASSERT_TRUE(dir->setName("hello"));
+
+    root->addChild(dir, true);
+
+    auto dir2 = DirectoryUnit::Create();
+    ASSERT_TRUE(dir2);
+    dir2->setType(DirectoryUnit::Type::Directory);
+    ASSERT_TRUE(dir2->setName("world"));
+
+    dir->addChild(dir2, true);
+
+    EXPECT_EQ("world", dir2->getName());
+    EXPECT_EQ(projectDir / "hello" / "world", dir2->getPath());
+}
+
+TEST(ProjectTreeTest, InvalidPWD)
+{
+    auto dir1 = DirectoryUnit::CreateFromPath(projectDir);
+    auto dir2 = DirectoryUnit::CreateFromPath(projectDir);
+
+    dir1->addChild(dir2);
+
+    auto path = dir2->getPath();
+
+    EXPECT_EQ(dir1->getPath(), dir2->getPath());
 }

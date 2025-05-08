@@ -1,22 +1,24 @@
-// Copyright (c) 2024 Valerii Koniushenko
+//  MIT License
 //
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
+//  Copyright (c) 2019-2025 Valerii Koniushenko
 //
-// The above copyright notice and this permission notice shall be included in all
-// copies or substantial portions of the Software.
+//  Permission is hereby granted, free of charge, to any person obtaining a copy
+//  of this software and associated documentation files (the "Software"), to deal
+//  in the Software without restriction, including without limitation the rights
+//  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+//  copies of the Software, and to permit persons to whom the Software is
+//  furnished to do so, subject to the following conditions:
 //
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-// SOFTWARE.
+//  The above copyright notice and this permission notice shall be included in all
+//  copies or substantial portions of the Software.
+//
+//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+//  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+//  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+//  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+//  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+//  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+//  SOFTWARE.
 
 #include "DiskUnits.h"
 
@@ -24,7 +26,7 @@ namespace Ast
 {
     const char __BaseLogHeader_DiskUnit[] = "FileSystem";
 
-    void DiskUnit::_trySetParent(const Ptr& parent)
+    void DiskUnit::trySetParent(const Ptr& parent)
     {
         if (_parent)
         {
@@ -35,7 +37,7 @@ namespace Ast
         _parent = parent;
     }
 
-    void DiskUnit::_forceSetParent(const Ptr& parent)
+    void DiskUnit::forceSetParent(const Ptr& parent)
     {
         if (_parent)
         {
@@ -67,9 +69,19 @@ namespace Ast
             logger->warn("Impossible to identify unit type(folder, file, etc) for this path: {}", path.generic_string());
         }
 
-        unit->_path = path;
+        unit->_name = path.generic_string();
         unit->_lastWriteTime = std::filesystem::last_write_time(path).time_since_epoch().count();
         unit->_permissions = status.permissions();
+    }
+
+    bool DiskUnit::NameValidator::IsValid(const String& name)
+    {
+        return name.regexMatch(regex);
+    }
+
+    String DiskUnit::NameValidator::GetHint()
+    {
+        return "Available names for a disk unit should be matched with this regular expression: " + String(regex);
     }
 
     DiskUnit::Ptr DiskUnit::CreateFromPath(const std::filesystem::path& path)
@@ -95,6 +107,32 @@ namespace Ast
         return unit;
     }
 
+    std::filesystem::path DiskUnit::getPath() const
+    {
+        std::vector<std::string> units;
+        auto* i = this;
+
+        while (i)
+        {
+            if (i->_name.isEmpty())
+            {
+                logger->error("Can't return a path to a disk unit. Because name of the unit is not defined.");
+                return {};
+            }
+            units.emplace_back(i->_name.toStdString());
+            i = i->_parent.get();
+        }
+
+        std::reverse(units.begin(), units.end());
+        std::filesystem::path ret;
+        for (const auto& u : units)
+        {
+            ret /= u;
+        }
+
+        return ret;
+    }
+
     bool DiskUnit::isWriteable() const noexcept
     {
         using T = std::filesystem::perms;
@@ -103,13 +141,26 @@ namespace Ast
 
     bool DiskUnit::isValid() const
     {
-        return !_path.empty() && _type != DiskUnit::Type::None;
+        return !_name.isEmpty() && _type != DiskUnit::Type::None;
+    }
+
+    bool DiskUnit::setName(const String& name)
+    {
+        if (NameValidator::IsValid(name))
+        {
+            setNameUnsafe(name);
+            return true;
+        }
+
+        logger->error((("Invalid name for file '{}'. "_f << name.c_str()) + NameValidator::GetHint()).toStdStringView());
+
+        return false;
     }
 
     void DiskUnit::clear()
     {
         _parent = nullptr;
-        _path.clear();
+        _name.clear();
         _lastWriteTime = 0;
         _type = DiskUnit::Type::None;
         _permissions = std::filesystem::perms::none;
@@ -151,9 +202,9 @@ namespace Ast
         _childs.clear();
     }
 
-    void DirectoryUnit::_addChild(const DiskUnit::Ptr& child)
+    void DirectoryUnit::addChild(const DiskUnit::Ptr& child, bool isIgnoreDiskCheck /* = false*/)
     {
-        if (!child->isExistOnDisk())
+        if (!isIgnoreDiskCheck && !child->isExistOnDisk())
         {
             Assert();
             logger->error("Impossible to add child: {} - which not exists on the disk.", child->getPath().string());
@@ -161,6 +212,7 @@ namespace Ast
         }
 
         _childs.insert(child);
+        child->forceSetParent(this);
     }
 
     bool DirectoryUnit::existChild(const DiskUnit::Ptr& child) const

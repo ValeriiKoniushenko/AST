@@ -1,22 +1,24 @@
-// Copyright (c) 2024 Valerii Koniushenko
+//  MIT License
 //
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
+//  Copyright (c) 2019-2025 Valerii Koniushenko
 //
-// The above copyright notice and this permission notice shall be included in all
-// copies or substantial portions of the Software.
+//  Permission is hereby granted, free of charge, to any person obtaining a copy
+//  of this software and associated documentation files (the "Software"), to deal
+//  in the Software without restriction, including without limitation the rights
+//  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+//  copies of the Software, and to permit persons to whom the Software is
+//  furnished to do so, subject to the following conditions:
 //
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-// SOFTWARE.
+//  The above copyright notice and this permission notice shall be included in all
+//  copies or substantial portions of the Software.
+//
+//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+//  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+//  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+//  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+//  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+//  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+//  SOFTWARE.
 
 #pragma once
 
@@ -38,12 +40,19 @@ namespace Ast
     public:
         AST_CLASS(DiskUnit)
 
-        struct Hash
+        struct NameValidator
         {
-            [[nodiscard]] bool operator()(const DiskUnit::Ptr& unit) const { return std::hash<std::filesystem::path>()(unit->_path); }
+            inline static const char* regex = "^[0-9A-Za-z_\\-\\. ]+$";
+            static bool IsValid(const String& name);
+            static String GetHint();
         };
 
-        enum class Type
+        struct Hash
+        {
+            [[nodiscard]] bool operator()(const DiskUnit::Ptr& unit) const { return unit->_name.makeHash(); }
+        };
+
+        enum class Type : char
         {
             None,
             File,
@@ -59,9 +68,9 @@ namespace Ast
 
         [[nodiscard]] Type getType() const noexcept { return _type; }
 
-        [[nodiscard]] bool isExistOnDisk() const { return std::filesystem::exists(_path); }
+        [[nodiscard]] bool isExistOnDisk() const { return std::filesystem::exists(getPath()); }
 
-        [[nodiscard]] const std::filesystem::path& getPath() const noexcept { return _path; }
+        [[nodiscard]] std::filesystem::path getPath() const;
 
         [[nodiscard]] uint64_t getLastWriteTime() const noexcept { return _lastWriteTime; }
 
@@ -74,20 +83,23 @@ namespace Ast
 
         [[nodiscard]] bool isValid() const;
 
+        [[nodiscard]] bool setName(const String& name);
+        void setNameUnsafe(const String& name) { _name = name; }
+        [[nodiscard]] String getName() const { return _name; }
+
         virtual void clear();
 
-        void _setType(Type type) noexcept { _type = type; }
-        void _setPath(const std::filesystem::path& name) { _path = name; }
-        void _setType(uint64_t time) noexcept { _lastWriteTime = time; }
-        void _trySetParent(const Ptr& parent);
-        void _forceSetParent(const Ptr& parent);
+        void setType(Type type) noexcept { _type = type; }
+        void setLastWriteTime(uint64_t time) noexcept { _lastWriteTime = time; }
+        void trySetParent(const Ptr& parent);
+        void forceSetParent(const Ptr& parent);
 
     protected:
         static void FillBaseInfo(DiskUnit* unit, const std::filesystem::path& path);
 
     protected:
         uint64_t _lastWriteTime = 0;
-        std::filesystem::path _path;
+        String _name;
         std::filesystem::perms _permissions = std::filesystem::perms::none;
         Type _type = Type::None;
 
@@ -104,7 +116,7 @@ namespace Ast
 
         void clear() override;
 
-        void _addChild(const DiskUnit::Ptr& child);
+        void addChild(const DiskUnit::Ptr& child, bool isIgnoreDiskCheck = false);
         [[nodiscard]] bool existChild(const DiskUnit::Ptr& child) const;
         void removeChild(const DiskUnit::Ptr& child);
 
