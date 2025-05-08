@@ -25,11 +25,74 @@
 namespace Ast
 {
 
-    FSTree FSTree::CreateTree(const std::filesystem::path& path, std::function<bool(const std::filesystem::path&)> pred)
+    FSTree::Ptr FSTree::CreateTree(const std::filesystem::path& path, std::function<bool(const std::filesystem::path&)> pred)
     {
-        FSTree tree;
-        
+        auto tree = Ptr(new FSTree);
+
+        tree->_root = DirectoryUnit::CreateFromPath(path);
+        if (!tree->_root)
+        {
+            Assert();
+            logger->error("Impossible to create a FSTree");
+            return nullptr;
+        }
+
+        if (!tree->_root->isValid())
+        {
+            Assert();
+            logger->error("Impossible to create a FSTree: invalid root folder");
+            return nullptr;
+        }
+
+        std::stack<DirectoryUnit*> units;
+        units.push(dynamic_cast<DirectoryUnit*>(tree->_root.get()));
+
+        std::function<void(const std::filesystem::directory_entry&)> readDiskUnit =
+            [&units, &readDiskUnit](const std::filesystem::directory_entry& entry)
+        {
+            auto* top = units.top();
+            if (!top)
+            {
+                Assert();
+                return;
+            }
+
+            if (entry.is_directory())
+            {
+                auto dir = DirectoryUnit::CreateFromPath(entry.path());
+                if (dir->isValid())
+                {
+                    top->addChild(dir);
+                    units.push(dir.get());
+                    dir->iterateOverPhysicalContent(readDiskUnit);
+                    units.pop();
+                }
+            }
+            else
+            {
+                if (!entry.is_regular_file())
+                {
+                    logger->warn(
+                        "Trying to read a physical file tree. Was met NON-file(and non-dir) entry. It will be considered as regular file. Not supporting other types. Path: " +
+                        entry.path().string());
+                }
+
+                auto file = FileUnit::CreateFromPath(entry.path());
+                if (file->isValid())
+                {
+                    top->addChild(file);
+                }
+            }
+        };
+
+        units.top()->iterateOverPhysicalContent(readDiskUnit);
+
         return tree;
+    }
+
+    void FSTree::clear()
+    {
+        _root = nullptr;
     }
 
 } // namespace Ast

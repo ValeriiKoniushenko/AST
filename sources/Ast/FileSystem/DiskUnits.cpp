@@ -219,6 +219,11 @@ namespace Ast
 
     void DirectoryUnit::addChild(const DiskUnit::Ptr& child, bool isIgnoreDiskCheck /* = false*/)
     {
+        if (!child)
+        {
+            return;
+        }
+        
         if (!isIgnoreDiskCheck && !child->isExistOnDisk())
         {
             Assert();
