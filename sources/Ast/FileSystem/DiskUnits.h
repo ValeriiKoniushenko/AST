@@ -22,10 +22,10 @@
 
 #pragma once
 
-#include "BaseLog.h"
+#include "../BaseLog.h"
+#include "../Readers/ContentStream.h"
+#include "../Tree.h"
 #include "Core/Enum.h"
-#include "Readers/ContentStream.h"
-#include "Tree.h"
 #include "Utils/CopyableAndMoveableBehaviour.h"
 
 #include <set>
