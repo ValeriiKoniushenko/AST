@@ -181,6 +181,18 @@ namespace Ast
         _permissions = std::filesystem::perms::none;
     }
 
+    int DiskUnit::distanceToRoot() const
+    {
+        int out = 0;
+        const auto* i = this;
+        while ((i = i->_parent.get()))
+        {
+            ++out;
+        }
+
+        return out;
+    }
+
     DirectoryUnit::Ptr DirectoryUnit::CreateFromPath(const std::filesystem::path& path)
     {
         if (path.empty() || !std::filesystem::exists(path))

@@ -95,4 +95,53 @@ namespace Ast
         _root = nullptr;
     }
 
+    void FSTree::prettyPrint(std::function<String(const DiskUnit*)>&& prefixInfo)
+    {
+        int prevDistance = -1;
+        char prefix[4] = "   ";
+
+        forEach(
+            [&prevDistance, &prefixInfo, &prefix](const DiskUnit* unit)
+            {
+                static const char* defaultSplitter = "─── ";
+                static const char* defaultSpace = "    ";
+                const auto distance = unit->distanceToRoot();
+
+                if (prefixInfo)
+                {
+                    auto customPrefix = prefixInfo(unit);
+                    customPrefix.resize(sizeof(prefix));
+                    memcpy_s(prefix, sizeof(prefix), customPrefix.c_str(), sizeof(prefix));
+                }
+
+                for (int i = 0; i < sizeof(prefix) - 1; ++i)
+                {
+                    if (prefix[i] < 32)
+                    {
+                        std::cout << " ";
+                    }
+                    else
+                    {
+                        std::cout << prefix[i];
+                    }
+                }
+                std::cout << " ";
+
+                if (prevDistance != -1)
+                {
+                    for (int i = 0; i < distance - 1; ++i)
+                    {
+                        std::cout << "│" << defaultSpace;
+                    }
+
+                    std::cout << "├" << defaultSplitter;
+                }
+
+                std::cout << unit->getName();
+                prevDistance = distance;
+
+                std::cout << std::endl;
+            });
+    }
+
 } // namespace Ast

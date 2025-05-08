@@ -100,6 +100,8 @@ namespace Ast
         [[nodiscard]] bool isSubPath(const DiskUnit* unit);
         [[nodiscard]] std::filesystem::path getRelativePathFrom(const DiskUnit* unit) const;
 
+        [[nodiscard]] int distanceToRoot() const;
+
     protected:
         static void FillBaseInfo(DiskUnit* unit, const std::filesystem::path& path);
 
@@ -128,6 +130,9 @@ namespace Ast
         void addChild(const DiskUnit::Ptr& child, bool isIgnoreDiskCheck = false);
         [[nodiscard]] bool existChild(const DiskUnit::Ptr& child) const;
         void removeChild(const DiskUnit::Ptr& child);
+
+        [[nodiscard]] std::unordered_set<DiskUnit::Ptr>& getChilds() { return _childs; }
+        [[nodiscard]] const std::unordered_set<DiskUnit::Ptr>& getChilds() const { return _childs; }
 
         /**
          * @brief Can take a functions of next types:
@@ -163,6 +168,12 @@ namespace Ast
     class FileUnit final : public DiskUnit
     {
     public:
+        struct DataContainer : public boost::intrusive_ref_counter<DataContainer>, public Utils::CopyableAndMoveable
+        {
+            AST_CLASS(DataContainer)
+        };
+
+    public:
         AST_CLASS(FileUnit)
 
         FileUnit() { _type = Type::File; }
@@ -174,6 +185,12 @@ namespace Ast
         void clear() override;
 
         [[nodiscard]] String getFileContent() const;
+
+        [[nodiscard]] DataContainer::Ptr& getData() { return _data; }
+        [[nodiscard]] const DataContainer::Ptr& getData() const { return _data; }
+
+    protected:
+        DataContainer::Ptr _data{};
     };
 
 } // namespace Ast

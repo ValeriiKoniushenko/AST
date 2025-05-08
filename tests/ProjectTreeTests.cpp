@@ -159,4 +159,7 @@ TEST(ProjectTreeTest, IterateOverDirectory)
 TEST(ProjectTreeTest, FSTreeBasedOnSmallProject)
 {
     auto tree = FSTree::CreateTree(projectDir);
+
+    std::cout << "\n\nPretty print: " << std::endl;
+    tree->prettyPrint();
 }

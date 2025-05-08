@@ -65,6 +65,8 @@ namespace Ast
             ForEachImpl<false, FuncT>(_root.get(), std::forward<decltype(callback)>(callback));
         }
 
+        void prettyPrint(std::function<String(const DiskUnit*)>&& additionalInfo = nullptr);
+
     private:
         DiskUnit::Ptr _root = nullptr;
 
@@ -73,28 +75,28 @@ namespace Ast
         template<bool IsConst, class FuncT>
         static bool ForEachImpl(DiskUnit::AdaptiveRawPtr<IsConst> base, FuncT&& callback)
         {
-            if (base->IsFile())
+            if constexpr (std::is_void_v<decltype(callback(base))>)
             {
-                if constexpr (std::is_void_v<decltype(callback(base))>)
+                std::invoke(std::forward<decltype(callback)>(callback), base);
+            }
+            else
+            {
+                if (!std::invoke(std::forward<decltype(callback)>(callback), base))
                 {
-                    std::invoke(std::forward<decltype(callback)>(callback), base);
-                }
-                else
-                {
-                    if (!std::invoke(std::forward<decltype(callback)>(callback), base))
-                    {
-                        return false;
-                    }
+                    return false;
                 }
             }
 
-            for (auto& child : base->_childs)
+            if (auto* dir = dynamic_cast<DirectoryUnit::AdaptiveRawPtr<IsConst>>(base))
             {
-                if (child)
+                for (auto& child : dir->getChilds())
                 {
-                    if (!ForEachImpl<IsConst>(child.get(), std::forward<decltype(callback)>(callback)))
+                    if (child)
                     {
-                        return false;
+                        if (!ForEachImpl<IsConst>(child.get(), std::forward<decltype(callback)>(callback)))
+                        {
+                            return false;
+                        }
                     }
                 }
             }
