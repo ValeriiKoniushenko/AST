@@ -129,9 +129,35 @@ namespace Ast
         [[nodiscard]] bool existChild(const DiskUnit::Ptr& child) const;
         void removeChild(const DiskUnit::Ptr& child);
 
-    protected:
+        /**
+         * @brief Can take a functions of next types:
+         * bool(const std::filesystem::directory_entry&) - this function will work until it gets 'false' in return
+         * void(const std::filesystem::directory_entry&) - will iterate without stopping through all a tree
+         */
+        template<class FuncT>
+        void iterateOverPhysicalContent(FuncT&& callback) const
+        {
+            const auto thisPath = getPath();
+            for (const auto& dirEntry : std::filesystem::directory_iterator(thisPath))
+            {
+                if constexpr (std::is_void_v<decltype(callback(dirEntry))>)
+                {
+                    std::invoke(std::forward<decltype(callback)>(callback), dirEntry);
+                }
+                else
+                {
+                    if (!std::invoke(std::forward<decltype(callback)>(callback), dirEntry))
+                    {
+                        return;
+                    }
+                }
+            }
+        }
+
     protected:
         std::unordered_set<DiskUnit::Ptr> _childs;
+
+    protected:
     };
 
     class FileUnit final : public DiskUnit

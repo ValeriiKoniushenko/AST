@@ -20,7 +20,7 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
-#include "Ast/FileSystem/DiskUnits.h"
+#include "Ast/FileSystem/FSTree.h"
 
 #include <gtest/gtest.h>
 
@@ -133,4 +133,30 @@ TEST(ProjectTreeTest, WorkingWithFiles)
     auto fileContent = file->getFileContent();
     EXPECT_FALSE(fileContent.isEmpty());
     EXPECT_GT(fileContent.size(), 100);
+}
+
+TEST(ProjectTreeTest, IterateOverDirectory)
+{
+    auto dir1 = DirectoryUnit::CreateFromPath(projectDir);
+
+    std::set<std::filesystem::path> set;
+
+    dir1->iterateOverPhysicalContent(
+        [&set](const std::filesystem::directory_entry& entry)
+        {
+            if (entry.exists())
+            {
+                set.insert(entry.path());
+            }
+        });
+
+    ASSERT_EQ(3, set.size());
+    EXPECT_TRUE(set.contains(projectDir / "excludedDir"));
+    EXPECT_TRUE(set.contains(projectDir / "sources"));
+    EXPECT_TRUE(set.contains(projectDir / ".gitignore"));
+}
+
+TEST(ProjectTreeTest, FSTreeBasedOnSmallProject)
+{
+    auto tree = FSTree::CreateTree(projectDir);
 }
