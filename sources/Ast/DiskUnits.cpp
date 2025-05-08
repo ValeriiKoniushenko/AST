@@ -22,6 +22,8 @@
 
 #include "DiskUnits.h"
 
+#include "../../dependencies/Utils/sources/Utils/Functions.h"
+
 namespace Ast
 {
     const char __BaseLogHeader_DiskUnit[] = "FileSystem";
@@ -259,4 +261,46 @@ namespace Ast
         _childs.erase(child);
     }
 
+    FileUnit::Ptr FileUnit::CreateFromPath(const std::filesystem::path& path)
+    {
+        if (path.empty() || !std::filesystem::exists(path))
+        {
+            logger->error("Impossible to find a disk unit by the next path: {}", path.generic_string());
+            Assert();
+            return nullptr;
+        }
+
+        auto unit = Ptr(new FileUnit());
+
+        FillBaseInfo(unit.get(), path);
+        if (unit->_type != DiskUnit::Type::File)
+        {
+            logger->error("Attempt to read a disk unit as a file is failed: {}", path.generic_string());
+            Assert();
+            return nullptr;
+        }
+
+        if (!unit->isValid())
+        {
+            logger->error("Unit's component is invalid: {}", path.generic_string());
+            Assert();
+            return nullptr;
+        }
+
+        return unit;
+    }
+
+    void FileUnit::clear()
+    {
+        DiskUnit::clear();
+    }
+
+    String FileUnit::getFileContent() const
+    {
+        if (isExistOnDisk())
+        {
+            return Utils::GetTextFileContentAs<String>(getPath());
+        }
+        return {};
+    }
 } // namespace Ast

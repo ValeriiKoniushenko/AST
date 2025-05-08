@@ -119,3 +119,18 @@ TEST(ProjectTreeTest, InvalidPWD)
     EXPECT_EQ(projectDir / "sources", dir2->getPath());
     EXPECT_EQ("sources", dir2->getName());
 }
+
+TEST(ProjectTreeTest, WorkingWithFiles)
+{
+    auto file = FileUnit::CreateFromPath(projectDir / "sources" / "CMakeLists.txt");
+    ASSERT_TRUE(file);
+
+    ASSERT_TRUE(file->isValid());
+    ASSERT_TRUE(file->hasAbsolutePath());
+    EXPECT_NE(0, file->getLastWriteTime());
+    EXPECT_EQ(projectDir / "sources" / "CMakeLists.txt", file->getPath());
+
+    auto fileContent = file->getFileContent();
+    EXPECT_FALSE(fileContent.isEmpty());
+    EXPECT_GT(fileContent.size(), 100);
+}

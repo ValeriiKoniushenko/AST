@@ -117,6 +117,9 @@ namespace Ast
     public:
         AST_CLASS(DirectoryUnit)
 
+        DirectoryUnit() { _type = Type::Directory; }
+        ~DirectoryUnit() override = default;
+
         static Ptr Create() { return { new DirectoryUnit() }; }
         static Ptr CreateFromPath(const std::filesystem::path& path);
 
@@ -127,6 +130,7 @@ namespace Ast
         void removeChild(const DiskUnit::Ptr& child);
 
     protected:
+    protected:
         std::unordered_set<DiskUnit::Ptr> _childs;
     };
 
@@ -135,10 +139,15 @@ namespace Ast
     public:
         AST_CLASS(FileUnit)
 
+        FileUnit() { _type = Type::File; }
+        ~FileUnit() override = default;
+
         static Ptr Create() { return { new FileUnit() }; }
         static Ptr CreateFromPath(const std::filesystem::path& path);
 
         void clear() override;
+
+        [[nodiscard]] String getFileContent() const;
     };
 
 } // namespace Ast
