@@ -48,6 +48,19 @@ namespace Ast
         _parent = parent;
     }
 
+    bool DiskUnit::isSubPath(const DiskUnit* unit)
+    {
+        const auto&& base = getPath();
+        const auto&& path = unit->getPath();
+
+        return std::mismatch(path.begin(), path.end(), base.begin(), base.end()).second == base.end();
+    }
+
+    std::filesystem::path DiskUnit::getRelativePathFrom(const DiskUnit* unit) const
+    {
+        return std::filesystem::relative(unit->getPath(), getPath());
+    }
+
     void DiskUnit::FillBaseInfo(DiskUnit* unit, const std::filesystem::path& path)
     {
         const auto status = std::filesystem::status(path);
@@ -209,6 +222,27 @@ namespace Ast
             Assert();
             logger->error("Impossible to add child: {} - which not exists on the disk.", child->getPath().string());
             return;
+        }
+
+        if (child->hasAbsolutePath())
+        {
+            if (isSubPath(child.get()))
+            {
+                const auto p = getRelativePathFrom(child.get());
+                if (p.empty())
+                {
+                    Assert();
+                    logger->error(("Invalid path of the child: " + child->getName()).toStdStringView());
+                    return;
+                }
+
+                const auto newName = String(p.generic_string());
+                if (!child->setName(newName))
+                {
+                    logger->error(("Can't set name for the child: " + newName).toStdStringView());
+                    return;
+                }
+            }
         }
 
         _childs.insert(child);

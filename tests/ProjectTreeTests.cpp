@@ -110,11 +110,12 @@ TEST(ProjectTreeTest, WorkingWithChildsInFolder)
 TEST(ProjectTreeTest, InvalidPWD)
 {
     auto dir1 = DirectoryUnit::CreateFromPath(projectDir);
-    auto dir2 = DirectoryUnit::CreateFromPath(projectDir);
+    auto dir2 = DirectoryUnit::CreateFromPath(projectDir / "sources");
 
     dir1->addChild(dir2);
 
     auto path = dir2->getPath();
 
-    EXPECT_EQ(dir1->getPath(), dir2->getPath());
+    EXPECT_EQ(projectDir / "sources", dir2->getPath());
+    EXPECT_EQ("sources", dir2->getName());
 }

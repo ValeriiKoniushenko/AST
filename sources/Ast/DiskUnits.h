@@ -94,6 +94,12 @@ namespace Ast
         void trySetParent(const Ptr& parent);
         void forceSetParent(const Ptr& parent);
 
+        [[nodiscard]] bool hasAbsolutePath() const { return std::filesystem::path(_name.toStdString()).is_absolute(); }
+        [[nodiscard]] bool hasRelativePath() const { return std::filesystem::path(_name.toStdString()).is_relative(); }
+
+        [[nodiscard]] bool isSubPath(const DiskUnit* unit);
+        [[nodiscard]] std::filesystem::path getRelativePathFrom(const DiskUnit* unit) const;
+
     protected:
         static void FillBaseInfo(DiskUnit* unit, const std::filesystem::path& path);
 
@@ -122,6 +128,17 @@ namespace Ast
 
     protected:
         std::unordered_set<DiskUnit::Ptr> _childs;
+    };
+
+    class FileUnit final : public DiskUnit
+    {
+    public:
+        AST_CLASS(FileUnit)
+
+        static Ptr Create() { return { new FileUnit() }; }
+        static Ptr CreateFromPath(const std::filesystem::path& path);
+
+        void clear() override;
     };
 
 } // namespace Ast
