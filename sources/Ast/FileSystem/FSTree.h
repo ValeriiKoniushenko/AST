@@ -24,6 +24,8 @@
 
 #include "DiskUnits.h"
 
+#include <utility>
+
 namespace Ast
 {
 
@@ -32,12 +34,19 @@ namespace Ast
     public:
         AST_CLASS(FSTree)
 
+        struct PrettyInfo
+        {
+            bool ignore = false; // if 'true' - will skip print of specific line
+            char prefix[4]{};
+            char suffix[4]{};
+        };
+
     public:
         FSTree() = default;
         ~FSTree() override = default;
 
-        explicit FSTree(const DiskUnit::Ptr& root)
-            : _root{ root }
+        explicit FSTree(DiskUnit::Ptr root)
+            : _root{ std::move(root) }
         {
         }
 
@@ -65,7 +74,10 @@ namespace Ast
             ForEachImpl<false, FuncT>(_root.get(), std::forward<decltype(callback)>(callback));
         }
 
-        void prettyPrint(std::function<String(const DiskUnit*)>&& additionalInfo = nullptr);
+        [[nodiscard]] DiskUnit::Ptr getRoot() { return _root; }
+        [[nodiscard]] DiskUnit::CPtr getRoot() const { return _root; }
+
+        void prettyPrint(std::function<PrettyInfo(const DiskUnit*)>&& pred = nullptr);
 
     private:
         DiskUnit::Ptr _root = nullptr;

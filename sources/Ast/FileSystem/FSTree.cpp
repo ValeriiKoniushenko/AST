@@ -95,36 +95,33 @@ namespace Ast
         _root = nullptr;
     }
 
-    void FSTree::prettyPrint(std::function<String(const DiskUnit*)>&& prefixInfo)
+    void FSTree::prettyPrint(std::function<PrettyInfo(const DiskUnit*)>&& pred /* = nullptr*/)
     {
         int prevDistance = -1;
-        char prefix[4] = "   ";
 
         forEach(
-            [&prevDistance, &prefixInfo, &prefix](const DiskUnit* unit)
+            [&](const DiskUnit* unit)
             {
+                PrettyInfo info;
+                if (pred)
+                {
+                    info = pred(unit);
+                }
+
+                if (info.ignore)
+                {
+                    return;
+                }
+
                 static const char* defaultSplitter = "─── ";
                 static const char* defaultSpace = "    ";
                 const auto distance = unit->distanceToRoot();
 
-                if (prefixInfo)
+                for (int i = 0; i < sizeof(info.prefix) - 1; ++i)
                 {
-                    auto customPrefix = prefixInfo(unit);
-                    customPrefix.resize(sizeof(prefix));
-                    memcpy_s(prefix, sizeof(prefix), customPrefix.c_str(), sizeof(prefix));
+                    std::cout << (info.prefix[i] < 32 ? ' ' : info.prefix[i]);
                 }
 
-                for (int i = 0; i < sizeof(prefix) - 1; ++i)
-                {
-                    if (prefix[i] < 32)
-                    {
-                        std::cout << " ";
-                    }
-                    else
-                    {
-                        std::cout << prefix[i];
-                    }
-                }
                 std::cout << " ";
 
                 if (prevDistance != -1)
@@ -138,6 +135,13 @@ namespace Ast
                 }
 
                 std::cout << unit->getName();
+
+                std::cout << "  ";
+                for (int i = 0; i < sizeof(info.suffix) - 1; ++i)
+                {
+                    std::cout << (info.suffix[i] < 32 ? ' ' : info.suffix[i]);
+                }
+
                 prevDistance = distance;
 
                 std::cout << std::endl;

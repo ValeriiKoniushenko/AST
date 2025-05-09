@@ -108,7 +108,7 @@ namespace Ast
             return nullptr;
         }
 
-        auto unit = Ptr(new DiskUnit());
+        auto unit = Ptr(new DiskUnit(Type::None));
 
         FillBaseInfo(unit.get(), path);
 
@@ -229,18 +229,18 @@ namespace Ast
         _childs.clear();
     }
 
-    void DirectoryUnit::addChild(const DiskUnit::Ptr& child, bool isIgnoreDiskCheck /* = false*/)
+    bool DirectoryUnit::addChild(const DiskUnit::Ptr& child, bool isIgnoreDiskCheck /* = true*/)
     {
         if (!child)
         {
-            return;
+            return false;
         }
         
         if (!isIgnoreDiskCheck && !child->isExistOnDisk())
         {
             Assert();
             logger->error("Impossible to add child: {} - which not exists on the disk.", child->getPath().string());
-            return;
+            return false;
         }
 
         if (child->hasAbsolutePath())
@@ -252,20 +252,22 @@ namespace Ast
                 {
                     Assert();
                     logger->error(("Invalid path of the child: " + child->getName()).toStdStringView());
-                    return;
+                    return false;
                 }
 
                 const auto newName = String(p.generic_string());
                 if (!child->setName(newName))
                 {
                     logger->error(("Can't set name for the child: " + newName).toStdStringView());
-                    return;
+                    return false;
                 }
             }
         }
 
         _childs.insert(child);
         child->forceSetParent(this);
+
+        return true;
     }
 
     bool DirectoryUnit::existChild(const DiskUnit::Ptr& child) const

@@ -160,6 +160,21 @@ TEST(ProjectTreeTest, FSTreeBasedOnSmallProject)
 {
     auto tree = FSTree::CreateTree(projectDir);
 
+    auto root = boost::dynamic_pointer_cast<DirectoryUnit>(tree->getRoot());
+    ASSERT_TRUE(root);
+
+    auto generatedDir = root->addChildAndGetBack(DirectoryUnit::Create("generated"));
+    generatedDir->addChild(FileUnit::Create("Reflect.h"));
+
     std::cout << "\n\nPretty print: " << std::endl;
-    tree->prettyPrint();
+    tree->prettyPrint(
+        [](const DiskUnit* unit) -> FSTree::PrettyInfo
+        {
+            if (unit->isExistOnDisk())
+            {
+                return { true };
+            }
+
+            return { false, "N" };
+        });
 }

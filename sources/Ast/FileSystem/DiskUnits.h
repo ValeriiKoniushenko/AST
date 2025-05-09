@@ -61,7 +61,14 @@ namespace Ast
         };
 
     public:
-        DiskUnit() = default;
+        explicit DiskUnit(Type type, const String& name = nullptr)
+            : _type{ type }
+        {
+            if (!name.isEmpty())
+            {
+                (void)setName(name);
+            }
+        };
         ~DiskUnit() override = default;
 
         static Ptr CreateFromPath(const std::filesystem::path& path);
@@ -119,15 +126,32 @@ namespace Ast
     public:
         AST_CLASS(DirectoryUnit)
 
-        DirectoryUnit() { _type = Type::Directory; }
+        explicit DirectoryUnit(const String& name = nullptr)
+            : DiskUnit(Type::Directory, name)
+        {
+            _type = Type::Directory;
+        }
+
         ~DirectoryUnit() override = default;
 
         static Ptr Create() { return { new DirectoryUnit() }; }
+        static Ptr Create(const String& name) { return { new DirectoryUnit(name) }; }
         static Ptr CreateFromPath(const std::filesystem::path& path);
 
         void clear() override;
 
-        void addChild(const DiskUnit::Ptr& child, bool isIgnoreDiskCheck = false);
+        bool addChild(const DiskUnit::Ptr& child, bool isIgnoreDiskCheck = true);
+
+        template<class T>
+        [[nodiscard]] boost::intrusive_ptr<T> addChildAndGetBack(const boost::intrusive_ptr<T>& child, bool isIgnoreDiskCheck = true)
+        {
+            if (addChild(child))
+            {
+                return child;
+            }
+
+            return nullptr;
+        }
         [[nodiscard]] bool existChild(const DiskUnit::Ptr& child) const;
         void removeChild(const DiskUnit::Ptr& child);
 
@@ -176,10 +200,15 @@ namespace Ast
     public:
         AST_CLASS(FileUnit)
 
-        FileUnit() { _type = Type::File; }
+        explicit FileUnit(const String& name = nullptr)
+            : DiskUnit(Type::File, name)
+        {
+        }
+
         ~FileUnit() override = default;
 
         static Ptr Create() { return { new FileUnit() }; }
+        static Ptr Create(const String& name) { return { new FileUnit(name) }; }
         static Ptr CreateFromPath(const std::filesystem::path& path);
 
         void clear() override;
