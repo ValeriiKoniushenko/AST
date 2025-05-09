@@ -213,7 +213,8 @@ namespace Ast
 
         void clear() override;
 
-        [[nodiscard]] String getFileContent() const;
+        [[nodiscard]] String getContent() const;
+        void putContent(const String& content);
 
         [[nodiscard]] DataContainer::Ptr& getData() { return _data; }
         [[nodiscard]] const DataContainer::Ptr& getData() const { return _data; }

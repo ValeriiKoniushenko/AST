@@ -130,7 +130,7 @@ TEST(ProjectTreeTest, WorkingWithFiles)
     EXPECT_NE(0, file->getLastWriteTime());
     EXPECT_EQ(projectDir / "sources" / "CMakeLists.txt", file->getPath());
 
-    auto fileContent = file->getFileContent();
+    auto fileContent = file->getContent();
     EXPECT_FALSE(fileContent.isEmpty());
     EXPECT_GT(fileContent.size(), 100);
 }

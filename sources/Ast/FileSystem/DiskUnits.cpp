@@ -314,12 +314,25 @@ namespace Ast
         DiskUnit::clear();
     }
 
-    String FileUnit::getFileContent() const
+    String FileUnit::getContent() const
     {
         if (isExistOnDisk())
         {
             return Utils::GetTextFileContentAs<String>(getPath());
         }
         return {};
+    }
+
+    void FileUnit::putContent(const String& content)
+    {
+        std::ofstream out(getPath());
+        if (!out.is_open())
+        {
+            Assert();
+            logger->error("Impossible to open a file for write: " + getPath().generic_string());
+            return;
+        }
+
+        out.write(reinterpret_cast<const char*>(content.c_str()), content.byteSize());
     }
 } // namespace Ast
