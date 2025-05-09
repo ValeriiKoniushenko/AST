@@ -1,28 +1,50 @@
-// Copyright (c) 2024 Valerii Koniushenko
+//  MIT License
 //
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
+//  Copyright (c) 2019-2025 Valerii Koniushenko
 //
-// The above copyright notice and this permission notice shall be included in all
-// copies or substantial portions of the Software.
+//  Permission is hereby granted, free of charge, to any person obtaining a copy
+//  of this software and associated documentation files (the "Software"), to deal
+//  in the Software without restriction, including without limitation the rights
+//  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+//  copies of the Software, and to permit persons to whom the Software is
+//  furnished to do so, subject to the following conditions:
 //
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-// SOFTWARE.
+//  The above copyright notice and this permission notice shall be included in all
+//  copies or substantial portions of the Software.
+//
+//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+//  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+//  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+//  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+//  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+//  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+//  SOFTWARE.
+
+#include "ProjectTree.h"
+
+namespace Ast
+{
+    const char __BaseLogHeader_ProjectTree[] = "ProjectTree";
+
+    bool ProjectTree::addIgnorePath(const String& path)
+    {
+        if (!DiskUnit::PathValidator::IsValid(path))
+        {
+            logger->error(("Impossible to ignore this path: " + path + " " + DiskUnit::PathValidator::GetHint()).toStdStringView());
+            return false;
+        }
+
+        _ignoredPaths.emplace_back(path);
+
+        return true;
+    }
+
+} // namespace Ast
 
 #ifdef false
 
-#include "deprProjectTree.h"
-
-#include "Utils/Functions.h"
+    #include "Utils/Functions.h"
+    #include "deprProjectTree.h"
 
 namespace
 {
@@ -102,7 +124,7 @@ namespace Ast::Deprecated
 
         if (!Verify(unit.IsExistsOnDisk()))
         {
-            return deprProjectTree::Unit{nullptr};
+            return deprProjectTree::Unit{ nullptr };
         }
 
         if (std::filesystem::is_directory(path))
@@ -421,7 +443,8 @@ namespace Ast::Deprecated
     {
         if (path.empty() || path.string() == ".")
         {
-            spdlog::warn(("Was passed a path to exclude it. But the path is empty or invalid. The passed path: {}"_f << path.string() ).toStdStringView());
+            spdlog::warn(
+                ("Was passed a path to exclude it. But the path is empty or invalid. The passed path: {}"_f << path.string()).toStdStringView());
             return;
         }
         _excluded.emplace(std::move(path));
@@ -670,7 +693,7 @@ namespace Ast::Deprecated
             const auto rootPath = _root->GetPath().string();
             if (!Verify(tmp.find(rootPath)))
             {
-                spdlog::warn( ( "Can't process the next file: {} - it's not a part of the project"_f << tmp ).toStdStringView());
+                spdlog::warn(("Can't process the next file: {} - it's not a part of the project"_f << tmp).toStdStringView());
                 continue;
             }
 
@@ -698,6 +721,6 @@ namespace Ast::Deprecated
         }
     }
 
-} // namespace Ast
+} // namespace Ast::Deprecated
 
 #endif

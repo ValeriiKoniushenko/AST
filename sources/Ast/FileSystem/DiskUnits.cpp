@@ -91,12 +91,12 @@ namespace Ast
 
     bool DiskUnit::NameValidator::IsValid(const String& name)
     {
-        return name.regexMatch(regex);
+        return name.regexMatch(regexFileName);
     }
 
     String DiskUnit::NameValidator::GetHint()
     {
-        return "Available names for a disk unit should be matched with this regular expression: " + String(regex);
+        return "Available names for a disk unit should be matched with this regular expression: " + String(regexFileName);
     }
 
     DiskUnit::Ptr DiskUnit::CreateFromPath(const std::filesystem::path& path)
@@ -334,5 +334,15 @@ namespace Ast
         }
 
         out.write(reinterpret_cast<const char*>(content.c_str()), content.byteSize());
+    }
+
+    bool DiskUnit::PathValidator::IsValid(const String& path)
+    {
+        return path.regexMatch(regexPath);
+    }
+
+    String DiskUnit::PathValidator::GetHint()
+    {
+        return "Available path for a disk unit[s] should be matched with this regular expression: " + String(regexPath);
     }
 } // namespace Ast

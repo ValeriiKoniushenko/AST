@@ -22,6 +22,38 @@
 
 #pragma once
 
+#include "FileSystem/FSTree.h"
+#include "Tree.h"
+
+namespace Ast
+{
+    extern const char __BaseLogHeader_ProjectTree[];
+
+    class ProjectTree :
+        public BaseLog<__BaseLogHeader_ProjectTree>,
+        public Utils::NotCopyableButMoveable,
+        public boost::intrusive_ref_counter<ProjectTree>
+    {
+    public:
+        bool addIgnorePath(const String& path);
+        void resetIgnorePaths() { _ignoredPaths.clear(); }
+        [[nodiscard]] std::vector<String>& getIgnorePaths() { return _ignoredPaths; }
+        [[nodiscard]] const std::vector<String>& getIgnorePaths() const { return _ignoredPaths; }
+
+        [[nodiscard]] const FSTree& getFSTree() const { return _fstree; }
+        [[nodiscard]] FSTree& getFSTree() { return _fstree; }
+
+        void setPathToProject(std::filesystem::path path) { _projectPath = std::move(path); }
+        [[nodiscard]] std::filesystem::path getProjectPath() const { return _projectPath; }
+
+    protected:
+        FSTree _fstree;
+        std::filesystem::path _projectPath;
+        std::vector<String> _ignoredPaths;
+    };
+
+} // namespace Ast
+
 #ifdef false
 
 #include "Readers/ContentStream.h"

@@ -42,8 +42,23 @@ namespace Ast
 
         struct NameValidator
         {
-            inline static const char* regex = "^[0-9A-Za-z_\\-\\. ]+$";
+            // Can accept:
+            // 0-9
+            // A-Z a-z
+            // '_', '-', ' '
+            inline static const char* regexFileName = R"(^[0-9A-Za-z_\-\. ]+$)";
             static bool IsValid(const String& name);
+            static String GetHint();
+        };
+
+        struct PathValidator
+        {
+            // Can accept:
+            // 0-9
+            // A-Z a-z
+            // '_', '-', '/', '\', '*', ' '
+            inline static const char* regexPath = R"(^[0-9A-Za-z_\-\. /\\*]+$)";
+            static bool IsValid(const String& path);
             static String GetHint();
         };
 
