@@ -153,4 +153,16 @@ namespace Ast
             });
     }
 
+    uint64_t FSTree::calculateUnitsCount() const
+    {
+        uint64_t count = 0;
+        forEach(
+            [&count](const auto*)
+            {
+                ++count;
+            });
+
+        return count;
+    }
+
 } // namespace Ast

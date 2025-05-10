@@ -74,10 +74,22 @@ namespace Ast
             ForEachImpl<false, FuncT>(_root.get(), std::forward<decltype(callback)>(callback));
         }
 
+        /**
+         * @brief Can take a functions of next types:
+         * bool(const DiskUnit*) - this function will work until it gets 'false' in return
+         * void(const DiskUnit*) - will iterate without stopping through all a tree
+         */
+        template<class FuncT>
+        void forEach(FuncT&& callback) const
+        {
+            ForEachImpl<true, FuncT>(_root.get(), std::forward<decltype(callback)>(callback));
+        }
+
         [[nodiscard]] DiskUnit::Ptr getRoot() { return _root; }
         [[nodiscard]] DiskUnit::CPtr getRoot() const { return _root; }
 
         void prettyPrint(std::function<PrettyInfo(const DiskUnit*)>&& pred = nullptr);
+        [[nodiscard]] uint64_t calculateUnitsCount() const;
 
     private:
         DiskUnit::Ptr _root = nullptr;

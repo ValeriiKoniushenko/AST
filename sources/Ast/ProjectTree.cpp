@@ -51,11 +51,19 @@ namespace Ast
 
     void ProjectTree::scanFilesystem()
     {
-        FSTree::CreateTree(_projectPath,
-                           [&](const std::filesystem::path& path)
-                           {
-                               return true;
-                           });
+        const auto start = std::chrono::system_clock::now();
+        _fstree = FSTree::CreateTree(_projectPath,
+                                     [&](const std::filesystem::path& path)
+                                     {
+                                         return true;
+                                     });
+        const auto end = std::chrono::system_clock::now();
+        uint64_t milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+        logger->info(("Was passed {}ms for filesystem scan"_f << milliseconds).toStdStringView());
+
+#ifdef AST_DEBUG
+        logger->info(("Was read {} units"_f << _fstree->calculateUnitsCount()).toStdStringView());
+#endif
     }
 
     bool ProjectTree::canBeScanned() const

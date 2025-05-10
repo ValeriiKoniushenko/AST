@@ -53,8 +53,8 @@ namespace Ast
         [[nodiscard]] std::vector<String>& getIgnorePaths() { return _ignoredPaths; }
         [[nodiscard]] const std::vector<String>& getIgnorePaths() const { return _ignoredPaths; }
 
-        [[nodiscard]] const FSTree& getFSTree() const { return _fstree; }
-        [[nodiscard]] FSTree& getFSTree() { return _fstree; }
+        [[nodiscard]] FSTree::CPtr getFSTree() const { return _fstree; }
+        [[nodiscard]] FSTree::Ptr getFSTree() { return _fstree; }
 
         void setPathToProject(std::filesystem::path path) { _projectPath = std::move(path); }
         [[nodiscard]] std::filesystem::path getProjectPath() const { return _projectPath; }
@@ -66,7 +66,7 @@ namespace Ast
         void scanFilesystem();
 
     protected:
-        FSTree _fstree;
+        FSTree::Ptr _fstree;
         std::filesystem::path _projectPath;
         std::vector<String> _ignoredPaths;
     };
