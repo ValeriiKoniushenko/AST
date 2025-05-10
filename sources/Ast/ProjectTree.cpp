@@ -22,6 +22,8 @@
 
 #include "ProjectTree.h"
 
+#include "Core/Timer.h"
+
 namespace Ast
 {
     const char __BaseLogHeader_ProjectTree[] = "ProjectTree";
@@ -51,21 +53,33 @@ namespace Ast
 
     void ProjectTree::scanFilesystem()
     {
-        const auto start = std::chrono::system_clock::now();
-        _fstree = FSTree::CreateTree(_projectPath,
-                                     [this](const std::filesystem::path& path)
-                                     {
-                                         return !isIgnoredPath(path);
+        uint64_t count = 0;
+
+        Core::Repeater repeater(0.1);
+        repeater.setCallback(
+            [&count, this](auto)
+            {
+                logger->info(("Status: have scanned {} entries."_f << count).toStdStringView());
+            });
+
+        _fstree = FSTree::CreateTree(
+            _projectPath,
+            [this, &count, &repeater](const std::filesystem::path& path)
+            {
+                ++count;
+                repeater.startOrUpdate();
+                return !isIgnoredPath(path);
             },
             _ignoreSymlinks);
 
-        const auto end = std::chrono::system_clock::now();
-        uint64_t milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-        logger->info(("Was passed {}ms for filesystem scan"_f << milliseconds).toStdStringView());
+        String metricsStr;
+        const auto timeGap = repeater.getTimeGap();
+        if (timeGap >= 0.001)
+        {
+            metricsStr = "~{} entries per second."_f << int(static_cast<double>(count) / timeGap);
+        }
 
-#ifdef AST_DEBUG
-        logger->info(("Was read {} units"_f << _fstree->calculateUnitsCount()).toStdStringView());
-#endif
+        logger->info(("Was took {}s for filesystem scan of {} entries. {}"_f << timeGap << count << metricsStr).toStdStringView());
     }
 
     bool ProjectTree::canBeScanned() const
