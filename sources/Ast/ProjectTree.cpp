@@ -117,6 +117,22 @@ namespace Ast
         return false;
     }
 
+    void ProjectTree::setPathToProject(std::filesystem::path path)
+    {
+        if (!path.is_absolute())
+        {
+            logger->warn("The passed project path is not absolute. You can meet some errors while working with a relative path. Passed path: " +
+                         path.generic_string());
+        }
+
+        if (!std::filesystem::exists(path))
+        {
+            logger->critical("The passed project path doesn't exist: " + path.generic_string());
+            return;
+        }
+        _projectPath = std::move(path);
+    }
+
 } // namespace Ast
 
 #ifdef false

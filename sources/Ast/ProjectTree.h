@@ -57,7 +57,7 @@ namespace Ast
         [[nodiscard]] FSTree::CPtr getFSTree() const { return _fstree; }
         [[nodiscard]] FSTree::Ptr getFSTree() { return _fstree; }
 
-        void setPathToProject(std::filesystem::path path) { _projectPath = std::move(path); }
+        void setPathToProject(std::filesystem::path path);
         [[nodiscard]] std::filesystem::path getProjectPath() const { return _projectPath; }
 
         void scanProject();
