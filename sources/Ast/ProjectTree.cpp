@@ -39,6 +39,30 @@ namespace Ast
         return true;
     }
 
+    void ProjectTree::scanProject()
+    {
+        if (!canBeScanned())
+        {
+            return;
+        }
+
+        scanFilesystem();
+    }
+
+    void ProjectTree::scanFilesystem()
+    {
+        FSTree::CreateTree(_projectPath,
+                           [&](const std::filesystem::path& path)
+                           {
+                               return true;
+                           });
+    }
+
+    bool ProjectTree::canBeScanned() const
+    {
+        return !_projectPath.empty();
+    }
+
 } // namespace Ast
 
 #ifdef false

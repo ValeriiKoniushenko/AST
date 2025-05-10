@@ -27,6 +27,14 @@
 
 namespace Ast
 {
+
+    struct FileData : public FileUnit::DataContainer
+    {
+        AST_CLASS(FileData)
+
+        Tree<FileLexer> tree;
+    };
+
     extern const char __BaseLogHeader_ProjectTree[];
 
     class ProjectTree :
@@ -35,6 +43,11 @@ namespace Ast
         public boost::intrusive_ref_counter<ProjectTree>
     {
     public:
+        AST_CLASS(ProjectTree)
+
+    public:
+        [[nodiscard]] static Ptr Create() { return { new ProjectTree }; }
+
         bool addIgnorePath(const String& path);
         void resetIgnorePaths() { _ignoredPaths.clear(); }
         [[nodiscard]] std::vector<String>& getIgnorePaths() { return _ignoredPaths; }
@@ -45,6 +58,12 @@ namespace Ast
 
         void setPathToProject(std::filesystem::path path) { _projectPath = std::move(path); }
         [[nodiscard]] std::filesystem::path getProjectPath() const { return _projectPath; }
+
+        void scanProject();
+        [[nodiscard]] bool canBeScanned() const;
+
+    private:
+        void scanFilesystem();
 
     protected:
         FSTree _fstree;

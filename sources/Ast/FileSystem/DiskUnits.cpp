@@ -60,7 +60,19 @@ namespace Ast
 
     std::filesystem::path DiskUnit::getRelativePathFrom(const DiskUnit* unit) const
     {
-        return std::filesystem::relative(unit->getPath(), getPath());
+        const auto&& base = getPath();
+        const auto&& path = unit->getPath();
+
+        /*
+                const auto rel = std::filesystem::relative(path, base).lexically_normal();
+                const auto rel1 = base.lexically_relative(path);
+                const auto rel11 = path.lexically_relative(base);
+                const auto rel13 = std::filesystem::relative(base, path).lexically_normal();
+                const auto prox = std::filesystem::proximate(path, base);
+                const auto prox1 = std::filesystem::proximate(base, path);
+        */
+
+        return path.lexically_relative(base);
     }
 
     void DiskUnit::FillBaseInfo(DiskUnit* unit, const std::filesystem::path& path)
@@ -167,7 +179,7 @@ namespace Ast
             return true;
         }
 
-        logger->error((("Invalid name for file '{}'. "_f << name.c_str()) + NameValidator::GetHint()).toStdStringView());
+        logger->error((("The passed name didn't set. Invalid name for file '{}'. "_f << name.c_str()) + NameValidator::GetHint()).toStdStringView());
 
         return false;
     }
@@ -258,7 +270,6 @@ namespace Ast
                 const auto newName = String(p.generic_string());
                 if (!child->setName(newName))
                 {
-                    logger->error(("Can't set name for the child: " + newName).toStdStringView());
                     return false;
                 }
             }

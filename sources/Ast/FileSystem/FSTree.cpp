@@ -48,12 +48,17 @@ namespace Ast
         units.push(dynamic_cast<DirectoryUnit*>(tree->_root.get()));
 
         std::function<void(const std::filesystem::directory_entry&)> readDiskUnit =
-            [&units, &readDiskUnit](const std::filesystem::directory_entry& entry)
+            [&pred, &units, &readDiskUnit](const std::filesystem::directory_entry& entry)
         {
             auto* top = units.top();
             if (!top)
             {
                 Assert();
+                return;
+            }
+
+            if (!pred(entry.path()))
+            {
                 return;
             }
 
