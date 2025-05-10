@@ -93,7 +93,6 @@ TEST(ProjectTreeTest, WorkingWithChildsInFolder)
     ASSERT_TRUE(dir);
     dir->setType(DirectoryUnit::Type::Directory);
     ASSERT_TRUE(dir->setName("hello"));
-
     root->addChild(dir, true);
 
     auto dir2 = DirectoryUnit::Create();

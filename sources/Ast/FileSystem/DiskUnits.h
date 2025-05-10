@@ -114,7 +114,7 @@ namespace Ast
         void setType(Type type) noexcept { _type = type; }
         void setLastWriteTime(uint64_t time) noexcept { _lastWriteTime = time; }
         void trySetParent(const Ptr& parent);
-        void forceSetParent(const Ptr& parent);
+        void forceSetParent(DiskUnit* parent);
 
         [[nodiscard]] bool hasAbsolutePath() const { return std::filesystem::path(_name.toStdString()).is_absolute(); }
         [[nodiscard]] bool hasRelativePath() const { return std::filesystem::path(_name.toStdString()).is_relative(); }
@@ -133,7 +133,7 @@ namespace Ast
         std::filesystem::perms _permissions = std::filesystem::perms::none;
         Type _type = Type::None;
 
-        Ptr _parent = nullptr;
+        DiskUnit* _parent = nullptr;
     };
 
     class DirectoryUnit final : public DiskUnit
@@ -147,7 +147,11 @@ namespace Ast
             _type = Type::Directory;
         }
 
-        ~DirectoryUnit() override = default;
+        ~DirectoryUnit() override
+        {
+            int i1 = 1;
+            int i = 1;
+        };
 
         static Ptr Create() { return { new DirectoryUnit() }; }
         static Ptr Create(const String& name) { return { new DirectoryUnit(name) }; }
@@ -182,7 +186,7 @@ namespace Ast
         void iterateOverPhysicalContent(FuncT&& callback) const
         {
             const auto thisPath = getPath();
-            for (const auto& dirEntry : std::filesystem::directory_iterator(thisPath))
+            for (const auto& dirEntry : std::filesystem::directory_iterator(thisPath, std::filesystem::directory_options::skip_permission_denied))
             {
                 if constexpr (std::is_void_v<decltype(callback(dirEntry))>)
                 {

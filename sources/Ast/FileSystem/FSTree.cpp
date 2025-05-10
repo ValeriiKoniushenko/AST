@@ -57,6 +57,16 @@ namespace Ast
                 return;
             }
 
+            if (entry.is_symlink())
+            {
+                return;
+            }
+
+            if (!entry.exists())
+            {
+                return;
+            }
+
             if (!pred(entry.path()))
             {
                 return;

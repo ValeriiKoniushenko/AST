@@ -52,6 +52,7 @@ namespace Ast
         void resetIgnorePaths() { _ignoredPaths.clear(); }
         [[nodiscard]] std::vector<String>& getIgnorePaths() { return _ignoredPaths; }
         [[nodiscard]] const std::vector<String>& getIgnorePaths() const { return _ignoredPaths; }
+        [[nodiscard]] bool isIgnoredPath(const std::filesystem::path& path) const;
 
         [[nodiscard]] FSTree::CPtr getFSTree() const { return _fstree; }
         [[nodiscard]] FSTree::Ptr getFSTree() { return _fstree; }

@@ -36,10 +36,10 @@ namespace Ast
             return;
         }
 
-        _parent = parent;
+        _parent = parent.get();
     }
 
-    void DiskUnit::forceSetParent(const Ptr& parent)
+    void DiskUnit::forceSetParent(DiskUnit* parent)
     {
         if (_parent)
         {
@@ -116,7 +116,6 @@ namespace Ast
         if (path.empty() || !std::filesystem::exists(path))
         {
             logger->error("Impossible to find a disk unit by the next path: ", path.generic_string());
-            Assert();
             return nullptr;
         }
 
@@ -147,7 +146,7 @@ namespace Ast
                 return {};
             }
             units.emplace_back(i->_name.toStdString());
-            i = i->_parent.get();
+            i = i->_parent;
         }
 
         std::reverse(units.begin(), units.end());
@@ -175,11 +174,12 @@ namespace Ast
     {
         if (NameValidator::IsValid(name))
         {
-            setNameUnsafe(name);
+            // setNameUnsafe(name);
+            _name = name;
             return true;
         }
 
-        logger->error((("The passed name didn't set. Invalid name for file '{}'. "_f << name.c_str()) + NameValidator::GetHint()).toStdStringView());
+        logger->warn((("The passed name didn't set. Invalid name for file '{}'. "_f << name.c_str()) + NameValidator::GetHint()).toStdStringView());
 
         return false;
     }
@@ -197,7 +197,7 @@ namespace Ast
     {
         int out = 0;
         const auto* i = this;
-        while ((i = i->_parent.get()))
+        while ((i = i->_parent))
         {
             ++out;
         }
@@ -210,7 +210,6 @@ namespace Ast
         if (path.empty() || !std::filesystem::exists(path))
         {
             logger->error("Impossible to find a disk unit by the next path: {}", path.generic_string());
-            Assert();
             return nullptr;
         }
 
@@ -275,8 +274,8 @@ namespace Ast
             }
         }
 
-        _childs.insert(child);
         child->forceSetParent(this);
+        _childs.insert(child);
 
         return true;
     }
@@ -296,7 +295,6 @@ namespace Ast
         if (path.empty() || !std::filesystem::exists(path))
         {
             logger->error("Impossible to find a disk unit by the next path: {}", path.generic_string());
-            Assert();
             return nullptr;
         }
 

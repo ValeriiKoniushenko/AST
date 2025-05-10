@@ -53,9 +53,9 @@ namespace Ast
     {
         const auto start = std::chrono::system_clock::now();
         _fstree = FSTree::CreateTree(_projectPath,
-                                     [&](const std::filesystem::path& path)
+                                     [this](const std::filesystem::path& path)
                                      {
-                                         return true;
+                                         return !isIgnoredPath(path);
                                      });
         const auto end = std::chrono::system_clock::now();
         uint64_t milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
@@ -69,6 +69,50 @@ namespace Ast
     bool ProjectTree::canBeScanned() const
     {
         return !_projectPath.empty();
+    }
+
+    bool ProjectTree::isIgnoredPath(const std::filesystem::path& path) const
+    {
+        if (_ignoredPaths.empty())
+        {
+            return false;
+        }
+
+        auto main = String((_projectPath / path).lexically_normal().generic_string());
+        main.replaceAll("\\", "/");
+
+        for (auto i : _ignoredPaths)
+        {
+            i = ((_projectPath / std::filesystem::path(i.toStdStringView())).lexically_normal()).generic_string();
+
+            // Escaping of regex chars to avoid mixing of them
+            // BUT we can pass * for match all as '.*'
+            // So, from this string: /hello/.world/.how+are/you*.json
+            // We must get this: /hello/\.world/\.how\+are/you.*\.json
+            //               replace '*' to '.*' to match all ^^
+            i.replaceAll("\\", "/");
+            i.replaceAll("+", "\\+");
+            i.replaceAll("!", "\\!");
+            i.replaceAll("-", "\\-");
+            i.replaceAll("?", "\\?");
+            i.replaceAll("[", "\\[");
+            i.replaceAll("]", "\\]");
+            i.replaceAll(".", "\\.");
+
+            i.replaceAll("*", ".*");
+
+            i.push_front('^');
+            i.push_back("/?$");
+
+            if (main.regexMatch(i))
+            {
+                logger->info("Due to ignore config, the next path was ignored: " + path.generic_string());
+                return true;
+            }
+        }
+        // escaping all chars
+
+        return false;
     }
 
 } // namespace Ast
