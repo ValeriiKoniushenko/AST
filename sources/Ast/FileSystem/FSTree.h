@@ -57,7 +57,8 @@ namespace Ast
          * every unit.
          * @return generated tree.
          */
-        static Ptr CreateTree(const std::filesystem::path& path, std::function<bool(const std::filesystem::path&)> pred = nullptr);
+        static Ptr CreateTree(const std::filesystem::path& path, std::function<bool(const std::filesystem::path&)> pred = nullptr,
+                              bool isIgnoreSymlinks = false);
 
         void clear();
 

@@ -63,6 +63,9 @@ namespace Ast
         void scanProject();
         [[nodiscard]] bool canBeScanned() const;
 
+        [[nodiscard]] bool isIgnoreSymlinks() const noexcept { return _ignoreSymlinks; }
+        void setIgnoreSymlinks(bool value) noexcept { _ignoreSymlinks = value; }
+
     private:
         void scanFilesystem();
 
@@ -70,6 +73,9 @@ namespace Ast
         FSTree::Ptr _fstree;
         std::filesystem::path _projectPath;
         std::vector<String> _ignoredPaths;
+
+        // scan configs
+        bool _ignoreSymlinks = false;
     };
 
 } // namespace Ast

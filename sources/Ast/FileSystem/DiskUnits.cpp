@@ -179,7 +179,9 @@ namespace Ast
             return true;
         }
 
-        logger->warn((("The passed name didn't set. Invalid name for file '{}'. "_f << name.c_str()) + NameValidator::GetHint()).toStdStringView());
+        logger->warn(
+            ("Parse-hard name for file: '{}'. Path: '{}'. Hint: {}"_f << name.c_str() << getPath().generic_string() << NameValidator::GetHint())
+                .toStdStringView());
 
         return false;
     }

@@ -25,7 +25,8 @@
 namespace Ast
 {
 
-    FSTree::Ptr FSTree::CreateTree(const std::filesystem::path& path, std::function<bool(const std::filesystem::path&)> pred)
+    FSTree::Ptr FSTree::CreateTree(const std::filesystem::path& path, std::function<bool(const std::filesystem::path&)> pred,
+                                   bool isIgnoreSymlinks /* = false*/)
     {
         auto tree = Ptr(new FSTree);
 
@@ -48,7 +49,7 @@ namespace Ast
         units.push(dynamic_cast<DirectoryUnit*>(tree->_root.get()));
 
         std::function<void(const std::filesystem::directory_entry&)> readDiskUnit =
-            [&pred, &units, &readDiskUnit](const std::filesystem::directory_entry& entry)
+            [&pred, &units, &readDiskUnit, isIgnoreSymlinks](const std::filesystem::directory_entry& entry)
         {
             auto* top = units.top();
             if (!top)
@@ -57,13 +58,21 @@ namespace Ast
                 return;
             }
 
-            if (entry.is_symlink())
+            if (isIgnoreSymlinks && entry.is_symlink())
             {
                 return;
             }
 
-            if (!entry.exists())
+            try
             {
+                if (!entry.exists())
+                {
+                    return;
+                }
+            }
+            catch (const std::filesystem::filesystem_error& er)
+            {
+                logger->warn(("Can't detect file status. Details: {}"_f << er.what()).toStdStringView());
                 return;
             }
 
@@ -93,7 +102,7 @@ namespace Ast
                 }
 
                 auto file = FileUnit::CreateFromPath(entry.path());
-                if (file->isValid())
+                if (file && file->isValid())
                 {
                     top->addChild(file);
                 }

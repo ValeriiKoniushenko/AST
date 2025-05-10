@@ -56,7 +56,9 @@ namespace Ast
                                      [this](const std::filesystem::path& path)
                                      {
                                          return !isIgnoredPath(path);
-                                     });
+            },
+            _ignoreSymlinks);
+
         const auto end = std::chrono::system_clock::now();
         uint64_t milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
         logger->info(("Was passed {}ms for filesystem scan"_f << milliseconds).toStdStringView());
