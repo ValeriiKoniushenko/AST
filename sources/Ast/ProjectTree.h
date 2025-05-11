@@ -28,13 +28,6 @@
 namespace Ast
 {
 
-    struct FileData : public FileUnit::DataContainer
-    {
-        AST_CLASS(FileData)
-
-        Tree<FileLexer> tree;
-    };
-
     extern const char __BaseLogHeader_ProjectTree[];
 
     class ProjectTree :
@@ -60,19 +53,24 @@ namespace Ast
         void setPathToProject(std::filesystem::path path);
         [[nodiscard]] std::filesystem::path getProjectPath() const { return _projectPath; }
 
-        void scanProject();
+        [[nodiscard]] bool scanProject();
         [[nodiscard]] bool canBeScanned() const;
 
         [[nodiscard]] bool isIgnoreSymlinks() const noexcept { return _ignoreSymlinks; }
         void setIgnoreSymlinks(bool value) noexcept { _ignoreSymlinks = value; }
 
-    private:
-        void scanFilesystem();
+        [[nodiscard]] std::optional<std::unordered_set<std::string>>& getAcceptableFileExtensions() { return _acceptableFileExtensions; }
+        [[nodiscard]] const std::optional<std::unordered_set<std::string>>& getAcceptableFileExtensions() const { return _acceptableFileExtensions; }
+
+    protected:
+        [[nodiscard]] bool scanFilesystem();
+        virtual void onFinishScanFilesystem() {}
 
     protected:
         FSTree::Ptr _fstree;
         std::filesystem::path _projectPath;
         std::vector<String> _ignoredPaths;
+        std::optional<std::unordered_set<std::string>> _acceptableFileExtensions;
 
         // scan configs
         bool _ignoreSymlinks = false;
@@ -82,12 +80,12 @@ namespace Ast
 
 #ifdef false
 
-#include "Readers/ContentStream.h"
-#include "Tree.h"
-#include "Utils/CopyableAndMoveableBehaviour.h"
+    #include "Readers/ContentStream.h"
+    #include "Tree.h"
+    #include "Utils/CopyableAndMoveableBehaviour.h"
 
-#include <set>
-#include <unordered_set>
+    #include <set>
+    #include <unordered_set>
 
 namespace Ast::Deprecated
 {
@@ -125,7 +123,8 @@ namespace Ast::Deprecated
             };
 
         public:
-            explicit Unit(deprProjectTree* projectTree) : _projectTree(projectTree){};
+            explicit Unit(deprProjectTree* projectTree)
+                : _projectTree(projectTree) {};
             ~Unit() override = default;
 
             [[nodiscard]] bool IsGeneratedFile() const { return deprProjectTree::IsGeneratedFile(_path); }
@@ -449,6 +448,6 @@ namespace Ast::Deprecated
         String _preferableExtension;
     };
 
-} // namespace Ast
+} // namespace Ast::Deprecated
 
 #endif

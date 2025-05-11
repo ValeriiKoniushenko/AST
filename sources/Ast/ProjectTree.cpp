@@ -41,17 +41,23 @@ namespace Ast
         return true;
     }
 
-    void ProjectTree::scanProject()
+    bool ProjectTree::scanProject()
     {
         if (!canBeScanned())
         {
-            return;
+            return false;
         }
 
-        scanFilesystem();
+        if (!scanFilesystem())
+        {
+            return false;
+        }
+        onFinishScanFilesystem();
+
+        return true;
     }
 
-    void ProjectTree::scanFilesystem()
+    bool ProjectTree::scanFilesystem()
     {
         uint64_t count = 0;
 
@@ -68,7 +74,16 @@ namespace Ast
             {
                 ++count;
                 repeater.startOrUpdate();
-                return !isIgnoredPath(path);
+
+                bool isValidFileExt = true;
+                if (_acceptableFileExtensions && !_acceptableFileExtensions->empty())
+                {
+                    if (std::filesystem::is_regular_file(path))
+                    {
+                        isValidFileExt = _acceptableFileExtensions->contains(path.extension());
+                    }
+                }
+                return isValidFileExt && !isIgnoredPath(path);
             },
             _ignoreSymlinks);
 
@@ -80,6 +95,8 @@ namespace Ast
         }
 
         logger->info(("Was took {}s for filesystem scan of {} entries. {}"_f << timeGap << count << metricsStr).toStdStringView());
+
+        return _fstree && _fstree;
     }
 
     bool ProjectTree::canBeScanned() const
