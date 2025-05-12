@@ -68,7 +68,10 @@ namespace Ast::Utils
             source = TryToSkipAnyQuotes(source);
 
             auto diff = old - source;
-
+            if (diff != 0)
+            {
+                int i = 1;
+            }
             if (*source == openedBracket)
             {
                 ++bracketCounter;
@@ -216,12 +219,15 @@ namespace Ast::Utils
             return src;
         }
 
+        // Maybe it's not char literal, let's check
+        int len = 0;
+
         ++src;
 
         String::CharT prev = 0;
         int counter = 1;
 
-        while (*src && counter != 0)
+        while (*src && counter != 0 && len < 2)
         {
             if (prev != '\\' && *src == '\'')
             {
@@ -230,9 +236,13 @@ namespace Ast::Utils
 
             prev = *src;
             ++src;
+            ++len;
         }
 
-        Assert(counter == 0);
+        if (counter != 0)
+        {
+            return src - len;
+        }
 
         return src;
     }
