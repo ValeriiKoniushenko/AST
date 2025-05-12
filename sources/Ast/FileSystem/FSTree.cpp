@@ -141,9 +141,9 @@ namespace Ast
                 static const char* defaultSpace = "    ";
                 const auto distance = unit->distanceToRoot();
 
-                for (int i = 0; i < sizeof(info.prefix) - 1; ++i)
+                for (char i : info.prefix)
                 {
-                    std::cout << (info.prefix[i] < 32 ? ' ' : info.prefix[i]);
+                    std::cout << (i < 32 ? ' ' : i);
                 }
 
                 std::cout << " ";
@@ -161,9 +161,9 @@ namespace Ast
                 std::cout << unit->getName();
 
                 std::cout << "  ";
-                for (int i = 0; i < sizeof(info.suffix) - 1; ++i)
+                for (char i : info.suffix)
                 {
-                    std::cout << (info.suffix[i] < 32 ? ' ' : info.suffix[i]);
+                    std::cout << (i < 32 ? ' ' : i);
                 }
 
                 prevDistance = distance;
