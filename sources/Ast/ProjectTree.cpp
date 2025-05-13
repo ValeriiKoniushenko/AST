@@ -61,7 +61,7 @@ namespace Ast
     {
         uint64_t count = 0;
 
-        Core::Repeater repeater(0.1);
+        Core::Repeater repeater(0.25);
         repeater.setCallback(
             [&count, this](auto)
             {
