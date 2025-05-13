@@ -193,17 +193,24 @@ namespace Ast::Utils
 
         ++src;
 
-        String::CharT prev = 0;
         int counter = 1;
 
         while (*src && counter != 0)
         {
-            if (prev != '\\' && *src == '"')
+            if (*src == '"')
             {
-                --counter;
+                int i = 0;
+                while (src[-i - 1] == '\\')
+                {
+                    ++i;
+                }
+
+                if (i % 2 == 0)
+                {
+                    --counter;
+                }
             }
 
-            prev = *src;
             ++src;
         }
 
@@ -227,7 +234,7 @@ namespace Ast::Utils
         String::CharT prev = 0;
         int counter = 1;
 
-        while (*src && counter != 0 && len < 2)
+        while (*src && counter != 0 && len < 5)
         {
             if (prev != '\\' && *src == '\'')
             {
@@ -271,6 +278,29 @@ namespace Ast::Utils
         Assert(counter == 0);
 
         return src;
+    }
+
+    bool IsStartOfStringLiteral(const String::CharT* src)
+    {
+        if (!src || !*src)
+        {
+            return false;
+        }
+
+        if (*src == '\'')
+        {
+            return true;
+        }
+        else if (*src == 'R' && src[1] && src[1] == '"' && src[2] && src[2] == '(')
+        {
+            return true;
+        }
+        else if (*src == '"')
+        {
+            return true;
+        }
+
+        return false;
     }
 
 } // namespace Ast::Utils

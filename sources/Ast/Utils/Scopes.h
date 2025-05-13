@@ -37,5 +37,6 @@ namespace Ast::Utils
     [[nodiscard]] const String::CharT* SkipDoubleQuotes(const String::CharT* src);
     [[nodiscard]] const String::CharT* SkipSingleQuotes(const String::CharT* src);
     [[nodiscard]] const String::CharT* SkipRawQuotes(const String::CharT* src);
+    [[nodiscard]] bool IsStartOfStringLiteral(const String::CharT* src);
 
 } // namespace Ast::Utils
