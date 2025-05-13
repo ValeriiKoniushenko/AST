@@ -76,7 +76,7 @@ namespace Ast
                 return;
             }
 
-            if (!pred(entry.path()))
+            if (pred && !pred(entry.path()))
             {
                 return;
             }

@@ -30,6 +30,7 @@
 
 namespace Ast
 {
+    const char __BaseLogHeader_Lexer[] = "Lexer";
 
     bool BaseLexer::operator==(const BaseLexer& other) const
     {

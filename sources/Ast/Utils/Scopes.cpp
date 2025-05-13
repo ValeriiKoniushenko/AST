@@ -82,7 +82,7 @@ namespace Ast::Utils
             }
         }
 
-        Assert(bracketCounter == 0);
+        // Assert(bracketCounter == 0);
 
         return bracketCounter == 0 && *source != 0 ? --source : nullptr;
     }

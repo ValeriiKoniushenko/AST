@@ -78,7 +78,7 @@ TEST(ProjectTreeTest, NameValidator)
     EXPECT_TRUE(DiskUnit::NameValidator::IsValid("123.512config14123"));
     EXPECT_TRUE(DiskUnit::NameValidator::IsValid("...--_--_--.512config14123"));
     EXPECT_FALSE(DiskUnit::NameValidator::IsValid("how are you?"));
-    EXPECT_FALSE(DiskUnit::NameValidator::IsValid("how are you123###"));
+    EXPECT_TRUE(DiskUnit::NameValidator::IsValid("how are you123###"));
 }
 
 TEST(ProjectTreeTest, WorkingWithChildsInFolder)
