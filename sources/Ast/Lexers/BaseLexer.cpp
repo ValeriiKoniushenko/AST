@@ -62,7 +62,7 @@ namespace Ast
             return false;
         }
 
-        spdlog::info(( "Successful parsing of the {}: '{}'"_f << _lexerType << _lexerName ).toStdStringView());
+        logger->debug(("Successful parsing of the {}: '{}'"_f << _lexerType << _lexerName).toStdStringView());
 
         return IsValid();
     }
