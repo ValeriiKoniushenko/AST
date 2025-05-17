@@ -29,6 +29,7 @@
 
 namespace Ast
 {
+    class DiskUnit;
 
     class GeneratorFileComposer : public BaseLog, public Utils::NotCopyableButMoveable, public boost::intrusive_ref_counter<GeneratorFileComposer>
     {
@@ -67,7 +68,8 @@ namespace Ast
         [[nodiscard]] BaseGenerator* getGenerator(const String& name);
         [[nodiscard]] BaseGenerator* getGenerator(const BaseLexer* lexer);
 
-        void generate(const std::vector<BaseLexer*>& lexers, const std::filesystem::path& path);
+        void generate(const std::vector<BaseLexer*>& lexers, const std::filesystem::path& path, const DiskUnit* originFile,
+                      const std::filesystem::path& projectPath);
 
         void setFileHeader(const String& header) { _fileHeader = header; }
         void resetFileHeader() { _fileHeader.clear(); }
@@ -76,8 +78,12 @@ namespace Ast
         void setStyleRules(const StyleRules& rules) noexcept { _styleRules = rules; }
         [[nodiscard]] const StyleRules& getStyleRules() const noexcept { return _styleRules; }
 
+        [[nodiscard]] uint64_t getModifTimeOfOriginalFile(const std::filesystem::path& path);
+
     protected:
         GeneratorFileComposer() = default;
+
+        [[nodiscard]] String getHeaderFileDescription(const DiskUnit* originFile, const std::filesystem::path& projectPath) const;
 
         [[nodiscard]] spdlog::logger* getLogger() const final
         {
