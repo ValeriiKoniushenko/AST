@@ -51,6 +51,15 @@ namespace Ast
 
         String body(1024);
 
+        auto getBlanks = [](int count)
+        {
+            String out;
+            for (int i = 0; i < count; ++i)
+            {
+                out += ITextSourceReader::Code::Endl();
+            }
+            return out;
+        };
         for (auto* lexer : lexers)
         {
             auto* generator = getGenerator(lexer);
@@ -64,10 +73,14 @@ namespace Ast
             globalHead.merge(generator->getGlobalHead());
             globalTail.merge(generator->getGlobalTail());
 
+            if (!body.isEmpty())
+            {
+                body += getBlanks(_styleRules.blanksBetweenLexers);
+            }
             body += generator->generateLocalHead();
-            body += ITextSourceReader::Code::Endl();
+            body += getBlanks(_styleRules.blanksAfterLocalHead);
             body += generator->generateBody();
-            body += ITextSourceReader::Code::Endl();
+            body += getBlanks(_styleRules.blanksBeforeLocalTail);
             body += generator->generateLocalTail();
         }
 
@@ -79,10 +92,10 @@ namespace Ast
             fullHeader.push_back(str);
             fullHeader.push_back(ITextSourceReader::Code::Endl());
         }
-        fullHeader.push_back(ITextSourceReader::Code::Endl());
+        fullHeader += getBlanks(_styleRules.blanksAfterGlobalHead);
 
         String fullTail;
-        fullTail.push_back(ITextSourceReader::Code::Endl());
+        fullTail += getBlanks(_styleRules.blanksBeforeGlobalTail);
         for (auto& str : globalTail)
         {
             fullTail.push_back(str);

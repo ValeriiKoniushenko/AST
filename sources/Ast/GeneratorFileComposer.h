@@ -35,6 +35,17 @@ namespace Ast
     public:
         AST_CLASS(GeneratorFileComposer)
 
+        struct StyleRules
+        {
+            uint8_t blanksBetweenLexers = 6;
+
+            uint8_t blanksAfterGlobalHead = 2;
+            uint8_t blanksBeforeGlobalTail = 1;
+
+            uint8_t blanksAfterLocalHead = 2;
+            uint8_t blanksBeforeLocalTail = 2;
+        };
+
     public:
         [[nodiscard]] static Ptr Create() { return new GeneratorFileComposer(); }
         ~GeneratorFileComposer() override = default;
@@ -62,6 +73,9 @@ namespace Ast
         void resetFileHeader() { _fileHeader.clear(); }
         [[nodiscard]] const String& resetFileHeader() const { return _fileHeader; }
 
+        void setStyleRules(const StyleRules& rules) noexcept { _styleRules = rules; }
+        [[nodiscard]] const StyleRules& getStyleRules() const noexcept { return _styleRules; }
+
     protected:
         GeneratorFileComposer() = default;
 
@@ -70,6 +84,8 @@ namespace Ast
             static std::shared_ptr<spdlog::logger> logger = spdlog::stdout_color_mt("GeneratorFileComposer");
             return logger.get();
         }
+
+        StyleRules _styleRules;
 
     private:
         std::unordered_map<String, BaseGenerator::Ptr> _generators;
