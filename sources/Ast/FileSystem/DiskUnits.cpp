@@ -26,7 +26,6 @@
 
 namespace Ast
 {
-    const char __BaseLogHeader_DiskUnit[] = "FileSystem";
 
     void DiskUnit::trySetParent(const Ptr& parent)
     {
@@ -93,7 +92,7 @@ namespace Ast
         }
         else
         {
-            logger->warn("Impossible to identify unit type(folder, file, etc) for this path: {}", path.generic_string());
+            globalLog.warnLog("Impossible to identify unit type(folder, file, etc) for this path: {}"_f << path.generic_string());
         }
 
         unit->_name = path.generic_string();
@@ -115,7 +114,7 @@ namespace Ast
     {
         if (path.empty() || !std::filesystem::exists(path))
         {
-            logger->error("Impossible to find a disk unit by the next path: ", path.generic_string());
+            globalLog.errorLog("Impossible to find a disk unit by the next path: " + path.generic_string());
             return nullptr;
         }
 
@@ -125,7 +124,7 @@ namespace Ast
 
         if (!unit->isValid())
         {
-            logger->error("Unit's component is invalid: {}", path.generic_string());
+            globalLog.errorLog("Unit's component is invalid: {}" + path.generic_string());
             Assert();
             return nullptr;
         }
@@ -142,7 +141,7 @@ namespace Ast
         {
             if (i->_name.isEmpty())
             {
-                logger->error("Can't return a path to a disk unit. Because name of the unit is not defined.");
+                globalLog.errorLog("Can't return a path to a disk unit. Because name of the unit is not defined.");
                 return {};
             }
             units.emplace_back(i->_name.toStdString());
@@ -179,9 +178,7 @@ namespace Ast
             return true;
         }
 
-        logger->warn(
-            ("Parse-hard name for file: '{}'. Path: '{}'. Hint: {}"_f << name.c_str() << getPath().generic_string() << NameValidator::GetHint())
-                .toStdStringView());
+        warnLog("Parse-hard name for file: '{}'. Path: '{}'. Hint: {}"_f << name.c_str() << getPath().generic_string() << NameValidator::GetHint());
 
         return false;
     }
@@ -211,7 +208,7 @@ namespace Ast
     {
         if (path.empty() || !std::filesystem::exists(path))
         {
-            logger->error("Impossible to find a disk unit by the next path: {}", path.generic_string());
+            globalLog.errorLog("Impossible to find a disk unit by the next path: {}"_f << path.generic_string());
             return nullptr;
         }
 
@@ -220,14 +217,14 @@ namespace Ast
         FillBaseInfo(unit.get(), path);
         if (unit->_type != DiskUnit::Type::Directory)
         {
-            logger->error("Attempt to read a disk unit as a directory is failed: {}", path.generic_string());
+            globalLog.errorLog("Attempt to read a disk unit as a directory is failed: {}"_f << path.generic_string());
             Assert();
             return nullptr;
         }
 
         if (!unit->isValid())
         {
-            logger->error("Unit's component is invalid: {}", path.generic_string());
+            globalLog.errorLog("Unit's component is invalid: {}"_f << path.generic_string());
             Assert();
             return nullptr;
         }
@@ -252,7 +249,7 @@ namespace Ast
         if (!isIgnoreDiskCheck && !child->isExistOnDisk())
         {
             Assert();
-            logger->error("Impossible to add child: {} - which not exists on the disk.", child->getPath().string());
+            errorLog("Impossible to add child: {} - which not exists on the disk."_f << child->getPath().string());
             return false;
         }
 
@@ -264,7 +261,7 @@ namespace Ast
                 if (p.empty())
                 {
                     Assert();
-                    logger->error(("Invalid path of the child: " + child->getName()).toStdStringView());
+                    errorLog("Invalid path of the child: {}"_f << child->getName());
                     return false;
                 }
 
@@ -292,11 +289,92 @@ namespace Ast
         _childs.erase(child);
     }
 
+    bool DirectoryUnit::hasChild(const String& name) const
+    {
+        return _childs.cend() != std::find_if(_childs.cbegin(), _childs.cend(),
+                                              [&name](const DiskUnit::Ptr& a)
+                                              {
+                                                  return a->getName() == name;
+                                              });
+    }
+
+    DiskUnit::Ptr DirectoryUnit::findChild(const String& name)
+    {
+        auto it = std::find_if(_childs.begin(), _childs.end(),
+                               [&name](const auto& a)
+                               {
+                                   return a->getName() == name;
+                               });
+
+        return it != _childs.end() ? *it : DiskUnit::Ptr();
+    }
+
+    DiskUnit::CPtr DirectoryUnit::findChild(const String& name) const
+    {
+        auto it = std::find_if(_childs.cbegin(), _childs.cend(),
+                               [&name](const auto& a)
+                               {
+                                   return a->getName() == name;
+                               });
+
+        return it != _childs.cend() ? *it : DiskUnit::Ptr();
+    }
+
+    DirectoryUnit::Ptr DirectoryUnit::makeOrGetDir(const std::filesystem::path& path)
+    {
+        auto* lastDir = this;
+        for (const auto& p : path)
+        {
+            auto name = String(p.generic_string());
+            if (name.isEmpty())
+            {
+                break;
+            }
+
+            auto child = lastDir->findChild(name).get();
+
+            if (!child)
+            {
+                lastDir = lastDir->addChildAndGetBack(DirectoryUnit::Create(name)).get();
+            }
+            else
+            {
+                lastDir = dynamic_cast<DirectoryUnit*>(child);
+                if (!lastDir)
+                {
+                    Assert();
+                    debugLog("Can't cast DiskUnit to DirectoryUnit.");
+                    return nullptr;
+                }
+            }
+
+            if (!lastDir->createOnDiskIfNotExists())
+            {
+                return nullptr;
+            }
+        }
+        return lastDir;
+    }
+
+    bool DirectoryUnit::createOnDiskIfNotExists()
+    {
+        std::error_code ec;
+        std::filesystem::create_directory(getPath(), ec);
+        if (ec)
+        {
+            criticalLog("Can't create a directory by the next path: {} - OS error code & message: #{} - {} "_f << getPath().generic_string()
+                                                                                                               << ec.value() << ec.message());
+            return false;
+        }
+
+        return true;
+    }
+
     FileUnit::Ptr FileUnit::CreateFromPath(const std::filesystem::path& path)
     {
         if (path.empty() || !std::filesystem::exists(path))
         {
-            logger->error("Impossible to find a disk unit by the next path: {}", path.generic_string());
+            globalLog.errorLog("Impossible to find a disk unit by the next path: {}"_f << path.generic_string());
             return nullptr;
         }
 
@@ -305,14 +383,14 @@ namespace Ast
         FillBaseInfo(unit.get(), path);
         if (unit->_type != DiskUnit::Type::File)
         {
-            logger->error("Attempt to read a disk unit as a file is failed: {}", path.generic_string());
+            globalLog.errorLog("Attempt to read a disk unit as a file is failed: {}"_f << path.generic_string());
             Assert();
             return nullptr;
         }
 
         if (!unit->isValid())
         {
-            logger->error("Unit's component is invalid: {}", path.generic_string());
+            globalLog.errorLog("Unit's component is invalid: {}"_f << path.generic_string());
             Assert();
             return nullptr;
         }
@@ -340,7 +418,7 @@ namespace Ast
         if (!out.is_open())
         {
             Assert();
-            logger->error("Impossible to open a file for write: " + getPath().generic_string());
+            criticalLog("Impossible to open a file for write: " + getPath().generic_string());
             return;
         }
 

@@ -22,23 +22,22 @@
 
 #pragma once
 
+#include "Ast/GeneratorFileComposer.h"
 #include "FileSystem/FSTree.h"
 #include "Tree.h"
 
 namespace Ast
 {
 
-    extern const char __BaseLogHeader_ProjectTree[];
-
-    class ProjectTree :
-        public BaseLog<__BaseLogHeader_ProjectTree>,
-        public Utils::NotCopyableButMoveable,
-        public boost::intrusive_ref_counter<ProjectTree>
+    class ProjectTree : public BaseLog, public Utils::NotCopyableButMoveable, public boost::intrusive_ref_counter<ProjectTree>
     {
     public:
         AST_CLASS(ProjectTree)
 
     public:
+        ProjectTree() = default;
+        ~ProjectTree() override = default;
+
         [[nodiscard]] static Ptr Create() { return { new ProjectTree }; }
 
         bool addIgnorePath(const String& path);
@@ -62,392 +61,33 @@ namespace Ast
         [[nodiscard]] std::optional<std::unordered_set<std::string>>& getAcceptableFileExtensions() { return _acceptableFileExtensions; }
         [[nodiscard]] const std::optional<std::unordered_set<std::string>>& getAcceptableFileExtensions() const { return _acceptableFileExtensions; }
 
+        // ======= FOR-EACHes ========
+        void forEach(const std::function<void(DiskUnit*)>& callback);
+        void forEachFiles(const std::function<void(FileUnit*)>& callback);
+        void forEachFilesWithData(const std::function<void(FileUnit*)>& callback);
+
+        void setGeneratorFileComposer(const GeneratorFileComposer::Ptr& composer) { _composer = composer; }
+
     protected:
         [[nodiscard]] bool scanFilesystem();
         virtual void onFinishScanFilesystem() {}
+
+    protected:
+        [[nodiscard]] spdlog::logger* getLogger() const final
+        {
+            static std::shared_ptr<spdlog::logger> logger = spdlog::stdout_color_mt("ProjectTree");
+            return logger.get();
+        }
 
     protected:
         FSTree::Ptr _fstree;
         std::filesystem::path _projectPath;
         std::vector<String> _ignoredPaths;
         std::optional<std::unordered_set<std::string>> _acceptableFileExtensions;
+        GeneratorFileComposer::Ptr _composer;
 
         // scan configs
         bool _ignoreSymlinks = false;
     };
 
 } // namespace Ast
-
-#ifdef false
-
-    #include "Readers/ContentStream.h"
-    #include "Tree.h"
-    #include "Utils/CopyableAndMoveableBehaviour.h"
-
-    #include <set>
-    #include <unordered_set>
-
-namespace Ast::Deprecated
-{
-    class deprProjectTree : public Utils::NotCopyableButMoveable, public boost::intrusive_ref_counter<deprProjectTree>
-    {
-    public:
-        AST_CLASS(deprProjectTree)
-
-        struct Config
-        {
-            bool noRewriteExistingUnitTree = false;
-        };
-
-        class Unit : public Utils::CopyableAndMoveable, public boost::intrusive_ref_counter<Unit>, public ITextSourceReader
-        {
-        public:
-            AST_CLASS(Unit);
-
-            inline static const char* generatedFileHeader_Head = "// Time of generation: ";
-            inline static const char* generatedFileHeader_Body = R"(// This file was generated automatically don't change it and don't remove it
-// If you see some compile errors you can fix it in the code-gen setup of
-// your project. If the issue was caused by core of the code-gen - find a
-// contact in the github repository and author will fix it.
-// Original file is:)";
-            inline static const char* generatedSuffixDecl = ".generated";
-
-            using Permission = std::filesystem::perms;
-
-            enum class Type
-            {
-                None,
-                File,
-                Folder,
-                Link
-            };
-
-        public:
-            explicit Unit(deprProjectTree* projectTree)
-                : _projectTree(projectTree) {};
-            ~Unit() override = default;
-
-            [[nodiscard]] bool IsGeneratedFile() const { return deprProjectTree::IsGeneratedFile(_path); }
-            [[nodiscard]] String GetGeneratedDummyHeader() const;
-            [[nodiscard]] String GetTextSource() override;
-
-            [[nodiscard]] static Ptr Create(deprProjectTree* projectTree) { return new Self(projectTree); }
-
-            [[nodiscard]] Type GetType() const { return _type; }
-            [[nodiscard]] bool IsFile() const { return _type == Type::File; }
-            [[nodiscard]] bool IsFolder() const { return _type == Type::Folder; }
-            [[nodiscard]] bool IsLink() const { return _type == Type::Link; }
-            [[nodiscard]] bool IsExistsOnDisk() const;
-
-            [[nodiscard]] std::filesystem::path GetPath() const { return _path; }
-            [[nodiscard]] const FileContentStream::Ptr& GetFileContentStream() const { return _contentStream; }
-            [[nodiscard]] FileContentStream::Ptr GetFileContentStream() { return _contentStream; }
-
-            [[nodiscard]] bool operator<(const Unit& rhs) const { return _path < rhs._path; }
-            [[nodiscard]] bool operator==(const Unit& rhs) const { return _path == rhs._path; }
-
-            template<class T>
-            Unit* AddChild(T&& unit)
-            {
-                return _AddChild(std::forward<T>(unit), false, false);
-            }
-
-            template<class T>
-            Unit* ForceAddChild(T&& unit)
-            {
-                return _AddChild(std::forward<T>(unit), true, true);
-            }
-
-            template<class T>
-            Unit* TryToAddChild(T&& unit)
-            {
-                return _AddChild(std::forward<T>(unit), false, true);
-            }
-
-            [[nodiscard]] bool HasChild(const Unit& unit) const;
-            [[nodiscard]] const Ptr FindChild(const Unit& unit) const;
-
-            [[nodiscard]] const Ptr& GetParent() const noexcept { return _parent; }
-            [[nodiscard]] Ptr GetParent() { return _parent; }
-
-            [[nodiscard]] static Unit CreateFromPath(const std::filesystem::path& path, deprProjectTree* projectTree);
-            [[nodiscard]] static Ptr CreatePtrFromPath(const std::filesystem::path& path, deprProjectTree* projectTree);
-
-            [[nodiscard]] Ptr GetUnitByPath(const std::filesystem::path& path);
-            [[nodiscard]] bool IsExistUnitByPath(const std::filesystem::path& path);
-
-            [[nodiscard]] uint64_t GetLastModificationTime() const;
-
-            /** @brief a subfolder will be created based on logic(will be added to _childs) and will be
-             * validated in the real path.
-             * If the path will not valid - you will get an assert and the folder will not be created on the hard disk.
-             */
-            Unit* LinkSubFolder(const String& name);
-
-            /** @brief a file will be created based on logic(will be added to _childs) and will be
-             * validated in the real path.
-             * If the path will not valid - you will get an assert and the file will not be created on the hard disk.
-             */
-            Unit* LinkSubFile(const String& name);
-
-            /**
-             * @brief Can take a functions of next types:
-             * bool([const] Unit*) - this function will work until it gets 'false' in return
-             * void([const] Unit*) - will iterate without stopping through all a tree
-             */
-            template<class FuncT>
-            void ForEach(FuncT&& callback)
-            {
-                ForEachImpl<false, FuncT>(this, std::forward<decltype(callback)>(callback));
-            }
-
-            /**
-             * @brief Can take a functions of next types:
-             * bool(const Unit*) - this function will work until it gets 'false' in return
-             * void(const Unit*) - will iterate without stopping through all a tree
-             */
-            template<class FuncT>
-            void ForEach(FuncT&& callback) const
-            {
-                ForEachImpl<true, FuncT>(this, std::forward<decltype(callback)>(callback));
-            }
-
-            [[nodiscard]] Tree<FileLexer>::AdaptivePtr<false> GetTree() { return _tree; }
-            [[nodiscard]] Tree<FileLexer>::AdaptivePtr<true> GetTree() const { return _tree; }
-
-            [[nodiscard]] Permission GetPermission() const noexcept { return _permission; }
-
-            [[nodiscard]] bool HasGeneratedSiblingFile() const;
-            [[nodiscard]] std::filesystem::path GetGeneratedSiblingFilePath() const;
-
-            virtual void RecalculateDirtyBasedOnTree()
-            {
-                // continue checking for is dirty or no
-                if (!_isDirty && _tree)
-                {
-                    // TODO: replace it with events
-                    _isDirty = _tree->HasAtLeastOneMarkedLexer();
-                }
-            }
-
-        protected:
-            // ================== PIMPLs =======================
-            template<bool IsConst, class FuncT>
-            static bool ForEachImpl(AdaptiveRawPtr<IsConst> base, FuncT&& callback)
-            {
-                if (base->IsFile())
-                {
-                    if constexpr (std::is_void_v<decltype(callback(base))>)
-                    {
-                        std::invoke(std::forward<decltype(callback)>(callback), base);
-                    }
-                    else
-                    {
-                        if (!std::invoke(std::forward<decltype(callback)>(callback), base))
-                        {
-                            return false;
-                        }
-                    }
-                }
-
-                for (auto& child : base->_childs)
-                {
-                    if (child)
-                    {
-                        if (!ForEachImpl<IsConst>(child.get(), std::forward<decltype(callback)>(callback)))
-                        {
-                            return false;
-                        }
-                    }
-                }
-
-                return true;
-            }
-
-            template<class T>
-            T* _AddChild(T&& unit, const bool isForce, const bool isIgnoreAssert)
-            {
-                if (!isForce)
-                {
-                    if (HasChild(unit))
-                    {
-                        Assert(isIgnoreAssert, ("Impossible to add already existing unit: " + unit.GetPath().string()).c_str());
-                        return nullptr;
-                    }
-                }
-
-                unit._parent = this;
-                auto it = _childs.emplace(Ptr(new Unit(std::move(unit))));
-
-                return it.second ? it.first->get() : nullptr;
-            }
-
-            template<class T>
-            T* _AddChild(boost::intrusive_ptr<T>&& unit, const bool isForce, const bool isIgnoreAssert)
-            {
-                if (!Verify(!!unit, "Was passed nullptr unit"))
-                {
-                    return nullptr;
-                }
-
-                if (!isForce)
-                {
-                    if (HasChild(*unit))
-                    {
-                        Assert(isIgnoreAssert, ("Impossible to add already existing unit: " + unit->GetPath().string()).c_str());
-                        return nullptr;
-                    }
-                }
-
-                unit->_parent = this;
-                auto it = _childs.emplace(std::move(unit));
-
-                return it.second ? it.first->get() : nullptr;
-            }
-
-            Unit* RawAddToChilds(Ptr&& unit);
-
-        protected:
-            [[nodiscard]] bool CheckByPathIfWasGenerated() const;
-            [[nodiscard]] uint64_t ExtrudeGenerationTime() const;
-
-        protected:
-            Permission _permission = Permission::none;
-            std::filesystem::path _path;
-            Type _type = Type::None;
-
-            bool _isDirty = false;
-            uint64_t _lastWriteTime = 0;
-
-            Tree<FileLexer>::Ptr _tree;
-            FileContentStream::Ptr _contentStream;
-
-            std::set<Ptr> _childs;
-            Ptr _parent;
-            deprProjectTree* const _projectTree;
-        };
-
-    public:
-        deprProjectTree() = default;
-        ~deprProjectTree() override = default;
-        deprProjectTree(deprProjectTree&&) = default;
-        deprProjectTree& operator=(deprProjectTree&&) = default;
-
-        [[nodiscard]] static Ptr Create() { return new Self; }
-
-        void Clear();
-
-        [[nodiscard]] bool IsValid() const;
-
-        [[nodiscard]] bool operator!() const { return IsValid(); }
-
-        void SetFileExtensions(std::vector<String> extensions);
-        [[nodiscard]] const std::set<String>& GetFileExtensions() const { return _fileExtensions; };
-
-        void ExcludeFromProject(std::filesystem::path path);
-        [[nodiscard]] bool IsExcludedPath(std::filesystem::path path) const;
-        [[nodiscard]] const std::unordered_set<std::filesystem::path>& GetExcludedPaths() const noexcept;
-
-        void SetTargetProject(const std::filesystem::path& path);
-        [[nodiscard]] std::filesystem::path GetTargetProject() const noexcept { return _root ? _root->GetPath() : std::filesystem::path(); }
-
-        void SetPreferableExtensionForGeneration(String str) { _preferableExtension = std::move(str); }
-        [[nodiscard]] const String& GetPreferableExtensionForGeneration() const { return _preferableExtension; }
-
-        bool Process();
-
-        template<IsParser ParserT, IsContentFilter ContentFilterT = void>
-        void ParseUsing()
-        {
-            ForEach(
-                [this](Unit* unit)
-                {
-                    if (unit->IsGeneratedFile())
-                    {
-                        return true;
-                    }
-
-                    if constexpr (!std::is_void_v<ContentFilterT>)
-                    {
-                        unit->GetFileContentStream()->ApplyFilters<ContentFilterT>();
-                    }
-
-                    if (auto* tree = unit->GetTree().get(); Verify(tree))
-                    {
-                        tree->ParseUsing<ParserT>();
-                        unit->RecalculateDirtyBasedOnTree();
-                    }
-
-                    return true;
-                });
-        }
-
-        // ==========================================================
-        // ================== WORKING WITH UNITS ====================
-        // ==========================================================
-        [[nodiscard]] Unit::AdaptivePtr<true> GetUnitByPath() const { return _root; }
-        [[nodiscard]] Unit::AdaptivePtr<false> GetUnitByPath() { return _root; }
-
-        [[nodiscard]] Unit::AdaptivePtr<true> GetUnitByPath(const std::filesystem::path& path) const
-        {
-            return _root && !path.empty() ? _root->GetUnitByPath(path) : nullptr;
-        }
-        [[nodiscard]] Unit::AdaptivePtr<false> GetUnitByPath(const std::filesystem::path& path)
-        {
-            return _root && !path.empty() ? _root->GetUnitByPath(path) : nullptr;
-        }
-
-        [[nodiscard]] Unit::AdaptivePtr<false> GetGeneratedFileOfUnit(const Unit::Ptr& unit);
-        [[nodiscard]] Unit::AdaptivePtr<true> GetGeneratedFileOfUnit(const Unit::CPtr& unit) const;
-        [[nodiscard]] Unit::AdaptivePtr<false> GetGeneratedFileOfUnit(const Unit& unit);
-        [[nodiscard]] Unit::AdaptivePtr<true> GetGeneratedFileOfUnit(const Unit& unit) const;
-        [[nodiscard]] bool IsNeedRegeneration(const Unit::CPtr& unit) const;
-        [[nodiscard]] bool IsNeedRegeneration(const Unit& unit) const;
-
-        /**
-         * @brief Can take a functions of next types:
-         * 1. bool(const Unit*) - this function will work until it gets 'false' in return
-         * 2. void(const Unit*) - will iterate without stopping through all a tree
-         */
-        template<class FuncT>
-        void ForEach(FuncT&& callback) const
-        {
-            if (_root)
-            {
-                static_cast<const Unit*>(_root.get())->template ForEach<FuncT>(std::forward<decltype(callback)>(callback));
-            }
-        }
-        /**
-         * @brief Can take a functions of next types:
-         * 1. bool([const] Unit*) - this function will work until it gets 'false' in return
-         * 2. void([const] Unit*) - will iterate without stopping through all a tree
-         */
-        template<class FuncT>
-        void ForEach(FuncT&& callback)
-        {
-            if (_root)
-            {
-                _root->template ForEach<FuncT>(std::forward<decltype(callback)>(callback));
-            }
-        }
-
-        [[nodiscard]] const Config& GetConfig() const noexcept { return _config; }
-        void SetConfig(const Config& config) noexcept { _config = config; }
-
-    protected:
-        [[nodiscard]] static bool IsGeneratedFile(const std::filesystem::path& path);
-        [[nodiscard]] bool IsValidExtension(const std::filesystem::path& path) const;
-        void ProcessFile(const std::filesystem::path& folders, const std::filesystem::path& fullPath);
-        void IterateOverDirectory(const std::filesystem::path& path);
-
-    protected:
-        std::set<String> _fileExtensions;
-        Unit::Ptr _root;
-        std::unordered_set<std::filesystem::path> _excluded;
-        Config _config;
-        String _preferableExtension;
-    };
-
-} // namespace Ast::Deprecated
-
-#endif

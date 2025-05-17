@@ -33,9 +33,7 @@
 
 namespace Ast
 {
-    extern const char __BaseLogHeader_DiskUnit[];
-
-    class DiskUnit : public BaseLog<__BaseLogHeader_DiskUnit>, public Utils::NotCopyableButMoveable, public boost::intrusive_ref_counter<DiskUnit>
+    class DiskUnit : public BaseLog, public Utils::NotCopyableButMoveable, public boost::intrusive_ref_counter<DiskUnit>
     {
     public:
         AST_CLASS(DiskUnit)
@@ -126,6 +124,11 @@ namespace Ast
 
     protected:
         static void FillBaseInfo(DiskUnit* unit, const std::filesystem::path& path);
+        [[nodiscard]] spdlog::logger* getLogger() const final
+        {
+            static std::shared_ptr<spdlog::logger> logger = spdlog::stdout_color_mt("DiskUnit");
+            return logger.get();
+        }
 
     protected:
         uint64_t _lastWriteTime = 0;
@@ -161,6 +164,12 @@ namespace Ast
 
         bool addChild(const DiskUnit::Ptr& child, bool isIgnoreDiskCheck = true);
 
+        [[nodiscard]] bool hasChild(const String& name) const;
+        [[nodiscard]] DiskUnit::Ptr findChild(const String& name);
+        [[nodiscard]] DiskUnit::CPtr findChild(const String& name) const;
+
+        [[nodiscard]] DirectoryUnit::Ptr makeOrGetDir(const std::filesystem::path& path);
+
         template<class T>
         [[nodiscard]] boost::intrusive_ptr<T> addChildAndGetBack(const boost::intrusive_ptr<T>& child, bool isIgnoreDiskCheck = true)
         {
@@ -176,6 +185,8 @@ namespace Ast
 
         [[nodiscard]] std::unordered_set<DiskUnit::Ptr>& getChilds() { return _childs; }
         [[nodiscard]] const std::unordered_set<DiskUnit::Ptr>& getChilds() const { return _childs; }
+
+        [[nodiscard]] bool createOnDiskIfNotExists();
 
         /**
          * @brief Can take a functions of next types:

@@ -30,7 +30,6 @@
 
 namespace Ast
 {
-    const char __BaseLogHeader_Lexer[] = "Lexer";
 
     bool BaseLexer::operator==(const BaseLexer& other) const
     {
@@ -62,7 +61,7 @@ namespace Ast
             return false;
         }
 
-        logger->debug(("Successful parsing of the {}: '{}'"_f << _lexerType << _lexerName).toStdStringView());
+        debugLog("Successful parsing of the {}: '{}'"_f << _lexerType << _lexerName);
 
         return IsValid();
     }

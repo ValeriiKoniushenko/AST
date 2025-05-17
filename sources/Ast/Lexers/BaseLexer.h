@@ -47,8 +47,6 @@ namespace Ast
     template<class T>
     concept IsLexerOrBase = IsLexer<T> || std::is_base_of_v<BaseLexer, T>;
 
-    extern const char __BaseLogHeader_Lexer[];
-
     /**
      * @brief Base class for all derived lexer
      * @details Never let for a user to create derived class without using of smart pointers
@@ -67,7 +65,7 @@ namespace Ast
         public virtual ::Utils::CopyableAndMoveable,
         public ITextSourceReader,
         public boost::intrusive_ref_counter<BaseLexer>,
-        public BaseLog<__BaseLogHeader_Lexer>
+        public BaseLog
     {
     public:
         AST_CLASS(BaseLexer)
@@ -248,6 +246,12 @@ namespace Ast
 
         virtual void OnParse() {}
         virtual void ValidateMark() {}
+
+        [[nodiscard]] spdlog::logger* getLogger() const final
+        {
+            static std::shared_ptr<spdlog::logger> logger = spdlog::stdout_color_mt("Lexer");
+            return logger.get();
+        }
 
         BaseLexer(const ContentStream::Ptr& reader, const String& type);
 

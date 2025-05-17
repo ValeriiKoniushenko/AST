@@ -34,14 +34,14 @@ namespace Ast
         if (!tree->_root)
         {
             Assert();
-            logger->error("Impossible to create a FSTree");
+            globalLog.errorLog("Impossible to create a FSTree");
             return nullptr;
         }
 
         if (!tree->_root->isValid())
         {
             Assert();
-            logger->error("Impossible to create a FSTree: invalid root folder");
+            globalLog.errorLog("Impossible to create a FSTree: invalid root folder");
             return nullptr;
         }
 
@@ -72,7 +72,7 @@ namespace Ast
             }
             catch (const std::filesystem::filesystem_error& er)
             {
-                logger->warn(("Can't detect file status. Details: {}"_f << er.what()).toStdStringView());
+                globalLog.warnLog("Can't detect file status. Details: {}"_f << er.what());
                 return;
             }
 
@@ -96,7 +96,7 @@ namespace Ast
             {
                 if (!entry.is_regular_file())
                 {
-                    logger->warn(
+                    globalLog.warnLog(
                         "Trying to read a physical file tree. Was met NON-file(and non-dir) entry. It will be considered as regular file. Not supporting other types. Path: " +
                         entry.path().string());
                 }

@@ -29,20 +29,66 @@
 namespace Ast
 {
 
-    template <const char* sinkName>
     class BaseLog
     {
     public:
-        void infoLog(const char* str) { logger->info(str); }
+        void infoLog(const char* str) const { getPrefix() ? getLogger()->info("{}: {}", getPrefix(), str) : getLogger()->info("{}", str); }
 
-        void infoLog(const std::string& str) { infoLog(str.c_str()); }
+        void infoLog(const std::string& str) const { infoLog(str.c_str()); }
 
-        void infoLog(const String& str) { infoLog(str.c_str()); }
+        void infoLog(const String& str) const { infoLog(str.c_str()); }
 
-        void infoLog(const Core::StringFormatter<char>& str) { infoLog(str.c_str()); }
+        void infoLog(const Core::StringFormatter<char>& str) const { infoLog(str.c_str()); }
 
-        // private:
-        inline static std::shared_ptr<spdlog::logger> logger = spdlog::stdout_color_mt(sinkName);
+        void warnLog(const char* str) const { getPrefix() ? getLogger()->warn("{}: {}", getPrefix(), str) : getLogger()->warn("{}", str); }
+
+        void warnLog(const std::string& str) const { warnLog(str.c_str()); }
+
+        void warnLog(const String& str) const { warnLog(str.c_str()); }
+
+        void warnLog(const Core::StringFormatter<char>& str) const { warnLog(str.c_str()); }
+
+        void criticalLog(const char* str) const
+        {
+            getPrefix() ? getLogger()->critical("{}: {}", getPrefix(), str) : getLogger()->critical("{}", str);
+        }
+
+        void criticalLog(const std::string& str) const { criticalLog(str.c_str()); }
+
+        void criticalLog(const String& str) const { criticalLog(str.c_str()); }
+
+        void criticalLog(const Core::StringFormatter<char>& str) const { criticalLog(str.c_str()); }
+
+        void errorLog(const char* str) const { getPrefix() ? getLogger()->error("{}: {}", getPrefix(), str) : getLogger()->error("{}", str); }
+
+        void errorLog(const std::string& str) const { errorLog(str.c_str()); }
+
+        void errorLog(const String& str) const { errorLog(str.c_str()); }
+
+        void errorLog(const Core::StringFormatter<char>& str) const { errorLog(str.c_str()); }
+
+        void debugLog(const char* str) const { getPrefix() ? getLogger()->debug("{}: {}", getPrefix(), str) : getLogger()->debug("{}", str); }
+
+        void debugLog(const std::string& str) const { debugLog(str.c_str()); }
+
+        void debugLog(const String& str) const { debugLog(str.c_str()); }
+
+        void debugLog(const Core::StringFormatter<char>& str) const { debugLog(str.c_str()); }
+
+        [[nodiscard]] virtual const char* getPrefix() const { return nullptr; }
+        [[nodiscard]] virtual spdlog::logger* getLogger() const = 0;
     };
+
+    class GlobalLog : public BaseLog
+    {
+    public:
+        [[nodiscard]] spdlog::logger* getLogger() const final
+        {
+            static std::shared_ptr<spdlog::logger> logger = spdlog::stdout_color_mt("Global");
+            return logger.get();
+        }
+    };
+
+    extern GlobalLog globalLog;
 
 } // namespace Ast

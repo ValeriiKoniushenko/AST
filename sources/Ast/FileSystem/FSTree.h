@@ -29,7 +29,7 @@
 namespace Ast
 {
 
-    class FSTree : public boost::intrusive_ref_counter<FSTree>, public Utils::CopyableAndMoveable, public BaseLog<__BaseLogHeader_DiskUnit>
+    class FSTree : public boost::intrusive_ref_counter<FSTree>, public Utils::CopyableAndMoveable, public BaseLog
     {
     public:
         AST_CLASS(FSTree)
@@ -87,10 +87,29 @@ namespace Ast
         }
 
         [[nodiscard]] DiskUnit::Ptr getRoot() { return _root; }
+
+        template<class T>
+        [[nodiscard]] T::Ptr getRootAs()
+        {
+            return boost::dynamic_pointer_cast<T>(_root);
+        }
+        template<class T>
+        [[nodiscard]] T::CPtr getRootAs() const
+        {
+            return boost::dynamic_pointer_cast<const T>(_root);
+        }
+
         [[nodiscard]] DiskUnit::CPtr getRoot() const { return _root; }
 
         void prettyPrint(std::function<PrettyInfo(const DiskUnit*)>&& pred = nullptr);
         [[nodiscard]] uint64_t calculateUnitsCount() const;
+
+    protected:
+        [[nodiscard]] spdlog::logger* getLogger() const final
+        {
+            static std::shared_ptr<spdlog::logger> logger = spdlog::stdout_color_mt("Parser");
+            return logger.get();
+        }
 
     private:
         DiskUnit::Ptr _root = nullptr;
