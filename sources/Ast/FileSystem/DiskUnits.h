@@ -168,7 +168,7 @@ namespace Ast
         [[nodiscard]] DiskUnit::Ptr findChild(const String& name);
         [[nodiscard]] DiskUnit::CPtr findChild(const String& name) const;
 
-        [[nodiscard]] DirectoryUnit::Ptr makeOrGetDir(const std::filesystem::path& path);
+        [[nodiscard]] DirectoryUnit::Ptr makeOrGetDir(const std::filesystem::path& path, bool isIgnoreDiskProcessing = true);
 
         template<class T>
         [[nodiscard]] boost::intrusive_ptr<T> addChildAndGetBack(const boost::intrusive_ptr<T>& child, bool isIgnoreDiskCheck = true)

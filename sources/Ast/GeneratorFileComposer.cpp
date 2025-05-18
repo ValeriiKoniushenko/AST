@@ -37,7 +37,7 @@ namespace Ast
             return i->second.get();
         }
 
-        errorLog("Generator for this lexer '{}' not found."_f << name);
+        // errorLog("Generator for this lexer '{}' not found."_f << name);
         return nullptr;
     }
 
@@ -47,8 +47,14 @@ namespace Ast
     }
 
     void GeneratorFileComposer::generate(const std::vector<BaseLexer*>& lexers, const std::filesystem::path& path, const DiskUnit* originFile,
-                                         const std::filesystem::path& projectPath)
+                                         const std::filesystem::path& projectPath, DirectoryUnit* targetDir)
     {
+        if (!targetDir) [[unlikely]]
+        {
+            Assert();
+            return;
+        }
+
         infoLog("Generation of file: " + originFile->getPath().lexically_relative(projectPath).generic_string());
 
         std::set<String> globalHead;
@@ -76,8 +82,10 @@ namespace Ast
 
             generator->setLexer(lexer);
 
-            globalHead.merge(generator->getGlobalHead());
-            globalTail.merge(generator->getGlobalTail());
+            auto tmpHead = generator->getGlobalHead();
+            auto tmpTail = generator->getGlobalTail();
+            globalHead.merge(tmpHead);
+            globalTail.merge(tmpTail);
 
             if (!body.isEmpty())
             {
@@ -88,6 +96,16 @@ namespace Ast
             body += generator->generateBody();
             body += getBlanks(_styleRules.blanksBeforeLocalTail);
             body += generator->generateLocalTail();
+        }
+
+        if (body.isEmpty())
+        {
+            return;
+        }
+
+        if (!targetDir->createOnDiskIfNotExists())
+        {
+            return;
         }
 
         String fullHeader(1024);

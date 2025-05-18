@@ -320,7 +320,7 @@ namespace Ast
         return it != _childs.cend() ? *it : DiskUnit::Ptr();
     }
 
-    DirectoryUnit::Ptr DirectoryUnit::makeOrGetDir(const std::filesystem::path& path)
+    DirectoryUnit::Ptr DirectoryUnit::makeOrGetDir(const std::filesystem::path& path, bool isIgnoreDiskProcessing /* = true*/)
     {
         auto* lastDir = this;
         for (const auto& p : path)
@@ -348,9 +348,12 @@ namespace Ast
                 }
             }
 
-            if (!lastDir->createOnDiskIfNotExists())
+            if (!isIgnoreDiskProcessing)
             {
-                return nullptr;
+                if (!lastDir->createOnDiskIfNotExists())
+                {
+                    return nullptr;
+                }
             }
         }
         return lastDir;
@@ -359,11 +362,12 @@ namespace Ast
     bool DirectoryUnit::createOnDiskIfNotExists()
     {
         std::error_code ec;
-        std::filesystem::create_directory(getPath(), ec);
+        const auto path = getPath();
+        std::filesystem::create_directories(path, ec);
         if (ec)
         {
-            criticalLog("Can't create a directory by the next path: {} - OS error code & message: #{} - {} "_f << getPath().generic_string()
-                                                                                                               << ec.value() << ec.message());
+            criticalLog("Can't create a directory by the next path: {} - OS error code & message: #{} - {} "_f << path.generic_string() << ec.value()
+                                                                                                               << ec.message());
             return false;
         }
 

@@ -30,6 +30,7 @@
 namespace Ast
 {
     class DiskUnit;
+    class DirectoryUnit;
 
     class GeneratorFileComposer : public BaseLog, public Utils::NotCopyableButMoveable, public boost::intrusive_ref_counter<GeneratorFileComposer>
     {
@@ -69,7 +70,7 @@ namespace Ast
         [[nodiscard]] BaseGenerator* getGenerator(const BaseLexer* lexer);
 
         void generate(const std::vector<BaseLexer*>& lexers, const std::filesystem::path& path, const DiskUnit* originFile,
-                      const std::filesystem::path& projectPath);
+                      const std::filesystem::path& projectPath, DirectoryUnit* targetDir);
 
         void setFileHeader(const String& header) { _fileHeader = header; }
         void resetFileHeader() { _fileHeader.clear(); }
