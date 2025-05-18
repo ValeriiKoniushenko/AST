@@ -46,13 +46,13 @@ namespace Ast
         return getGenerator(lexer->GetLexerType());
     }
 
-    void GeneratorFileComposer::generate(const std::vector<BaseLexer*>& lexers, const std::filesystem::path& path, const DiskUnit* originFile,
+    bool GeneratorFileComposer::generate(const std::vector<BaseLexer*>& lexers, const std::filesystem::path& targetPath, const DiskUnit* originFile,
                                          const std::filesystem::path& projectPath, DirectoryUnit* targetDir)
     {
         if (!targetDir) [[unlikely]]
         {
             Assert();
-            return;
+            return false;
         }
 
         infoLog("Generation of file: " + originFile->getPath().lexically_relative(projectPath).generic_string());
@@ -100,12 +100,12 @@ namespace Ast
 
         if (body.isEmpty())
         {
-            return;
+            return false;
         }
 
         if (!targetDir->createOnDiskIfNotExists())
         {
-            return;
+            return false;
         }
 
         String fullHeader(1024);
@@ -127,16 +127,19 @@ namespace Ast
         }
 
         const String headerFileDescription = getHeaderFileDescription(originFile, projectPath);
-        std::ofstream out(path);
+        std::ofstream out(targetPath);
         if (!out.is_open())
         {
-            criticalLog("Can't put generated content to file. Impossible to open or create the next file for write: {}"_f << path.generic_string());
-            return;
+            criticalLog("Can't put generated content to file. Impossible to open or create the next file for write: {}"_f
+                        << targetPath.generic_string());
+            return false;
         }
         out.write(headerFileDescription.c_str(), headerFileDescription.byteSize());
         out.write(fullHeader.c_str(), fullHeader.byteSize());
         out.write(body.c_str(), body.byteSize());
         out.write(fullTail.c_str(), fullTail.byteSize());
+
+        return true;
     }
 
     String GeneratorFileComposer::getHeaderFileDescription(const DiskUnit* originFile, const std::filesystem::path& projectPath) const

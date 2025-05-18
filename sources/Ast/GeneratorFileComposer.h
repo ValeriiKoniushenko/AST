@@ -69,8 +69,8 @@ namespace Ast
         [[nodiscard]] BaseGenerator* getGenerator(const String& name);
         [[nodiscard]] BaseGenerator* getGenerator(const BaseLexer* lexer);
 
-        void generate(const std::vector<BaseLexer*>& lexers, const std::filesystem::path& path, const DiskUnit* originFile,
-                      const std::filesystem::path& projectPath, DirectoryUnit* targetDir);
+        [[nodiscard]] bool generate(const std::vector<BaseLexer*>& lexers, const std::filesystem::path& targetPath, const DiskUnit* originFile,
+                                    const std::filesystem::path& projectPath, DirectoryUnit* targetDir);
 
         void setFileHeader(const String& header) { _fileHeader = header; }
         void resetFileHeader() { _fileHeader.clear(); }
