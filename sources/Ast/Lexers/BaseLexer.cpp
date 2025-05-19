@@ -191,7 +191,7 @@ namespace Ast
         _openScope.reset();
         _closeScope.reset();
         _lexerName.clear();
-        _parentLexer.reset();
+        _parentLexer = nullptr;
         _childLexers.clear();
     }
 

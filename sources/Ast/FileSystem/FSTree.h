@@ -121,11 +121,11 @@ namespace Ast
         {
             if constexpr (std::is_void_v<decltype(callback(base))>)
             {
-                std::invoke(std::forward<decltype(callback)>(callback), base);
+                std::invoke(callback, base);
             }
             else
             {
-                if (!std::invoke(std::forward<decltype(callback)>(callback), base))
+                if (!std::invoke(callback, base))
                 {
                     return false;
                 }
@@ -137,7 +137,7 @@ namespace Ast
                 {
                     if (child)
                     {
-                        if (!ForEachImpl<IsConst>(child.get(), std::forward<decltype(callback)>(callback)))
+                        if (!ForEachImpl<IsConst>(child.get(), callback))
                         {
                             return false;
                         }

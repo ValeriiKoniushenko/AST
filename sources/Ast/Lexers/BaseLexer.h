@@ -267,7 +267,7 @@ namespace Ast
 
         const String _lexerType;
         String _lexerName = "none"_atom;
-        Ptr _parentLexer;
+        BaseLexer* _parentLexer;
         std::vector<Ptr> _childLexers;
 
     private:
