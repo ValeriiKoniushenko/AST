@@ -21,13 +21,13 @@
 #pragma once
 
 #include "Ast/CommonTypes.h"
-#include "Utils/CopyableAndMoveableBehaviour.h"
+#include "Core/Singleton.h"
 
 #include <map>
 
 namespace Ast
 {
-    class TextSourceConfig : public Core::Singleton<TextSourceConfig, ::Utils::NotCopyableAndNotMoveable>
+    class TextSourceConfig : public Core::StrictSingleton<TextSourceConfig>
     {
     public:
         enum class EndLineType
@@ -90,10 +90,6 @@ namespace Ast
 
             return indents;
         }
-
-    protected:
-        TextSourceConfig() = default;
-        friend Singleton;
 
     private:
         CodeStyle _codeStyle;
