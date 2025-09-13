@@ -12,4 +12,4 @@ set_target_properties(ASTCore PROPERTIES LINKER_LANGUAGE CXX)
 target_include_directories(ASTCore PUBLIC ../)
 target_link_libraries(ASTCore PUBLIC Utils boost_smart_ptr Ast::RapidXML spdlog)
 
-include(CheckCXXCompilerFlag)
+AstAddCompileOptionsTo(ASTCore)

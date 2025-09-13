@@ -178,7 +178,7 @@ namespace Ast
             file.getline(line, sizeof(line));
         }
 
-        for (int i = 0; i < sizeof(line) && line[i]; ++i)
+        for (std::size_t i = 0; i < sizeof(line) && line[i]; ++i)
         {
             if (std::isdigit(line[i]))
             {
