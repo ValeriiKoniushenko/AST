@@ -1,3 +1,5 @@
+include_guard()
+
 include(FetchContent)
 
 function(installBoostModule module_name boost_version)

@@ -4,12 +4,10 @@ project(AST VERSION 1.0 LANGUAGES CXX)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/Flags.cmake)
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/Features.cmake)
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/Predefinitions.cmake)
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/FetchDependencies.cmake)
-
 
 # ========= Base setup & Predefinitions =========
 set(CMAKE_CXX_STANDARD_REQUIRED YES)
