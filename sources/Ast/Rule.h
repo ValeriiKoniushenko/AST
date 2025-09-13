@@ -35,8 +35,7 @@ namespace Ast
     public:
         AST_CLASS(Rule)
 
-        [[nodiscard]] virtual bool IsCorrespondingTheRules(const BaseLexer* lexer,
-                                                           const char* additionalMessage = nullptr) const = 0;
+        [[nodiscard]] virtual bool IsCorrespondingTheRules(const BaseLexer* lexer, const char* additionalMessage = nullptr) const = 0;
 
         [[nodiscard]] spdlog::level::level_enum GetLevel() const noexcept { return _logLevel; }
         void SetLevel(spdlog::level::level_enum logLevel) noexcept { _logLevel = logLevel; }

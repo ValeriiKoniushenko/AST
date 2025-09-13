@@ -116,9 +116,11 @@ namespace Ast
             {
                 const auto maxSize = IsValid() ? _lexer->GetChildLexers().size() : -1;
                 const String lexerName = IsValid() && _lexer->IsValid() ? _lexer->GetLexerName() : "";
-                Assert(
-                    false,
-                    String::Format("Impossible to move the LexerIterator's index for {}. Current index: {}; max size: {}. Lexer name: '{}'", step, _currentLexer, maxSize).c_str(), lexerName);
+                Assert(false,
+                       String::Format("Impossible to move the LexerIterator's index for {}. Current index: {}; max size: {}. Lexer name: '{}'", step,
+                                      _currentLexer, maxSize)
+                           .c_str(),
+                       lexerName);
             }
             _currentLexer += step;
 
@@ -138,9 +140,11 @@ namespace Ast
             {
                 const auto maxSize = IsValid() ? _lexer->GetChildLexers().size() : -1;
                 const String lexerName = IsValid() && _lexer->IsValid() ? _lexer->GetLexerName() : "";
-                Assert(
-                    false,
-                    String::Format("Impossible to move the LexerIterator's index for {}. Current index: {}; max size: {}. Lexer name: '{}'", step, _currentLexer, maxSize).c_str(), lexerName);
+                Assert(false,
+                       String::Format("Impossible to move the LexerIterator's index for {}. Current index: {}; max size: {}. Lexer name: '{}'", step,
+                                      _currentLexer, maxSize)
+                           .c_str(),
+                       lexerName);
             }
             _currentLexer += step;
 
@@ -161,30 +165,15 @@ namespace Ast
             return tmp;
         }
 
-        [[nodiscard]] bool operator>(const LexerIterator& other) const noexcept override
-        {
-            return _currentLexer > other._currentLexer;
-        }
+        [[nodiscard]] bool operator>(const LexerIterator& other) const noexcept override { return _currentLexer > other._currentLexer; }
 
-        [[nodiscard]] bool operator>=(const LexerIterator& other) const noexcept override
-        {
-            return _currentLexer >= other._currentLexer;
-        }
+        [[nodiscard]] bool operator>=(const LexerIterator& other) const noexcept override { return _currentLexer >= other._currentLexer; }
 
-        [[nodiscard]] bool operator<(const LexerIterator& other) const noexcept override
-        {
-            return _currentLexer < other._currentLexer;
-        }
+        [[nodiscard]] bool operator<(const LexerIterator& other) const noexcept override { return _currentLexer < other._currentLexer; }
 
-        [[nodiscard]] bool operator<=(const LexerIterator& other) const noexcept override
-        {
-            return _currentLexer <= other._currentLexer;
-        }
+        [[nodiscard]] bool operator<=(const LexerIterator& other) const noexcept override { return _currentLexer <= other._currentLexer; }
 
-        void Swap(LexerIterator& other) override
-        {
-            std::swap(*this, other);
-        }
+        void Swap(LexerIterator& other) override { std::swap(*this, other); }
 
         [[nodiscard]] bool IsValid() const noexcept { return _lexer; }
 

@@ -211,7 +211,7 @@ namespace Ast
 
     void BaseLexer::OnGetAsXml(Xml& xml, XmlNode* output) const
     {
-        auto* mainNode = xml.allocate_node(rapidxml::node_element, "lexer");
+        auto* mainNode = xml.allocate_node(rapidxml::node_type::node_element, "lexer");
         mainNode->append_attribute(xml.allocate_attribute("type", _lexerType.c_str()));
         mainNode->append_attribute(xml.allocate_attribute("name", _lexerName.c_str()));
         if (Verify(!!_reader))
@@ -226,19 +226,19 @@ namespace Ast
 
         if (_marking)
         {
-            auto* markNode = xml.allocate_node(rapidxml::node_element, "marking");
+            auto* markNode = xml.allocate_node(rapidxml::node_type::node_element, "marking");
             markNode->append_attribute(xml.allocate_attribute("rule", _marking->rule.c_str()));
             for (const auto& param : _marking->params)
             {
-                markNode->append_node(xml.allocate_node(rapidxml::node_element, "param", param.c_str()));
+                markNode->append_node(xml.allocate_node(rapidxml::node_type::node_element, "param", param.c_str()));
             }
             mainNode->append_node(markNode);
         }
 
-        auto* childsNode = xml.allocate_node(rapidxml::node_element, "childs");
+        auto* childsNode = xml.allocate_node(rapidxml::node_type::node_element, "childs");
         mainNode->append_node(childsNode);
 
-        auto* infoNode = xml.allocate_node(rapidxml::node_element, "additional_info");
+        auto* infoNode = xml.allocate_node(rapidxml::node_type::node_element, "additional_info");
         mainNode->append_node(infoNode);
         OnPutAdditionalInfoToXml(xml, infoNode);
 

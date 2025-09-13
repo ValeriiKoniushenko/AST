@@ -107,10 +107,7 @@ namespace Ast
         };
 
         [[nodiscard]] virtual String GetTextSource() = 0;
-        [[nodiscard]] bool TextSourceWasGenerated()
-        {
-            return _textSourceWasGenerated;
-        }
+        [[nodiscard]] bool TextSourceWasGenerated() { return _textSourceWasGenerated; }
 
         struct Code
         {

@@ -22,7 +22,7 @@
 
 #include "DiskUnits.h"
 
-#include "../../dependencies/Utils/sources/Utils/Functions.h"
+#include "Utils/Functions.h"
 
 namespace Ast
 {
@@ -245,7 +245,7 @@ namespace Ast
         {
             return false;
         }
-        
+
         if (!isIgnoreDiskCheck && !child->isExistOnDisk())
         {
             Assert();

@@ -29,10 +29,11 @@ namespace Ast::Utils
 
     [[nodiscard]] const String::CharT* FindFirstBracket(const String::CharT* source, String::CharT bracket);
     [[nodiscard]] const String::CharT* FindClosedBracket(const String::CharT* source, String::CharT closedBracket, String::CharT openedBracket);
-    [[nodiscard]] const String::CharT* FindClosedBracketR(const String::CharT* source, String::CharT closedBracket, String::CharT openedBracket, const String::CharT* const stopPointBegin);
+    [[nodiscard]] const String::CharT* FindClosedBracketR(const String::CharT* source, String::CharT closedBracket, String::CharT openedBracket,
+                                                          const String::CharT* const stopPointBegin);
     [[nodiscard]] bool HasUnclosedBracket(const String::CharT* from, const String::CharT* to, String::CharT closedBracket,
                                           String::CharT openedBracket);
-    
+
     [[nodiscard]] const String::CharT* TryToSkipAnyQuotes(const String::CharT* src);
     [[nodiscard]] const String::CharT* SkipDoubleQuotes(const String::CharT* src);
     [[nodiscard]] const String::CharT* SkipSingleQuotes(const String::CharT* src);

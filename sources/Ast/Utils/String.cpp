@@ -24,7 +24,8 @@
 
 namespace Ast::Utils
 {
-    const String::CharT* SkipBracketsR(const BaseLexer* lexer, const String::CharT* str, String::CharT openBracket, String::CharT closedBracket, const String::CharT* const stopPointBegin)
+    const String::CharT* SkipBracketsR(const BaseLexer* lexer, const String::CharT* str, String::CharT openBracket, String::CharT closedBracket,
+                                       const String::CharT* const stopPointBegin)
     {
         if (!Verify(lexer->GetTokenReader().IsValid()) || !Verify(str))
         {

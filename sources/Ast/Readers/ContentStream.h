@@ -97,19 +97,13 @@ namespace Ast
             ApplyFilters<Filter...>();
         }
 
-        void SetFilePath(const std::filesystem::path& path)
-        {
-            _path = path;
-        }
+        void SetFilePath(const std::filesystem::path& path) { _path = path; }
 
         bool ReadFromFile(const std::filesystem::path& path);
 
         ~FileContentStream() override = default;
 
-        [[nodiscard]] String GetFilePath() const override
-        {
-            return String::MakeFrom(_path);
-        }
+        [[nodiscard]] String GetFilePath() const override { return String::MakeFrom(_path); }
 
     protected:
         void OnPut() override;

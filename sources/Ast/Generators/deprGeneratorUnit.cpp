@@ -94,7 +94,7 @@ namespace Ast
 
     void GeneratorUnit::RequireValidLexers() const
     {
-#ifdef AST_DEBUG
+    #ifdef AST_DEBUG
         if (_lexers.empty())
         {
             return;
@@ -167,7 +167,7 @@ namespace Ast
         }
 
         (void)std::ranges::all_of(_lexers, checkLexer);
-#endif
+    #endif
     }
 
 #endif

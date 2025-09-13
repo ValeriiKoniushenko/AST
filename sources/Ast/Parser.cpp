@@ -19,6 +19,7 @@
 // SOFTWARE.
 
 #include "Parser.h"
+
 #include "Readers/ContentStream.h"
 
 namespace Ast
