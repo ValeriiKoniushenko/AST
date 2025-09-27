@@ -41,13 +41,13 @@ namespace Ast
 
         if (!lexer->IsValid())
         {
-            Assert();
+            ASSERT(false);
             return false;
         }
 
         if (lexer->GetLexerType() != _type)
         {
-            Assert();
+            ASSERT(false);
             return false;
         }
 
@@ -106,21 +106,21 @@ namespace Ast
         {
             if (inputLexer == nullptr)
             {
-                Assert();
+                ASSERT(false);
                 spdlog::error(("Nullptr lexer was passed into GeneratorUnit of type '{}'"_f << _type).toStdStringView());
                 return false;
             }
 
             if (!inputLexer->IsValid())
             {
-                Assert();
+                ASSERT(false);
                 spdlog::error(("Invalid lexer was passed into GeneratorUnit of type '{}'"_f << _type).toStdStringView());
                 return false;
             }
 
             if (inputLexer->GetLexerType() != _type)
             {
-                Assert();
+                ASSERT(false);
                 spdlog::error(("Invalid lexer's type was passed into GeneratorUnit of type '{}'. Lexer name is '{}'; and type is '{}'"_f
                               << _type << inputLexer->GetLexerName() << inputLexer->GetLexerType()).toStdStringView());
                 return false;
@@ -128,7 +128,7 @@ namespace Ast
 
             if (!inputLexer->GetReader())
             {
-                Assert();
+                ASSERT(false);
                 spdlog::error(("Nullptr lexer's Reader was passed into GeneratorUnit of type '{}'. Lexer name is '{}'; and type is '{}'"_f
                               << _type << inputLexer->GetLexerName() << inputLexer->GetLexerType()).toStdStringView());
                 return false;
@@ -141,7 +141,7 @@ namespace Ast
                 if (strPath.isEmpty() || strPath == "none"_atom || validPath.empty() || !std::filesystem::exists(validPath))
                 {
                     validPath.clear();
-                    Assert();
+                    ASSERT(false);
                     spdlog::error((
                         "Nullptr or invalid lexer's Reader->filePath was passed into GeneratorUnit of type '{}'. Lexer name is '{}'; and type is '{}'"_f
                         << _type << inputLexer->GetLexerName() << inputLexer->GetLexerType()).toStdStringView());
@@ -152,7 +152,7 @@ namespace Ast
             if (validPath.empty() || !std::filesystem::exists(validPath))
             {
                 validPath.clear();
-                Assert();
+                ASSERT(false);
                 spdlog::error(( "Nullptr or invalid lexer's Reader->filePath was passed into GeneratorUnit of type '{}'. Lexer name is '{}'; and type is '{}'"_f
                               << _type << inputLexer->GetLexerName() << inputLexer->GetLexerType()).toStdStringView());
                 return false;

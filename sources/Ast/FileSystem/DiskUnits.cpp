@@ -1,6 +1,6 @@
 //  MIT License
 //
-//  Copyright (c) 2019-2025 Valerii Koniushenko
+//  Copyright (c) 2018-2025 Valerii Koniushenko
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -31,7 +31,7 @@ namespace Ast
     {
         if (_parent)
         {
-            Assert();
+            ASSERT(false);
             return;
         }
 
@@ -42,7 +42,7 @@ namespace Ast
     {
         if (_parent)
         {
-            Assert();
+            ASSERT(false);
             return;
         }
 
@@ -125,7 +125,7 @@ namespace Ast
         if (!unit->isValid())
         {
             globalLog.errorLog("Unit's component is invalid: {}" + path.generic_string());
-            Assert();
+            ASSERT(false);
             return nullptr;
         }
 
@@ -218,14 +218,14 @@ namespace Ast
         if (unit->_type != DiskUnit::Type::Directory)
         {
             globalLog.errorLog("Attempt to read a disk unit as a directory is failed: {}"_f << path.generic_string());
-            Assert();
+            ASSERT(false);
             return nullptr;
         }
 
         if (!unit->isValid())
         {
             globalLog.errorLog("Unit's component is invalid: {}"_f << path.generic_string());
-            Assert();
+            ASSERT(false);
             return nullptr;
         }
 
@@ -248,7 +248,7 @@ namespace Ast
 
         if (!isIgnoreDiskCheck && !child->isExistOnDisk())
         {
-            Assert();
+            ASSERT(false);
             errorLog("Impossible to add child: {} - which not exists on the disk."_f << child->getPath().string());
             return false;
         }
@@ -260,7 +260,7 @@ namespace Ast
                 const auto p = getRelativePathFrom(child.get());
                 if (p.empty())
                 {
-                    Assert();
+                    ASSERT(false);
                     errorLog("Invalid path of the child: {}"_f << child->getName());
                     return false;
                 }
@@ -342,7 +342,7 @@ namespace Ast
                 lastDir = dynamic_cast<DirectoryUnit*>(child);
                 if (!lastDir)
                 {
-                    Assert();
+                    ASSERT(false);
                     debugLog("Can't cast DiskUnit to DirectoryUnit.");
                     return nullptr;
                 }
@@ -388,14 +388,14 @@ namespace Ast
         if (unit->_type != DiskUnit::Type::File)
         {
             globalLog.errorLog("Attempt to read a disk unit as a file is failed: {}"_f << path.generic_string());
-            Assert();
+            ASSERT(false);
             return nullptr;
         }
 
         if (!unit->isValid())
         {
             globalLog.errorLog("Unit's component is invalid: {}"_f << path.generic_string());
-            Assert();
+            ASSERT(false);
             return nullptr;
         }
 
@@ -421,7 +421,7 @@ namespace Ast
         std::ofstream out(getPath());
         if (!out.is_open())
         {
-            Assert();
+            ASSERT(false);
             criticalLog("Impossible to open a file for write: " + getPath().generic_string());
             return;
         }

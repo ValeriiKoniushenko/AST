@@ -1,6 +1,6 @@
 //  MIT License
 //
-//  Copyright (c) 2019-2025 Valerii Koniushenko
+//  Copyright (c) 2018-2025 Valerii Koniushenko
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -35,7 +35,7 @@ namespace Ast
             : BaseTokenReaderImpl(baseTokenReader),
               _regexExpr{ regexExpr }
         {
-            Assert(!!_regexExpr, "Was passed NULL string as regex expression");
+            ASSERT(!!_regexExpr, "Was passed NULL string as regex expression");
         }
 
         [[nodiscard]] std::optional<TokenReader> FindNextToken() const override;

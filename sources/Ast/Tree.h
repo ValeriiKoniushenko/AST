@@ -79,7 +79,7 @@ namespace Ast
         template<IsParser ParserT>
         void ParseUsing()
         {
-            if (!Verify(!!_contentStream, "File reader was nullptr"))
+            if (!ASSERT_VAL(!!_contentStream, "File reader was nullptr"))
             {
                 spdlog::error("File reader was nullptr");
                 return;
@@ -91,7 +91,7 @@ namespace Ast
             parser.IterateOverLexers(
                 [&](BaseLexer* lexer)
                 {
-                    if (!Verify(lexer, "Some lexer was nullptr but expected a valid object."))
+                    if (!ASSERT_VAL(lexer, "Some lexer was nullptr but expected a valid object."))
                     {
                         spdlog::error("Some lexer was nullptr but expected a valid object.");
                         return true;

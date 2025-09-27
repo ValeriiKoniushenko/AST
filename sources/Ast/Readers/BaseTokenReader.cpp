@@ -40,7 +40,7 @@ namespace Ast
 
     BaseTokenReader::Iterator& BaseTokenReader::Iterator::operator++() noexcept
     {
-        if (Verify(_baseTokenReader))
+        if (ASSERT_VAL(_baseTokenReader))
         {
             if (auto token = _baseTokenReader->FindNextToken())
             {
@@ -64,7 +64,7 @@ namespace Ast
 
     std::optional<TokenReader> BaseTokenReader::FindNextToken() const
     {
-        if (Verify(!!_tokenReaderImpl))
+        if (ASSERT_VAL(!!_tokenReaderImpl))
         {
             return _tokenReaderImpl->FindNextToken();
         }

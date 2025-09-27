@@ -116,7 +116,7 @@ namespace Ast
             {
                 const auto maxSize = IsValid() ? _lexer->GetChildLexers().size() : -1;
                 const String lexerName = IsValid() && _lexer->IsValid() ? _lexer->GetLexerName() : "";
-                Assert(false,
+                ASSERT(false,
                        String::Format("Impossible to move the LexerIterator's index for {}. Current index: {}; max size: {}. Lexer name: '{}'", step,
                                       _currentLexer, maxSize)
                            .c_str(),
@@ -140,7 +140,7 @@ namespace Ast
             {
                 const auto maxSize = IsValid() ? _lexer->GetChildLexers().size() : -1;
                 const String lexerName = IsValid() && _lexer->IsValid() ? _lexer->GetLexerName() : "";
-                Assert(false,
+                ASSERT(false,
                        String::Format("Impossible to move the LexerIterator's index for {}. Current index: {}; max size: {}. Lexer name: '{}'", step,
                                       _currentLexer, maxSize)
                            .c_str(),

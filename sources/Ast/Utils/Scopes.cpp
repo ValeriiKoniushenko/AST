@@ -1,6 +1,6 @@
 //  MIT License
 //
-//  Copyright (c) 2019-2025 Valerii Koniushenko
+//  Copyright (c) 2018-2025 Valerii Koniushenko
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -27,7 +27,7 @@ namespace Ast::Utils
 
     const String::CharT* FindFirstBracket(const String::CharT* source, String::CharT bracket)
     {
-        if (!Verify(source, "Impossible to find the first bracket because was passed the NULL string"))
+        if (!ASSERT_VAL(source, "Impossible to find the first bracket because was passed the NULL string"))
         {
             return nullptr;
         }
@@ -49,7 +49,7 @@ namespace Ast::Utils
 
     const String::CharT* FindClosedBracket(const String::CharT* source, String::CharT closedBracket, String::CharT openedBracket)
     {
-        if (!Verify(source, "Impossible to find the first bracket because was passed the NULL string"))
+        if (!ASSERT_VAL(source, "Impossible to find the first bracket because was passed the NULL string"))
         {
             return nullptr;
         }
@@ -82,7 +82,7 @@ namespace Ast::Utils
             }
         }
 
-        // Assert(bracketCounter == 0);
+        // ASSERT(bracketCounter == 0);
 
         return bracketCounter == 0 && *source != 0 ? --source : nullptr;
     }
@@ -90,7 +90,7 @@ namespace Ast::Utils
     const String::CharT* FindClosedBracketR(const String::CharT* source, String::CharT closedBracket, String::CharT openedBracket,
                                             const String::CharT* const stopPointBegin)
     {
-        if (!Verify(source, "Impossible to find the first bracket because was passed the NULL string"))
+        if (!ASSERT_VAL(source, "Impossible to find the first bracket because was passed the NULL string"))
         {
             return nullptr;
         }
@@ -125,12 +125,12 @@ namespace Ast::Utils
 
     bool HasUnclosedBracket(const String::CharT* from, const String::CharT* to, String::CharT closedBracket, String::CharT openedBracket)
     {
-        if (!Verify(from && to, "Impossible to find the unclosed bracket because was passed the NULL string[s]"))
+        if (!ASSERT_VAL(from && to, "Impossible to find the unclosed bracket because was passed the NULL string[s]"))
         {
             return false;
         }
 
-        if (!Verify(from < to, "Was passed 'from' like an end of string & 'to' like a start of the string"))
+        if (!ASSERT_VAL(from < to, "Was passed 'from' like an end of string & 'to' like a start of the string"))
         {
             return false;
         }
@@ -214,7 +214,7 @@ namespace Ast::Utils
             ++src;
         }
 
-        Assert(counter == 0);
+        ASSERT(counter == 0);
 
         return src;
     }
@@ -275,7 +275,7 @@ namespace Ast::Utils
             ++src;
         }
 
-        Assert(counter == 0);
+        ASSERT(counter == 0);
 
         return src;
     }

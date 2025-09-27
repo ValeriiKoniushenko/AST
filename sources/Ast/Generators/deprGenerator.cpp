@@ -37,12 +37,12 @@ namespace Ast
                 tree->ForEachOverSameType(
                     [&](std::vector<const BaseLexer*>& lexers)
                     {
-                        if (Verify(!lexers.empty() && lexers.front()))
+                        if (ASSERT_VAL(!lexers.empty() && lexers.front()))
                         {
                             const auto* pinnedLexer = lexers.front();
 
                             auto generators = GetGeneratorUnitFor(*pinnedLexer);
-                            if (!Verify(!!generators))
+                            if (!ASSERT_VAL(!!generators))
                             {
                                 spdlog::error(("Generator wasn't found for lexer: '{}' by the next path: {}"_f
                                                                               << pinnedLexer->GetLexerType() << pinnedLexer->GetFullPath().first ).toStdStringView());
@@ -67,7 +67,7 @@ namespace Ast
 
     bool Generator::IsNeedRegenerate() const
     {
-        if (!Verify(!!_projectTree, "No project. Use Ast::Generator::SetTargetProject to set a project."))
+        if (!ASSERT_VAL(!!_projectTree, "No project. Use Ast::Generator::SetTargetProject to set a project."))
         {
             return false;
         }
@@ -76,7 +76,7 @@ namespace Ast
         _projectTree->ForEach(
             [&isNeed, this](const ProjectTree::Unit* unit)
             {
-                if (!Verify(unit))
+                if (!ASSERT_VAL(unit))
                 {
                     return true;
                 }
@@ -95,7 +95,7 @@ namespace Ast
 
     void Generator::ForEachOverRegenerateableUnits(std::function<void(const ProjectTree::Unit*)> callback) const
     {
-        if (!Verify(!!_projectTree, "No project. Use Ast::Generator::SetTargetProject to set a project."))
+        if (!ASSERT_VAL(!!_projectTree, "No project. Use Ast::Generator::SetTargetProject to set a project."))
         {
             return;
         }
@@ -115,7 +115,7 @@ namespace Ast
 
     void Generator::ForEachOverRegenerateableUnits(std::function<void(ProjectTree::Unit*)> callback)
     {
-        if (!Verify(!!_projectTree, "No project. Use Ast::Generator::SetTargetProject to set a project."))
+        if (!ASSERT_VAL(!!_projectTree, "No project. Use Ast::Generator::SetTargetProject to set a project."))
         {
             return;
         }
@@ -145,7 +145,7 @@ namespace Ast
     }
     const Generator::GeneratorContainerT* Generator::GetGeneratorUnitFor(const BaseLexer::Ptr& lexer) const
     {
-        return Verify(!!lexer) ? GetGeneratorUnitFor(lexer->GetLexerType()) : nullptr;
+        return ASSERT_VAL(!!lexer) ? GetGeneratorUnitFor(lexer->GetLexerType()) : nullptr;
     }
 #endif
 } // namespace Ast

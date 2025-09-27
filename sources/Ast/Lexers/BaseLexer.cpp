@@ -1,6 +1,6 @@
 //  MIT License
 //
-//  Copyright (c) 2019-2025 Valerii Koniushenko
+//  Copyright (c) 2018-2025 Valerii Koniushenko
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -25,7 +25,6 @@
 #include "../Readers/ContentStream.h"
 #include "Ast/Rule.h"
 #include "Ast/Utils/Scopes.h"
-#include "Core/Assert.h"
 #include "spdlog/spdlog.h"
 
 namespace Ast
@@ -91,7 +90,7 @@ namespace Ast
 
     std::pair<const String::CharT* const, const String::CharT* const> BaseLexer::GetReaderLimits() const
     {
-        if (Verify(!!_reader))
+        if (ASSERT_VAL(!!_reader))
         {
             return std::make_pair(_reader->Data().c_str() - 1, _reader->Data().c_str() + _reader->Data().size());
         }
@@ -100,7 +99,7 @@ namespace Ast
 
     bool BaseLexer::HasTheSameParentAs(BaseLexer::Ptr parent) const
     {
-        if (Verify(!!parent))
+        if (ASSERT_VAL(!!parent))
         {
             if (_parentLexer)
             {
@@ -122,7 +121,7 @@ namespace Ast
 
     void BaseLexer::TryToSetAsChild(const Ptr& child)
     {
-        if (Verify(!!child) && !child->HasParent())
+        if (ASSERT_VAL(!!child) && !child->HasParent())
         {
             if (_modifierParams.wasModified || IsContainLexer(child.get()))
             {
@@ -142,7 +141,7 @@ namespace Ast
     }
     void BaseLexer::ForceSetAsChild(const Ptr& child)
     {
-        if (Verify(!!child) && !child->HasParent())
+        if (ASSERT_VAL(!!child) && !child->HasParent())
         {
             auto it = std::find_if(_childLexers.cbegin(), _childLexers.cend(),
                                    [&child](const auto& lexer)
@@ -162,13 +161,15 @@ namespace Ast
 
     bool BaseLexer::IsContainLexer(const BaseLexer* other, bool isInItsScope /* = false*/) const
     {
-        const bool isValidOther = Verify(other, "BaseLexer 'other' is nullptr");
-        const bool hasOpenedScope = Verify(_closeScope.has_value(), "This Lexer doesn't have a close scope(it should be bound to the source code)");
-        const bool hasClosedScope = Verify(_openScope.has_value(), "This Lexer doesn't have an open scope(it should be bound to the source code)");
+        const bool isValidOther = ASSERT_VAL(other, "BaseLexer 'other' is nullptr");
+        const bool hasOpenedScope =
+            ASSERT_VAL(_closeScope.has_value(), "This Lexer doesn't have a close scope(it should be bound to the source code)");
+        const bool hasClosedScope =
+            ASSERT_VAL(_openScope.has_value(), "This Lexer doesn't have an open scope(it should be bound to the source code)");
         const bool hasOpenedScopeOther =
-            Verify(other->_closeScope.has_value(), "An 'other' Lexer doesn't have a close scope(it should be bound to the source code)");
+            ASSERT_VAL(other->_closeScope.has_value(), "An 'other' Lexer doesn't have a close scope(it should be bound to the source code)");
         const bool hasClosedScopeOther =
-            Verify(other->_openScope.has_value(), "An 'other' Lexer doesn't have an open scope(it should be bound to the source code)");
+            ASSERT_VAL(other->_openScope.has_value(), "An 'other' Lexer doesn't have an open scope(it should be bound to the source code)");
 
         if (isValidOther && hasOpenedScope && hasClosedScope && hasOpenedScopeOther && hasClosedScopeOther)
         {
@@ -214,12 +215,12 @@ namespace Ast
         auto* mainNode = xml.allocate_node(rapidxml::node_type::node_element, "lexer");
         mainNode->append_attribute(xml.allocate_attribute("type", _lexerType.c_str()));
         mainNode->append_attribute(xml.allocate_attribute("name", _lexerName.c_str()));
-        if (Verify(!!_reader))
+        if (ASSERT_VAL(!!_reader))
         {
             mainNode->append_attribute(xml.allocate_attribute("path", _reader->GetFilePath().c_str()));
         }
 
-        if (auto path = GetFullPath().first; Verify(!!path))
+        if (auto path = GetFullPath().first; ASSERT_VAL(!!path))
         {
             mainNode->append_attribute(xml.allocate_attribute("ast_path", path.c_str()));
         }
@@ -244,7 +245,7 @@ namespace Ast
 
         for (const auto& child : _childLexers)
         {
-            if (Verify(!!child))
+            if (ASSERT_VAL(!!child))
             {
                 child->OnGetAsXml(xml, childsNode);
             }
@@ -264,8 +265,8 @@ namespace Ast
         : _reader{ reader },
           _lexerType{ type }
     {
-        Assert(!!_reader);
-        Assert(!_lexerType.isEmpty());
+        ASSERT(!!_reader);
+        ASSERT(!_lexerType.isEmpty());
     }
 
 } // namespace Ast

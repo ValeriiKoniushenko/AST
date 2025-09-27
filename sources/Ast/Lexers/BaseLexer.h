@@ -1,6 +1,6 @@
 //  MIT License
 //
-//  Copyright (c) 2019-2025 Valerii Koniushenko
+//  Copyright (c) 2018-2025 Valerii Koniushenko
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -79,7 +79,7 @@ namespace Ast
 
             [[nodiscard]] bool operator<(const LineToken& other) const noexcept
             {
-                return Verify(other.IsValid() && IsValid()) ? string < other.string : false;
+                return ASSERT_VAL(other.IsValid() && IsValid()) ? string < other.string : false;
             }
         };
 
@@ -222,7 +222,7 @@ namespace Ast
 
         [[nodiscard]] long long GetDistanceToLexer(const BaseLexer* lexer) const noexcept
         {
-            return Verify(lexer && lexer->GetOpenScope() && _closeScope) ? lexer->_openScope->string - _closeScope->string : 0;
+            return ASSERT_VAL(lexer && lexer->GetOpenScope() && _closeScope) ? lexer->_openScope->string - _closeScope->string : 0;
         }
 
         [[nodiscard]] long long GetDistanceToLexer(const Ptr& lexer) const noexcept { return GetDistanceToLexer(lexer.get()); }
@@ -292,7 +292,7 @@ namespace Ast
         [[nodiscard]] static AdaptivePtr<IsConst> GetRootLexerImpl(AdaptiveRawPtr<IsConst> lexer)
         {
             auto* i = const_cast<BaseLexer*>(lexer);
-            if (Verify(i))
+            if (ASSERT_VAL(i))
             {
                 while (i->HasParent())
                 {
@@ -309,7 +309,7 @@ namespace Ast
             std::vector<AdaptivePtr<IsConst>> pathLexers;
 
             auto* i = const_cast<BaseLexer*>(lexer);
-            if (Verify(i))
+            if (ASSERT_VAL(i))
             {
                 do
                 {

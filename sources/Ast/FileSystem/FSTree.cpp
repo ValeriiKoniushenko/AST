@@ -1,6 +1,6 @@
 //  MIT License
 //
-//  Copyright (c) 2019-2025 Valerii Koniushenko
+//  Copyright (c) 2018-2025 Valerii Koniushenko
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -33,14 +33,14 @@ namespace Ast
         tree->_root = DirectoryUnit::CreateFromPath(path);
         if (!tree->_root)
         {
-            Assert();
+            ASSERT(false);
             globalLog.errorLog("Impossible to create a FSTree");
             return nullptr;
         }
 
         if (!tree->_root->isValid())
         {
-            Assert();
+            ASSERT(false);
             globalLog.errorLog("Impossible to create a FSTree: invalid root folder");
             return nullptr;
         }
@@ -54,7 +54,7 @@ namespace Ast
             auto* top = units.top();
             if (!top)
             {
-                Assert();
+                ASSERT(false);
                 return;
             }
 

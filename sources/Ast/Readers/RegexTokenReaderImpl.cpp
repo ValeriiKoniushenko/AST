@@ -28,12 +28,12 @@ namespace Ast
 
     std::optional<TokenReader> RegexTokenReaderImpl::FindNextToken() const
     {
-        if (!Verify(_baseTokenReader))
+        if (!ASSERT_VAL(_baseTokenReader))
         {
             return std::nullopt;
         }
 
-        if (!Verify(!!_baseTokenReader->GetReader()))
+        if (!ASSERT_VAL(!!_baseTokenReader->GetReader()))
         {
             return std::nullopt;
         }
@@ -48,7 +48,7 @@ namespace Ast
             tempToken.endData = data.c_str() + data.size() - 1ull;
         }
 
-        if (!Verify(tempToken.IsValid()))
+        if (!ASSERT_VAL(tempToken.IsValid()))
         {
             return std::nullopt;
         }

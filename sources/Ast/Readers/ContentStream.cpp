@@ -67,7 +67,7 @@ namespace Ast
     void FileContentStream::OnPut()
     {
         std::ofstream out(_path);
-        if (!Verify(out.is_open()))
+        if (!ASSERT_VAL(out.is_open()))
         {
             return;
         }

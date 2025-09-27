@@ -32,10 +32,10 @@ namespace Ast
         IterateOverLexers(
             [&](BaseLexer* lexer)
             {
-                if (Verify(lexer))
+                if (ASSERT_VAL(lexer))
                 {
                     const auto reader = lexer->GetReader();
-                    if (Verify(!!reader))
+                    if (ASSERT_VAL(!!reader))
                     {
                         if (const auto r = boost::dynamic_pointer_cast<const FileReader>(reader))
                         {
