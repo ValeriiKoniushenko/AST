@@ -34,7 +34,7 @@ endforeach ()
 
 FetchContent_Declare(Utils
     GIT_REPOSITORY https://github.com/ValeriiKoniushenko/Utils.git
-    GIT_TAG origin/develop
+    GIT_TAG e162d718fe984f3dd3a66a3666ab83632e418669
     GIT_SHALLOW TRUE
     GIT_PROGRESS TRUE
 )
